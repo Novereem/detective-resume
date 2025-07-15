@@ -1,92 +1,71 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass }   from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass }   from 'three/examples/jsm/postprocessing/ShaderPass.js'
-import { OutlineShader } from './OutlineShader'
+import { OutlineShader } from '@/shaders/OutlineShader'   // adjust path if needed
 
-export function OutlinePass({
-                                edgeThickness   = 1.0,
-                                depthThreshold  = 0.01,
-                                normalThreshold = 0.1,
-                                outlineColor    = '#ff0000',
-                            }) {
+export function OutlinePass ({
+                                 edgeThickness = 1,         // pixels – 1-2 looks clean
+                                 baseThreshold = 0.02,      // adaptive gap in metres
+                                 outlineColor  = '#ffffff', // silhouette colour
+                             }) {
+
+    /* R3F handles ---------------------------------------------------- */
     const { gl, scene, camera, size } = useThree()
-    const composer = useRef()
 
-    // RenderTarget for depth + color (composer uses this internally)
+    /* composer + render-target refs ---------------------------------- */
+    const composer    = useRef()
     const colorTarget = useRef()
-    // RenderTarget for normals
-    const normalTarget = useRef()
 
-    // A shared MeshNormalMaterial for the override pass
-    const normalMaterial = useMemo(() => new THREE.MeshNormalMaterial(), [])
-
+    /* --------------------------------------------------------------- */
+    /* setup / dispose whenever size or params change                  */
+    /* --------------------------------------------------------------- */
     useEffect(() => {
-        // 1) Color+Depth target
+
+        /* 1) colour + depth render-target ----------------------------- */
         colorTarget.current = new THREE.WebGLRenderTarget(size.width, size.height, {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
-            format: THREE.RGBAFormat,
+            format   : THREE.RGBAFormat,
         })
         colorTarget.current.depthTexture = new THREE.DepthTexture(size.width, size.height)
         colorTarget.current.depthTexture.type = THREE.UnsignedShortType
 
-        // 2) Normals target
-        normalTarget.current = new THREE.WebGLRenderTarget(size.width, size.height, {
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
-            format: THREE.RGBAFormat,       // we’ll pack normals into RGB
-        })
-
-        // 3) Composer setup
+        /* 2) effect composer ------------------------------------------ */
         composer.current = new EffectComposer(gl, colorTarget.current)
         composer.current.setSize(size.width, size.height)
 
-        const renderPass = new RenderPass(scene, camera)
+        const renderPass  = new RenderPass(scene, camera)
         const outlinePass = new ShaderPass(OutlineShader)
 
-        // hook up our three buffers into the outline shader uniforms
-        outlinePass.uniforms.tDepth.value       = colorTarget.current.depthTexture
-        outlinePass.uniforms.tNormal.value      = normalTarget.current.texture
+        /* 3) wire uniforms -------------------------------------------- */
+        outlinePass.uniforms.tDepth.value        = colorTarget.current.depthTexture
         outlinePass.uniforms.resolution.value.set(size.width, size.height)
-        outlinePass.uniforms.cameraNear.value   = camera.near
-        outlinePass.uniforms.cameraFar.value    = camera.far
-        outlinePass.uniforms.edgeThickness.value  = edgeThickness
-        outlinePass.uniforms.depthThreshold.value = depthThreshold
-        outlinePass.uniforms.normalThreshold.value= normalThreshold
-        outlinePass.uniforms.outlineColor.value   = new THREE.Color(outlineColor)
+        outlinePass.uniforms.cameraNear.value    = camera.near
+        outlinePass.uniforms.cameraFar.value     = camera.far
+        outlinePass.uniforms.edgeThickness.value = edgeThickness
+        outlinePass.uniforms.baseThreshold.value = baseThreshold
+        outlinePass.uniforms.outlineColor.value  = new THREE.Color(outlineColor)
 
         composer.current.addPass(renderPass)
         composer.current.addPass(outlinePass)
 
+        /* cleanup on unmount / param change --------------------------- */
         return () => {
-            composer.current.dispose()
-            colorTarget.current.dispose()
-            normalTarget.current.dispose()
+            composer.current?.dispose()
+            colorTarget.current?.dispose()
         }
-    }, [
-        gl, scene, camera, size.width, size.height,
-        edgeThickness, depthThreshold, normalThreshold, outlineColor
-    ])
+    }, [gl, scene, camera,
+        size.width, size.height,
+        edgeThickness, baseThreshold, outlineColor])
 
-    // each frame: first draw normals, then do composer.render()
+    /* --------------------------------------------------------------- */
+    /* render once each frame                                          */
+    /* --------------------------------------------------------------- */
     useFrame(() => {
-        // nothing to do until both targets & composer are created
-        if (!normalTarget.current || !composer.current) return
-
-        // 1) render normals
-        const old = scene.overrideMaterial
-        scene.overrideMaterial = normalMaterial
-        gl.setRenderTarget(normalTarget.current)
-        gl.clear()
-        gl.render(scene, camera)
-        scene.overrideMaterial = old
-
-        // 2) run composer
-        gl.setRenderTarget(null)
-        composer.current.render()
+        composer.current?.render()
     }, 1)
 
     return null

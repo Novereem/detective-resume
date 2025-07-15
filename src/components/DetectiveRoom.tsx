@@ -12,7 +12,7 @@ function Scene() {
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={0.5}/>
+            <ambientLight intensity={1}/>
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
@@ -21,14 +21,19 @@ function Scene() {
                 <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
             </mesh>
 
-            <mesh position={[0, 0.5, -3]}>
-                <boxGeometry args={[1, 1, 1]}/>
-                <meshStandardMaterial color="lightblue"/>
+            <mesh>
+                <planeGeometry args={[10, 10]}/>
+                <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
             </mesh>
 
-            <mesh position={[3, 0.5, 0]}>
+            <mesh position={[3, 1, -3]}>
                 <boxGeometry args={[1, 1, 1]}/>
-                <meshStandardMaterial color="white"/>
+                <meshStandardMaterial color={"#4e4e4e"}/>
+            </mesh>
+
+            <mesh position={[0.5, 0.6, -0.2]}>
+                <boxGeometry args={[1, 1, 0.1]}/>
+                <meshStandardMaterial color={"#979797"}/>
             </mesh>
 
             <OrbitControls enablePan={false} enableRotate/>
@@ -38,7 +43,7 @@ function Scene() {
 
 export default function DetectiveRoom() {
     return (
-        <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>
+        <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh'}}>
             <Canvas
                 gl={{ antialias: false }}
                 camera={{ position:[0,2,5], fov:100 }}
@@ -49,10 +54,9 @@ export default function DetectiveRoom() {
 
                 {/* ← this line turns on the full‐screen silhouette pass */}
                 <OutlinePass
-                    edgeThickness={2}         // how many pixels out to sample
-                    depthThreshold={1}    // depth jump to count as an edge
-                    normalThreshold={0.5}    // normal difference to count as an edge
-                    outlineColor="#ffffff"    // silhouette color
+                    edgeThickness={2}
+                    baseThreshold={0.15}
+                    outlineColor="#ffffff"
                 />
             </Canvas>
         </div>
