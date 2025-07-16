@@ -1,81 +1,58 @@
 import * as THREE from 'three'
 
 export const OutlineShader = {
-    /* ---------- UNIFORMS ---------- */
     uniforms: {
-        tDiffuse:       { value: null },                // colour buffer
-        tDepth:         { value: null },                // depth buffer
-        resolution:     { value: new THREE.Vector2(1,1)},
-        cameraNear:     { value: 0.1 },
-        cameraFar:      { value: 1000 },
-        edgeThickness:  { value: 1.0 },                 // 1‒2 px is plenty
-        baseThreshold:  { value: 0.02 },                // tweak in React
-        outlineColor:   { value: new THREE.Color(0xffffff) },
+        tColor:         { value: null },
+        tNormal:        { value: null },
+        tOutlineColor:  { value: null },
+        resolution:     { value: new THREE.Vector2(1,1) },
+        normalThreshold:{ value: 0.2 },
+        edgeThickness:  { value: 1.0 },
     },
 
-    /* ---------- VERTEX ---------- */
     vertexShader: /* glsl */`
+    attribute vec3 position;
+    attribute vec2 uv;
     varying vec2 vUv;
-    void main(){
+    void main() {
       vUv = uv;
-      gl_Position = vec4(position.xy, 0.0, 1.0);
+      gl_Position = vec4( position.xy, 0.0, 1.0 );
     }
   `,
 
-    /* ---------- FRAGMENT ---------- */
     fragmentShader: /* glsl */`
-    #ifdef GL_OES_standard_derivatives
-    #extension GL_OES_standard_derivatives : enable
-    #endif
-    
-    #include <packing>            // perspectiveDepthToViewZ()
-    
+    precision highp float;
     varying vec2 vUv;
-
-    uniform sampler2D tDiffuse;
-    uniform sampler2D tDepth;
-    uniform vec2  resolution;
-    uniform float cameraNear;
-    uniform float cameraFar;
+    uniform sampler2D tColor;
+    uniform sampler2D tNormal;
+    uniform sampler2D tOutlineColor;
+    uniform vec2 resolution;
+    uniform float normalThreshold;
     uniform float edgeThickness;
-    uniform float baseThreshold;
-    uniform vec3  outlineColor;
 
-    /* helper: depth → view-space Z (metres, negative in front) */
-    float viewZ( vec2 uv ){
-      float d = texture2D( tDepth, uv ).x;
-      return perspectiveDepthToViewZ( d, cameraNear, cameraFar );
-    }
-
-    void main(){
-
-      vec2  texel    = edgeThickness / resolution;   // step = 1 pixel
-      float zCentre  = viewZ( vUv );
-
-      /* local slope of the surface in Z per screen-pixel ------------ */
-      float dzdx = dFdx( zCentre );
-      float dzdy = dFdy( zCentre );
-      float localSlope = sqrt( dzdx*dzdx + dzdy*dzdy ) + 1e-6; // avoid 0
-
+    void main() {
+      vec2 texel = edgeThickness / resolution;
+      vec3 nC = texture2D( tNormal, vUv ).rgb * 2.0 - 1.0;
       float edge = 0.0;
 
-      /* 3×3 kernel --------------------------------------------------- */
-      for( int x = -1; x <= 1; ++x ){
-        for( int y = -1; y <= 1; ++y ){
-          float z = viewZ( vUv + vec2( x, y ) * texel );
-          float dz = z - zCentre;
-          float thresh = baseThreshold + localSlope * baseThreshold;
-
-          /* adaptive silhouette test -------------------------------- */
-          if( dz > thresh ) edge = 1.0;
+      // simple 3×3 normal-difference kernel
+      for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+          vec2 off = vec2(float(x),float(y)) * texel;
+          vec3 nS = texture2D( tNormal, vUv + off ).rgb * 2.0 - 1.0;
+          if (length(nC - nS) > normalThreshold) {
+            edge = 1.0;
+          }
         }
       }
 
-      /* output ------------------------------------------------------- */
-      if( edge > 0.5 ){
-        gl_FragColor = vec4( outlineColor, 1.0 );
-      }else{
-        gl_FragColor = texture2D( tDiffuse, vUv );
+      if (edge > 0.5) {
+        // outline: grab this pixel’s per-object hue
+        vec3 outCol = texture2D( tOutlineColor, vUv ).rgb;
+        gl_FragColor = vec4( outCol, 1.0 );
+      } else {
+        // otherwise show the lit scene
+        gl_FragColor = texture2D( tColor, vUv );
       }
     }
   `
