@@ -5,8 +5,9 @@ import React from 'react'
 import * as THREE from 'three'
 import {FramedPlane} from "@/shaders/FramedPlane";
 import {Outlined} from "@/shaders/OutlinedMesh";
+import ObjectInspectOverlay, { InspectState } from "@/components/ObjectInspectOverlay";
 
-function Scene() {
+function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
     const { scene } = useThree()
     scene.background = new THREE.Color('#3c3c3c')
 
@@ -35,8 +36,7 @@ function Scene() {
                 hoverColor="#ff3b30"
                 outlineScale={1.035}
                 position={[3, 1, -3]}
-                canInteract={true}
-                onClick={() => console.log('Clicked box')}
+                onInspect={openInspect}
             />
 
             <mesh position={[3, 1, -3]}>
@@ -55,14 +55,22 @@ function Scene() {
 }
 
 export default function DetectiveRoom() {
+    const [inspect, setInspect] = React.useState<InspectState | null>(null)
+
     return (
-        <div style={{position: 'fixed', inset: 0}}>
-            <Canvas
-                camera={{position: [0, 2, 5], fov: 100 }}
-                style={{ width: '100%', height: '100%' }}
-            >
-                <Scene />
-            </Canvas>
+        <div style={{ position: 'fixed', inset: 0 }}>
+            <div style={{position: 'absolute', inset: 0}}>
+                <Canvas camera={{position: [0, 2, 5], fov: 100}} style={{width: '100%', height: '100%'}}>
+                    <Scene openInspect={setInspect}/>
+                </Canvas>
+            </div>
+
+            {/* Foreground overlay with copy */}
+            <ObjectInspectOverlay
+                open={!!inspect}
+                state={inspect}
+                onClose={() => setInspect(null)}
+            />
         </div>
     )
 }
