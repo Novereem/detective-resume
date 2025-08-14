@@ -1,9 +1,10 @@
 'use client'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import React, { useRef } from 'react'
+import React from 'react'
 import * as THREE from 'three'
-import { OutlinePass } from "@/shaders/OutlinePass";
+import {FramedPlane} from "@/shaders/FramedPlane";
+import {Outlined} from "@/shaders/OutlinedMesh";
 
 function Scene() {
     const { scene } = useThree()
@@ -16,24 +17,36 @@ function Scene() {
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[10, 10]}/>
-                <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
-            </mesh>
+            <group rotation={[-Math.PI / 2, 0, 0]}>
+                <FramedPlane width={10} height={10} color="#333" borderColor="#fff" hoverColor="#ff3b30" canInteract={false} border={0.06}/>
+            </group>
 
+            {/* extra plane (as before) */}
             <mesh>
                 <planeGeometry args={[10, 10]}/>
                 <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
             </mesh>
 
+            {/* boxes */}
+            <Outlined
+                geometry={<boxGeometry args={[1, 1, 1]} />}
+                color="#4e4e4e"
+                outlineColor="#fff"
+                hoverColor="#ff3b30"
+                outlineScale={1.035}
+                position={[3, 1, -3]}
+                canInteract={true}
+                onClick={() => console.log('Clicked box')}
+            />
+
             <mesh position={[3, 1, -3]}>
                 <boxGeometry args={[1, 1, 1]}/>
-                <meshStandardMaterial color={"#4e4e4e"}/>
+                <meshStandardMaterial color="#4e4e4e"/>
             </mesh>
 
             <mesh position={[0.5, 0.6, -0.2]}>
                 <boxGeometry args={[1, 1, 0.1]}/>
-                <meshStandardMaterial color={"#979797"}/>
+                <meshStandardMaterial color="#979797"/>
             </mesh>
 
             <OrbitControls enablePan={false} enableRotate/>
@@ -43,21 +56,12 @@ function Scene() {
 
 export default function DetectiveRoom() {
     return (
-        <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh'}}>
+        <div style={{position: 'fixed', inset: 0}}>
             <Canvas
-                gl={{ antialias: false }}
-                camera={{ position:[0,2,5], fov:100 }}
+                camera={{position: [0, 2, 5], fov: 100 }}
                 style={{ width: '100%', height: '100%' }}
             >
-                <color attach="background" args={['#3c3c3c']} />
                 <Scene />
-
-                {/* ← this line turns on the full‐screen silhouette pass */}
-                <OutlinePass
-                    edgeThickness={2}
-                    baseThreshold={0.15}
-                    outlineColor="#ffffff"
-                />
             </Canvas>
         </div>
     )
