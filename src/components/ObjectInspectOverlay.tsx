@@ -4,18 +4,12 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Outlined } from '@/shaders/OutlinedMesh'
-
-export type InspectState = {
-    geometry: React.ReactElement
-    color?: string
-    outlineColor?: string
-    outlineScale?: number
-    initialRotation?: [number, number, number]
-}
+import {FramedPlane} from "@/shaders/FramedPlane";
+import {InspectState} from "@/shaders/inspectTypes";
 
 type Props = {
-    open: boolean                 // ← controls enter/exit
-    state: InspectState | null    // payload (can be null when closed)
+    open: boolean
+    state: InspectState | null
     onClose: () => void
     durationMs?: number
 }
@@ -26,18 +20,15 @@ export default function ObjectInspectOverlay({
                                                  onClose,
                                                  durationMs = 500,
                                              }: Props) {
-    // keep last non-null state so we can animate out with the same content
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
-    const [visible, setVisible] = React.useState(false) // drives CSS transform
+    const [visible, setVisible] = React.useState(false)
 
     React.useEffect(() => {
         if (open && state) {
             setRenderState(state)
-            // next frame: flip to "entered"
             const id = requestAnimationFrame(() => setVisible(true))
             return () => cancelAnimationFrame(id)
         } else {
-            // start exit
             setVisible(false)
             const t = setTimeout(() => setRenderState(null), durationMs)
             return () => clearTimeout(t)
@@ -52,7 +43,6 @@ export default function ObjectInspectOverlay({
         return () => window.removeEventListener('keydown', onKey)
     }, [open, onClose])
 
-    // nothing to show (not open and no content kept for exit)
     if (!open && !renderState) return null
 
     return (
@@ -101,15 +91,29 @@ export default function ObjectInspectOverlay({
                     <Canvas camera={{ position: [0, 0, 3.2], fov: 50 }}>
                         <ambientLight intensity={1} />
                         <directionalLight position={[2, 3, 4]} intensity={1} />
+
                         <group rotation={renderState.initialRotation ?? [0, 0, 0]}>
-                            <Outlined
-                                geometry={renderState.geometry}
-                                color={renderState.color ?? '#808080'}
-                                outlineColor={renderState.outlineColor ?? '#ffffff'}
-                                outlineScale={renderState.outlineScale ?? 1.035}
-                                canInteract={false}
-                            />
+                            {renderState.kind === 'outlined' ? (
+                                <Outlined
+                                    geometry={renderState.geometry}
+                                    color={renderState.color ?? '#808080'}
+                                    outlineColor={renderState.outlineColor ?? '#ffffff'}
+                                    outlineScale={renderState.outlineScale ?? 1.035}
+                                    canInteract={false}
+                                />
+                            ) : (
+                                <FramedPlane
+                                    width={renderState.width}
+                                    height={renderState.height}
+                                    color={renderState.color ?? '#333'}
+                                    borderColor={renderState.borderColor ?? '#fff'}
+                                    border={renderState.border ?? 0.05}
+                                    doubleSide={renderState.doubleSide ?? true}
+                                    canInteract={false}
+                                />
+                            )}
                         </group>
+
                         <OrbitControls enablePan={false} />
                     </Canvas>
                 )}

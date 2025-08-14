@@ -1,15 +1,7 @@
-// OutlinedMesh.tsx
 import * as THREE from 'three'
 import React from 'react'
 import { useCursor } from '@react-three/drei'
-
-export type InspectState = {
-    geometry: React.ReactElement
-    color?: string
-    outlineColor?: string
-    outlineScale?: number
-    initialRotation?: [number, number, number]
-}
+import { InspectState, OutlinedInspect } from './inspectTypes'
 
 type CommonTransform = {
     position?: [number, number, number]
@@ -25,10 +17,8 @@ type OutlinedProps = CommonTransform & {
     outlineScale?: number
     canInteract?: boolean
     onClick?: (e: any) => void
-    /** If provided, clicking will call this with a payload auto-built from props */
     onInspect?: (payload: InspectState) => void
-    /** Optional overrides to include in the payload (e.g. initialRotation) */
-    inspectOverrides?: Partial<InspectState>
+    inspectOverrides?: Partial<OutlinedInspect>
 }
 
 export function Outlined({
@@ -53,9 +43,9 @@ export function Outlined({
     const handleClick = (e: any) => {
         if (!canInteract) return
         e.stopPropagation()
-        // Build payload from current props
         if (onInspect) {
-            const payload: InspectState = {
+            const payload: OutlinedInspect = {
+                kind: 'outlined',
                 geometry,
                 color,
                 outlineColor,
@@ -76,7 +66,6 @@ export function Outlined({
             onPointerOut={canInteract ? (e) => { e.stopPropagation(); setHovered(false) } : undefined}
             onClick={handleClick}
         >
-            {/* Outline shell (non-interactive) */}
             <group scale={outlineScale}>
                 <mesh raycast={() => null}>
                     {React.cloneElement(geometry)}
@@ -92,7 +81,6 @@ export function Outlined({
                 </mesh>
             </group>
 
-            {/* Original */}
             <mesh>
                 {React.cloneElement(geometry)}
                 <meshStandardMaterial color={color} />
