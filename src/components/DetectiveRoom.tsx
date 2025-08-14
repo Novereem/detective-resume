@@ -7,6 +7,7 @@ import {FramedPlane} from "@/shaders/FramedPlane";
 import {Outlined} from "@/shaders/OutlinedMesh";
 import ObjectInspectOverlay from "@/components/ObjectInspectOverlay";
 import { InspectState } from '@/shaders/inspectTypes'
+import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
 
 
 function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
@@ -38,7 +39,7 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                 color="#4e4e4e"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
-                outlineScale={1.035}
+                outlineScale={1.025}
                 position={[-3, 1, -2]}
                 onInspect={openInspect}
             />
@@ -48,7 +49,7 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                 color="#626262"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
-                outlineScale={1.015}
+                outlineScale={1.025}
                 position={[3, 1, -2]}
                 onInspect={openInspect}
             />
@@ -60,7 +61,7 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                     color="#333"
                     borderColor="#fff"
                     hoverColor="#ff3b30"
-                    border={0.02}
+                    border={0.035}
                     canInteract
                     onInspect={openInspect}
                 />
@@ -78,12 +79,15 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
 
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
+    const [pixelSize, setPixelSize] = React.useState(3.5)
 
     return (
         <div style={{position: 'fixed', inset: 0}}>
-        <div style={{position: 'absolute', inset: 0}}>
-                <Canvas camera={{position: [0, 2, 5], fov: 100}} style={{width: '100%', height: '100%'}}>
+            <div style={{position: 'absolute', inset: 0}}>
+                <Canvas camera={{position: [0, 2, 5], fov: 100}} gl={{ antialias: false }} style={{width: '100%', height: '100%', imageRendering: 'pixelated'}}>
                     <Scene openInspect={setInspect}/>
+
+                    <PixelateNearestFX size={pixelSize} />
                 </Canvas>
             </div>
 
@@ -92,6 +96,7 @@ export default function DetectiveRoom() {
                 open={!!inspect}
                 state={inspect}
                 onClose={() => setInspect(null)}
+                pixelSize={pixelSize}
             />
         </div>
     )

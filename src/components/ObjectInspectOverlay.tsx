@@ -6,12 +6,14 @@ import * as THREE from 'three'
 import { Outlined } from '@/shaders/OutlinedMesh'
 import {FramedPlane} from "@/shaders/FramedPlane";
 import {InspectState} from "@/shaders/inspectTypes";
+import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
 
 type Props = {
     open: boolean
     state: InspectState | null
     onClose: () => void
     durationMs?: number
+    pixelSize?: number
 }
 
 export default function ObjectInspectOverlay({
@@ -19,6 +21,7 @@ export default function ObjectInspectOverlay({
                                                  state,
                                                  onClose,
                                                  durationMs = 500,
+                                                 pixelSize = 1,
                                              }: Props) {
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
@@ -88,7 +91,7 @@ export default function ObjectInspectOverlay({
                 }}
             >
                 {renderState && (
-                    <Canvas camera={{ position: [0, 0, 3.2], fov: 50 }}>
+                    <Canvas camera={{ position: [0, 0, 3.2], fov: 50 }} gl={{ antialias: false }} style={{ imageRendering: 'pixelated' }}>
                         <ambientLight intensity={1} />
                         <directionalLight position={[2, 3, 4]} intensity={1} />
 
@@ -115,6 +118,7 @@ export default function ObjectInspectOverlay({
                         </group>
 
                         <OrbitControls enablePan={false} />
+                        <PixelateNearestFX size={pixelSize} />
                     </Canvas>
                 )}
             </div>
