@@ -19,26 +19,32 @@ type OutlinedProps = CommonTransform & {
     onClick?: (e: any) => void
     onInspect?: (payload: InspectState) => void
     inspectOverrides?: Partial<OutlinedInspect>
+    hovered?: boolean
+    disablePointer?: boolean
 }
 
 export function Outlined({
-                             geometry,
-                             color = '#808080',
-                             outlineColor = '#ffffff',
-                             hoverColor = '#ff3b30',
-                             outlineScale = 1.04,
-                             canInteract = true,
-                             position,
-                             rotation,
-                             scale,
-                             onClick,
-                             onInspect,
-                             inspectOverrides = {initialRotation: [0.2, 0.6, 0]},
-                         }: OutlinedProps) {
-    const [hovered, setHovered] = React.useState(false)
-    useCursor(canInteract && hovered)
+    geometry,
+    color = '#808080',
+    outlineColor = '#ffffff',
+    hoverColor = '#ff3b30',
+    outlineScale = 1.04,
+    canInteract = true,
+    position,
+    rotation,
+    scale,
+    onClick,
+    onInspect,
+    inspectOverrides = {initialRotation: [0.2, 0.6, 0]},
+    hovered,
+    disablePointer = false,
+}: OutlinedProps) {
 
-    const currentOutline = canInteract && hovered ? hoverColor : outlineColor
+    const [localHover, setLocalHover] = React.useState(false)
+    const isHover = hovered !== undefined ? hovered : localHover
+
+    useCursor(canInteract && isHover)
+    const currentOutline = canInteract && isHover ? hoverColor : outlineColor
 
     const handleClick = (e: any) => {
         if (!canInteract) return
@@ -57,15 +63,17 @@ export function Outlined({
         onClick?.(e)
     }
 
+    const bind =
+        canInteract && !disablePointer
+            ? {
+                onPointerOver: (e: any) => { e.stopPropagation(); setLocalHover(true) },
+                onPointerOut:  (e: any) => { e.stopPropagation(); setLocalHover(false) },
+                onClick: handleClick,
+            }
+            : {}
+
     return (
-        <group
-            position={position}
-            rotation={rotation}
-            scale={scale}
-            onPointerOver={canInteract ? (e) => { e.stopPropagation(); setHovered(true) } : undefined}
-            onPointerOut={canInteract ? (e) => { e.stopPropagation(); setHovered(false) } : undefined}
-            onClick={handleClick}
-        >
+        <group position={position} rotation={rotation} scale={scale} {...bind}>
             <group scale={outlineScale}>
                 <mesh raycast={() => null}>
                     {React.cloneElement(geometry)}

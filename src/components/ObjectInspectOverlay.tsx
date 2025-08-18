@@ -1,16 +1,30 @@
-// ObjectInspectOverlay.tsx
 import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Outlined } from '@/shaders/OutlinedMesh'
-import {FramedPlane} from "@/shaders/FramedPlane";
-import {InspectState} from "@/shaders/inspectTypes";
-import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
+import { FramedPlane } from '@/shaders/FramedPlane'
+import { InspectState } from '@/shaders/inspectTypes'
+import { PixelateNearestFX } from '@/shaders/PixelateNearestFX'
+
+type OutlinedGroup = {
+    kind: 'outlinedGroup'
+    initialRotation?: [number, number, number]
+    parts: Array<{
+        geometry: React.ReactElement
+        color?: string
+        outlineColor?: string
+        outlineScale?: number
+        position?: [number, number, number]
+        rotation?: [number, number, number]
+        scale?: number | [number, number, number]
+    }>
+}
+type AnyInspect = InspectState | OutlinedGroup
 
 type Props = {
     open: boolean
-    state: InspectState | null
+    state: AnyInspect | null
     onClose: () => void
     durationMs?: number
     pixelSize?: number
@@ -23,8 +37,11 @@ export default function ObjectInspectOverlay({
                                                  durationMs = 500,
                                                  pixelSize = 1,
                                              }: Props) {
-    const [renderState, setRenderState] = React.useState<InspectState | null>(null)
+    const [renderState, setRenderState] = React.useState<AnyInspect | null>(null)
     const [visible, setVisible] = React.useState(false)
+
+    const contentRef = React.useRef<THREE.Group>(null)
+    const [offset, setOffset] = React.useState<[number, number, number]>([0, 0, 0])
 
     React.useEffect(() => {
         if (open && state) {
@@ -38,7 +55,20 @@ export default function ObjectInspectOverlay({
         }
     }, [open, state, durationMs])
 
-    // ESC to close
+    React.useLayoutEffect(() => {
+        if (!renderState) return
+        const id = requestAnimationFrame(() => {
+            if (!contentRef.current) return
+            contentRef.current.updateWorldMatrix(true, true)
+            const box = new THREE.Box3().setFromObject(contentRef.current)
+            const center = new THREE.Vector3()
+            box.getCenter(center)
+            console.log(center)
+            setOffset([0, -center.y, 0])
+        })
+        return () => cancelAnimationFrame(id)
+    }, [renderState])
+
     React.useEffect(() => {
         if (!open) return
         const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -84,41 +114,58 @@ export default function ObjectInspectOverlay({
                     background: 'rgba(18,18,18,0.6)',
                     backdropFilter: 'blur(2px)',
                     WebkitBackdropFilter: 'blur(2px)',
-                    transform: visible
-                        ? 'translateY(0)'
-                        : 'translateY(calc(100vh + 24px))',
+                    transform: visible ? 'translateY(0)' : 'translateY(calc(100vh + 24px))',
                     transition: `transform ${durationMs}ms cubic-bezier(.22,.8,.36,1)`,
                 }}
             >
                 {renderState && (
-                    <Canvas camera={{ position: [0, 0, 3.2], fov: 50 }} gl={{ antialias: false }} style={{ imageRendering: 'pixelated' }}>
-                        <ambientLight intensity={1} />
-                        <directionalLight position={[2, 3, 4]} intensity={1} />
+                    <Canvas camera={{position: [0, 0, 3.2], fov: 50}} gl={{antialias: false}}
+                            style={{imageRendering: 'pixelated'}}>
+                        <ambientLight intensity={1}/>
+                        <directionalLight position={[2, 3, 4]} intensity={1}/>
 
                         <group rotation={renderState.initialRotation ?? [0, 0, 0]}>
-                            {renderState.kind === 'outlined' ? (
-                                <Outlined
-                                    geometry={renderState.geometry}
-                                    color={renderState.color ?? '#808080'}
-                                    outlineColor={renderState.outlineColor ?? '#ffffff'}
-                                    outlineScale={renderState.outlineScale ?? 1.035}
-                                    canInteract={false}
-                                />
-                            ) : (
-                                <FramedPlane
-                                    width={renderState.width}
-                                    height={renderState.height}
-                                    color={renderState.color ?? '#333'}
-                                    borderColor={renderState.borderColor ?? '#fff'}
-                                    border={renderState.border ?? 0.05}
-                                    doubleSide={renderState.doubleSide ?? true}
-                                    canInteract={false}
-                                />
-                            )}
+                            <group ref={contentRef} position={offset}>
+                                {renderState.kind === 'outlined' ? (
+                                    <Outlined
+                                        geometry={(renderState as any).geometry}
+                                        color={(renderState as any).color ?? '#808080'}
+                                        outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
+                                        outlineScale={(renderState as any).outlineScale ?? 1.035}
+                                        canInteract={false}
+                                    />
+                                ) : renderState.kind === 'outlinedGroup' ? (
+                                    <>
+                                        {(renderState as any).parts.map((p: any, i: number) => (
+                                            <Outlined
+                                                key={i}
+                                                geometry={p.geometry}
+                                                color={p.color ?? '#808080'}
+                                                outlineColor={p.outlineColor ?? '#ffffff'}
+                                                outlineScale={p.outlineScale ?? 1.035}
+                                                canInteract={false}
+                                                position={p.position}
+                                                rotation={p.rotation}
+                                                scale={p.scale}
+                                            />
+                                        ))}
+                                    </>
+                                ) : (
+                                    <FramedPlane
+                                        width={(renderState as any).width}
+                                        height={(renderState as any).height}
+                                        color={(renderState as any).color ?? '#333'}
+                                        borderColor={(renderState as any).borderColor ?? '#fff'}
+                                        border={(renderState as any).border ?? 0.05}
+                                        doubleSide={(renderState as any).doubleSide ?? true}
+                                        canInteract={false}
+                                    />
+                                )}
+                            </group>
                         </group>
 
-                        <OrbitControls enablePan={false} />
-                        <PixelateNearestFX size={pixelSize} />
+                        <OrbitControls enablePan={false}/>
+                        <PixelateNearestFX size={pixelSize}/>
                     </Canvas>
                 )}
             </div>

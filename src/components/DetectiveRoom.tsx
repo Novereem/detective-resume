@@ -8,26 +8,41 @@ import {Outlined} from "@/shaders/OutlinedMesh";
 import ObjectInspectOverlay from "@/components/ObjectInspectOverlay";
 import { InspectState } from '@/shaders/inspectTypes'
 import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
+import { Desk } from '@/components/Models/Desk'
 
+type OutlinedGroup = {
+    kind: 'outlinedGroup'
+    initialRotation?: [number, number, number]
+    parts: Array<{
+        geometry: React.ReactElement
+        color?: string
+        outlineColor?: string
+        outlineScale?: number
+        position?: [number, number, number]
+        rotation?: [number, number, number]
+        scale?: number | [number, number, number]
+    }>
+}
+type AnyInspect = InspectState | OutlinedGroup
 
-function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
+function Scene({ openInspect }: { openInspect: (s: AnyInspect) => void }) {
     const { scene } = useThree()
     scene.background = new THREE.Color('#3c3c3c')
 
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={1}/>
+            <ambientLight intensity={0.1}/>
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
-            <group rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
                 <FramedPlane width={10} height={10} color="#333" borderColor="#fff" hoverColor="#ff3b30"
                              canInteract={false} border={0.06}/>
-            </group>
+            </mesh>
 
-            {/* extra plane (as before) */}
-            <mesh>
+            {/* extra plane */}
+            <mesh raycast={() => null} position={[10,0,0]}>
                 <planeGeometry args={[10, 10]}/>
                 <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
             </mesh>
@@ -39,7 +54,7 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                 color="#4e4e4e"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
-                outlineScale={1.025}
+                outlineScale={1.04}
                 position={[-3, 1, -2]}
                 onInspect={openInspect}
             />
@@ -49,12 +64,12 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                 color="#626262"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
-                outlineScale={1.025}
+                outlineScale={1.04}
                 position={[3, 1, -2]}
                 onInspect={openInspect}
             />
 
-            <group rotation={[0, 0, 0]} position={[0, 1, -2]}>
+            <group rotation={[0, 0, 0.2]} position={[0, 1, -2]}>
                 <FramedPlane
                     width={1}
                     height={1}
@@ -67,10 +82,16 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
                 />
             </group>
 
-            <mesh position={[0.5, 0.6, 0.2]}>
-                <boxGeometry args={[1, 2, 0.1]}/>
-                <meshStandardMaterial color="#979797"/>
-            </mesh>
+            <Desk
+                position={[0, 0, -3]}
+                rotation={[0, Math.PI / 6, 0]}
+                color="#626262"
+                outlineColor="#fff"
+                hoverColor="#ff3b30"
+                outlineScale={6.56}
+                outlinePerPart={{ topScale: 1.04, legScale: 1.1 }}
+                onInspect={openInspect as any}
+            />
 
             <OrbitControls enablePan={false} enableRotate/>
         </>
@@ -78,23 +99,25 @@ function Scene({openInspect}: { openInspect: (s: InspectState) => void }) {
 }
 
 export default function DetectiveRoom() {
-    const [inspect, setInspect] = React.useState<InspectState | null>(null)
-    const [pixelSize, setPixelSize] = React.useState(3.5)
+    const [inspect, setInspect] = React.useState<AnyInspect | null>(null)
+    const [pixelSize, setPixelSize] = React.useState(3)
 
     return (
-        <div style={{position: 'fixed', inset: 0}}>
-            <div style={{position: 'absolute', inset: 0}}>
-                <Canvas camera={{position: [0, 2, 5], fov: 100}} gl={{ antialias: false }} style={{width: '100%', height: '100%', imageRendering: 'pixelated'}}>
-                    <Scene openInspect={setInspect}/>
-
+        <div style={{ position: 'fixed', inset: 0 }}>
+            <div style={{ position: 'absolute', inset: 0 }}>
+                <Canvas
+                    camera={{ position: [0, 2, 5], fov: 100 }}
+                    gl={{ antialias: false }}
+                    style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
+                >
+                    <Scene openInspect={setInspect} />
                     <PixelateNearestFX size={pixelSize} />
                 </Canvas>
             </div>
 
-            {/* Foreground overlay with copy */}
             <ObjectInspectOverlay
                 open={!!inspect}
-                state={inspect}
+                state={inspect as any}
                 onClose={() => setInspect(null)}
                 pixelSize={pixelSize}
             />
