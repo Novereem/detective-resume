@@ -10,22 +10,7 @@ import { InspectState } from '@/shaders/inspectTypes'
 import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
 import { Desk } from '@/components/Models/Desk'
 
-type OutlinedGroup = {
-    kind: 'outlinedGroup'
-    initialRotation?: [number, number, number]
-    parts: Array<{
-        geometry: React.ReactElement
-        color?: string
-        outlineColor?: string
-        outlineScale?: number
-        position?: [number, number, number]
-        rotation?: [number, number, number]
-        scale?: number | [number, number, number]
-    }>
-}
-type AnyInspect = InspectState | OutlinedGroup
-
-function Scene({ openInspect }: { openInspect: (s: AnyInspect) => void }) {
+function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     const { scene } = useThree()
     scene.background = new THREE.Color('#3c3c3c')
 
@@ -79,6 +64,7 @@ function Scene({ openInspect }: { openInspect: (s: AnyInspect) => void }) {
                     border={0.035}
                     canInteract
                     onInspect={openInspect}
+                    inspectOverrides={{ pixelSize: 1}}
                 />
             </group>
 
@@ -91,6 +77,7 @@ function Scene({ openInspect }: { openInspect: (s: AnyInspect) => void }) {
                 outlineScale={6.56}
                 outlinePerPart={{ topScale: 1.04, legScale: 1.1 }}
                 onInspect={openInspect as any}
+                inspectPixelSize={6}
             />
 
             <OrbitControls enablePan={false} enableRotate/>
@@ -99,8 +86,9 @@ function Scene({ openInspect }: { openInspect: (s: AnyInspect) => void }) {
 }
 
 export default function DetectiveRoom() {
-    const [inspect, setInspect] = React.useState<AnyInspect | null>(null)
-    const [pixelSize, setPixelSize] = React.useState(3)
+    const [inspect, setInspect] = React.useState<InspectState | null>(null)
+    const defaultInspectPixelSize = 3
+    const [roomPixelSize, setroomPixelSize] = React.useState(3)
 
     return (
         <div style={{ position: 'fixed', inset: 0 }}>
@@ -111,15 +99,15 @@ export default function DetectiveRoom() {
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
                     <Scene openInspect={setInspect} />
-                    <PixelateNearestFX size={pixelSize} />
+                    <PixelateNearestFX size={roomPixelSize} />
                 </Canvas>
             </div>
 
             <ObjectInspectOverlay
                 open={!!inspect}
-                state={inspect as any}
+                state={inspect}
                 onClose={() => setInspect(null)}
-                pixelSize={pixelSize}
+                pixelSize={defaultInspectPixelSize}
             />
         </div>
     )

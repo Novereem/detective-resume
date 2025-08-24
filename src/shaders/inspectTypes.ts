@@ -9,6 +9,7 @@ export type OutlinedInspect = {
     outlineColor?: string
     outlineScale?: number
     initialRotation?: Vec3
+    pixelSize?: number
 }
 
 export type FramedInspect = {
@@ -20,6 +21,22 @@ export type FramedInspect = {
     border?: number
     doubleSide?: boolean
     initialRotation?: Vec3
+    pixelSize?: number
 }
 
-export type InspectState = OutlinedInspect | FramedInspect
+export type OutlinedGroupInspect = {
+    kind: 'outlinedGroup'
+    initialRotation?: Vec3
+    pixelSize?: number
+    parts: Array<{
+        geometry: React.ReactElement
+        color?: string
+        outlineColor?: string
+        outlineScale?: number
+        position?: Vec3
+        rotation?: Vec3
+        scale?: number | Vec3
+    }>
+}
+
+export type InspectState = OutlinedInspect | FramedInspect | OutlinedGroupInspect

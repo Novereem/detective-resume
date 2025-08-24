@@ -86,24 +86,9 @@ function ResetControlsOnChange({
     return null
 }
 
-type OutlinedGroup = {
-    kind: 'outlinedGroup'
-    initialRotation?: [number, number, number]
-    parts: Array<{
-        geometry: React.ReactElement
-        color?: string
-        outlineColor?: string
-        outlineScale?: number
-        position?: [number, number, number]
-        rotation?: [number, number, number]
-        scale?: number | [number, number, number]
-    }>
-}
-type AnyInspect = InspectState | OutlinedGroup
-
 type Props = {
     open: boolean
-    state: AnyInspect | null
+    state: InspectState | null
     onClose: () => void
     durationMs?: number
     pixelSize?: number
@@ -114,9 +99,9 @@ export default function ObjectInspectOverlay({
                                                  state,
                                                  onClose,
                                                  durationMs = 500,
-                                                 pixelSize = 1,
+                                                 pixelSize: defaultPixelSize = 1,
                                              }: Props) {
-    const [renderState, setRenderState] = React.useState<AnyInspect | null>(null)
+    const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
 
     // centering
@@ -126,6 +111,9 @@ export default function ObjectInspectOverlay({
     // r3f helpers
     const invalidateRef = React.useRef<() => void>(() => {})
     const canvasElRef = React.useRef<HTMLCanvasElement | null>(null)
+
+    // pixel size
+    const effectivePixelSize = state?.pixelSize ?? defaultPixelSize
 
     React.useEffect(() => {
         if (open && state) {
@@ -146,7 +134,6 @@ export default function ObjectInspectOverlay({
         const center = new THREE.Vector3()
         box.getCenter(center)
         setOffset([0, -center.y, 0])
-        console.log(center)
         invalidateRef.current?.()
     }, [])
 
@@ -304,7 +291,7 @@ export default function ObjectInspectOverlay({
                         enablePan={false}
                         onChange={() => invalidateRef.current?.()}
                     />
-                    <PixelateNearestFX size={pixelSize} />
+                    {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize} /> : null}
                 </Canvas>
             </div>
         </div>

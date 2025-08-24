@@ -1,9 +1,10 @@
 import React, { memo, useMemo, useRef, useState, useCallback } from 'react'
+import { InspectState, Vec3 } from '@/shaders/inspectTypes'
 import * as THREE from 'three'
 import { ThreeElements } from '@react-three/fiber'
 import { Outlined } from '@/shaders/OutlinedMesh'
 
-type OnInspect = (s: unknown) => void
+type OnInspect = (s: InspectState) => void
 
 type DeskProps = ThreeElements['group'] & {
     topSize?: [number, number, number]
@@ -20,6 +21,8 @@ type DeskProps = ThreeElements['group'] & {
         topScale?: number
         legScale?: number
     }
+
+    inspectPixelSize?: number
 }
 
 export const Desk = memo(function Desk({
@@ -32,6 +35,7 @@ export const Desk = memo(function Desk({
                                            outlineScale = 1.04,
                                            onInspect,
                                            outlinePerPart,
+                                           inspectPixelSize,
                                            ...props
                                        }: DeskProps) {
     const root = useRef<THREE.Group>(null)
@@ -81,25 +85,26 @@ export const Desk = memo(function Desk({
             onInspect?.({
                 kind: 'outlinedGroup',
                 initialRotation: [0.2, 0.6, 0],
+                pixelSize: inspectPixelSize,
                 parts: [
                     {
                         geometry: <boxGeometry args={[w, h, d]} />,
                         color,
                         outlineColor,
                         outlineScale: topScale,
-                        position: [0, legHeight + h / 2, 0],
+                        position: [0, legHeight + h / 2, 0] as Vec3,
                     },
                     ...legPositions.map(([x, z]) => ({
                         geometry: <cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />,
                         color,
                         outlineColor,
                         outlineScale: legScale,
-                        position: [x, legHeight / 2, z],
+                        position: [x, legHeight / 2, z] as Vec3,
                     })),
                 ],
             })
         },
-        [w, h, d, color, outlineColor, topScale, legScale, legHeight, legPositions, onInspect, legRadius]
+        [w, h, d, color, outlineColor, topScale, legScale, legHeight, legPositions, onInspect, legRadius, inspectPixelSize]
     )
 
     const proxyHalfY = (legHeight + h) / 2
