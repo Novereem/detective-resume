@@ -9,6 +9,7 @@ import ObjectInspectOverlay from "@/components/ObjectInspectOverlay";
 import { InspectState } from '@/shaders/inspectTypes'
 import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
 import { Desk } from '@/components/Models/Desk'
+import {Mug} from "@/components/Models/Mug";
 
 function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     const { scene } = useThree()
@@ -17,7 +18,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={0.1}/>
+            <ambientLight intensity={0.75}/>
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
@@ -77,7 +78,19 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
                 outlineScale={6.56}
                 outlinePerPart={{ topScale: 1.04, legScale: 1.1 }}
                 onInspect={openInspect as any}
-                inspectPixelSize={6}
+                inspectPixelSize={4}
+            />
+
+            <Mug
+                position={[0, 0.77, -3]}
+                rotation={[0, Math.PI / 6, 0]}
+                color="#5797ff"
+                outlineColor="#fff"
+                hoverColor="#ff3b30"
+                outlineThickness={0.008}
+                inspectDistance={0.5}
+                onInspect={openInspect}
+                inspectPixelSize={3}
             />
 
             <OrbitControls enablePan={false} enableRotate/>
@@ -88,7 +101,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize, setroomPixelSize] = React.useState(3)
+    const [roomPixelSize] = React.useState(3)
 
     return (
         <div style={{ position: 'fixed', inset: 0 }}>

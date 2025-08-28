@@ -92,6 +92,7 @@ type Props = {
     onClose: () => void
     durationMs?: number
     pixelSize?: number
+    camDistance?: number
 }
 
 export default function ObjectInspectOverlay({
@@ -100,6 +101,7 @@ export default function ObjectInspectOverlay({
                                                  onClose,
                                                  durationMs = 500,
                                                  pixelSize: defaultPixelSize = 1,
+                                                 camDistance = 3.2
                                              }: Props) {
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
@@ -114,6 +116,9 @@ export default function ObjectInspectOverlay({
 
     // pixel size
     const effectivePixelSize = state?.pixelSize ?? defaultPixelSize
+
+    // camera distance of object
+    const effectiveCamDist   = state?.inspectDistance ?? camDistance
 
     React.useEffect(() => {
         if (open && state) {
@@ -284,6 +289,7 @@ export default function ObjectInspectOverlay({
                         resetToken={renderState}
                         controlsRef={controlsRef}
                         invalidate={() => invalidateRef.current?.()}
+                        camPos={[0, 0, effectiveCamDist]}
                     />
 
                     <OrbitControls

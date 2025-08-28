@@ -1,8 +1,7 @@
-import React, { memo, useMemo, useRef, useState, useCallback } from 'react'
-import { InspectState, Vec3 } from '@/shaders/inspectTypes'
-import * as THREE from 'three'
+import React, { memo, useMemo } from 'react'
 import { ThreeElements } from '@react-three/fiber'
-import { Outlined } from '@/shaders/OutlinedMesh'
+import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
+import { InspectState, Vec3 } from '@/shaders/inspectTypes'
 
 type OnInspect = (s: InspectState) => void
 
@@ -14,14 +13,12 @@ type DeskProps = ThreeElements['group'] & {
     outlineColor?: string
     hoverColor?: string
     outlineScale?: number
-    onInspect?: OnInspect
-
     outlinePerPart?: {
         worldThickness?: number
         topScale?: number
         legScale?: number
     }
-
+    onInspect?: OnInspect
     inspectPixelSize?: number
 }
 
@@ -33,122 +30,59 @@ export const Desk = memo(function Desk({
                                            outlineColor = '#fff',
                                            hoverColor = '#ff3b30',
                                            outlineScale = 1.04,
-                                           onInspect,
                                            outlinePerPart,
+                                           onInspect,
                                            inspectPixelSize,
                                            ...props
                                        }: DeskProps) {
-    const root = useRef<THREE.Group>(null)
-    const [hovered, setHovered] = useState(false)
-
     const [w, h, d] = topSize
     const legX = w / 2 - legRadius * 2
     const legZ = d / 2 - legRadius * 2
 
-    const legPositions: [number, number][] = useMemo(
-        () => [
+    const hitboxSize: Vec3 = [w + 0.06, legHeight + h + 0.06, d + 0.06]
+    const hitboxCenter: Vec3 = [0, (legHeight + h) / 2, 0]
+
+    // radii for world-thickness → scale conversion (same logic you used before)
+    const rTop = Math.hypot(w/2, h/2, d/2)
+    const rLeg = Math.hypot(legRadius, legHeight/2)
+    const t = outlinePerPart?.worldThickness
+
+    const topScale = outlinePerPart?.topScale ?? (t ? 1 + t / rTop : outlineScale)
+    const legScale = outlinePerPart?.legScale ?? (t ? 1 + t / rLeg : outlineScale)
+
+    const parts = useMemo<PartSpec[]>(() => ([
+        {
+            geometry: <boxGeometry args={[w, h, d]} />,
+            color,
+            outlineColor,
+            outlineScale: topScale,
+            position: [0, legHeight + h / 2, 0],
+        },
+        ...[
             [-legX,  legZ],
             [ legX,  legZ],
             [-legX, -legZ],
             [ legX, -legZ],
-        ],
-        [legX, legZ]
-    )
-
-    // --- per-part outline thickness ---
-    const { topScale, legScale } = useMemo(() => {
-        if (outlinePerPart?.topScale || outlinePerPart?.legScale) {
-            return {
-                topScale: outlinePerPart?.topScale ?? outlineScale,
-                legScale: outlinePerPart?.legScale ?? outlineScale,
-            }
-        }
-        const t = outlinePerPart?.worldThickness ?? 0.006 // ~6 mm default
-        // bounding-sphere radii
-        const rTop = Math.hypot(w/2, h/2, d/2)
-        const rLeg = Math.hypot(legRadius, legHeight/2)
-        return {
-            topScale: 1 + t / rTop,
-            legScale: 1 + t / rLeg,
-        }
-    }, [
-        outlinePerPart?.topScale,
-        outlinePerPart?.legScale,
-        outlinePerPart?.worldThickness,
-        outlineScale,
-        w, h, d, legRadius, legHeight,
-    ])
-
-    const handleInspect = useCallback(
-        (e: any) => {
-            e.stopPropagation()
-            onInspect?.({
-                kind: 'outlinedGroup',
-                initialRotation: [0.2, 0.6, 0],
-                pixelSize: inspectPixelSize,
-                parts: [
-                    {
-                        geometry: <boxGeometry args={[w, h, d]} />,
-                        color,
-                        outlineColor,
-                        outlineScale: topScale,
-                        position: [0, legHeight + h / 2, 0] as Vec3,
-                    },
-                    ...legPositions.map(([x, z]) => ({
-                        geometry: <cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />,
-                        color,
-                        outlineColor,
-                        outlineScale: legScale,
-                        position: [x, legHeight / 2, z] as Vec3,
-                    })),
-                ],
-            })
-        },
-        [w, h, d, color, outlineColor, topScale, legScale, legHeight, legPositions, onInspect, legRadius, inspectPixelSize]
-    )
-
-    const proxyHalfY = (legHeight + h) / 2
+        ].map(([x, z]) => ({
+            geometry: <cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />,
+            color,
+            outlineColor,
+            outlineScale: legScale,
+            position: [x, legHeight / 2, z] as Vec3,
+        })),
+    ]), [w,h,d,color,outlineColor,topScale,legScale,legRadius,legHeight,legX,legZ])
 
     return (
-        <group
-            ref={root}
+        <ModelGroup
             {...props}
-            onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
-            onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
-            onClick={handleInspect}
-        >
-            {/* invisible hitbox */}
-            <mesh position={[0, proxyHalfY, 0]} raycast={undefined}>
-                <boxGeometry args={[w + 0.06, legHeight + h + 0.06, d + 0.06]} />
-                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-            </mesh>
-
-            {/* top */}
-            <Outlined
-                disablePointer
-                hovered={hovered}
-                geometry={<boxGeometry args={[w, h, d]} />}
-                color={color}
-                outlineColor={outlineColor}
-                hoverColor={hoverColor}
-                outlineScale={topScale}
-                position={[0, legHeight + h / 2, 0]}
-            />
-
-            {/* legs */}
-            {legPositions.map(([x, z], i) => (
-                <Outlined
-                    key={i}
-                    disablePointer
-                    hovered={hovered}
-                    geometry={<cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />}
-                    color={color}
-                    outlineColor={outlineColor}
-                    hoverColor={hoverColor}
-                    outlineScale={legScale}
-                    position={[x, legHeight / 2, z]}
-                />
-            ))}
-        </group>
+            parts={parts}
+            hitbox={{ size: hitboxSize, center: hitboxCenter }}
+            color={color}
+            outlineColor={outlineColor}
+            hoverColor={hoverColor}
+            onInspect={onInspect}
+            inspectPixelSize={inspectPixelSize}
+            initialRotation={[0.2, 0.6, 0]}
+        />
     )
 })

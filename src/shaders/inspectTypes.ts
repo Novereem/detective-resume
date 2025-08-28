@@ -10,6 +10,7 @@ export type OutlinedInspect = {
     outlineScale?: number
     initialRotation?: Vec3
     pixelSize?: number
+    inspectDistance?: number
 }
 
 export type FramedInspect = {
@@ -22,12 +23,14 @@ export type FramedInspect = {
     doubleSide?: boolean
     initialRotation?: Vec3
     pixelSize?: number
+    inspectDistance?: number
 }
 
 export type OutlinedGroupInspect = {
     kind: 'outlinedGroup'
     initialRotation?: Vec3
     pixelSize?: number
+    inspectDistance?: number
     parts: Array<{
         geometry: React.ReactElement
         color?: string
