@@ -23,7 +23,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
 
             {/* floor */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
-                <FramedPlane width={10} height={10} color="#333" borderColor="#fff" hoverColor="#ff3b30"
+                <FramedPlane width={10} height={10} color="#000" borderColor="#fff" hoverColor="#ff3b30"
                              canInteract={false} border={0.06}/>
             </mesh>
 
@@ -37,7 +37,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
             <Outlined
                 geometry={<boxGeometry args={[1, 1, 1]}/>}
                 rotation={[0.5, 0, 0]}
-                color="#4e4e4e"
+                color="#000"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
                 outlineScale={1.04}
@@ -47,7 +47,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
 
             <Outlined
                 geometry={<torusKnotGeometry args={[0.55, 0.18, 128, 16]}/>}
-                color="#626262"
+                color="#000"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
                 outlineScale={1.04}
@@ -59,7 +59,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
                 <FramedPlane
                     width={1}
                     height={1}
-                    color="#333"
+                    color="#000"
                     borderColor="#fff"
                     hoverColor="#ff3b30"
                     border={0.035}
@@ -72,7 +72,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
             <Desk
                 position={[0, 0, -3]}
                 rotation={[0, Math.PI / 6, 0]}
-                color="#626262"
+                color="#000"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
                 outlineScale={6.56}
@@ -101,13 +101,13 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize] = React.useState(3)
+    const [roomPixelSize] = React.useState(4)
 
     return (
         <div style={{ position: 'fixed', inset: 0 }}>
             <div style={{ position: 'absolute', inset: 0 }}>
                 <Canvas
-                    camera={{ position: [0, 2, 5], fov: 100 }}
+                    camera={{ position: [0, 2, -5], fov: 100 }}
                     gl={{ antialias: false }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
