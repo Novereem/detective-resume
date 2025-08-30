@@ -33,7 +33,7 @@ function RecenterOnce({
             // @ts-ignore
             if (obj?.isMesh && obj.geometry) {
                 const mat: any = (obj as any).material
-                if (!mat?.isMeshStandardMaterial) return
+                if (!(mat?.isMeshStandardMaterial || mat?.isMeshBasicMaterial)) return
                 const mesh = obj as THREE.Mesh
                 mesh.updateWorldMatrix(true, false)
                 if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox()
@@ -273,6 +273,10 @@ export default function ObjectInspectOverlay({
                                         border={(renderState as any).border ?? 0.05}
                                         doubleSide={(renderState as any).doubleSide ?? true}
                                         canInteract={false}
+                                        textureUrl={(renderState as any).textureUrl}
+                                        textureFit={(renderState as any).textureFit}
+                                        texturePixelated={(renderState as any).texturePixelated}
+                                        textureZ={(renderState as any).textureZ}
                                     />
                                 )}
                         </group>

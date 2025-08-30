@@ -1,6 +1,6 @@
 'use client'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, useTexture } from '@react-three/drei'
 import React from 'react'
 import * as THREE from 'three'
 import {FramedPlane} from "@/shaders/FramedPlane";
@@ -65,7 +65,9 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
                     border={0.035}
                     canInteract
                     onInspect={openInspect}
-                    inspectOverrides={{ pixelSize: 1}}
+                    inspectOverrides={{ pixelSize: 1 }}
+                    textureUrl="/textures/testimage.jpg"
+                    textureFit="stretch"
                 />
             </group>
 
@@ -107,8 +109,16 @@ export default function DetectiveRoom() {
         <div style={{ position: 'fixed', inset: 0 }}>
             <div style={{ position: 'absolute', inset: 0 }}>
                 <Canvas
+                    dpr={[1, 1.25]}
                     camera={{ position: [0, 2, -5], fov: 100 }}
-                    gl={{ antialias: false }}
+                    gl={{
+                        antialias: false,
+                        alpha: false,
+                        depth: true,
+                        stencil: false,
+                        powerPreference: 'high-performance',
+                        preserveDrawingBuffer: false,
+                    }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
                     <Scene openInspect={setInspect} />

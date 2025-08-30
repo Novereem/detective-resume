@@ -24,6 +24,10 @@ export type FramedInspect = {
     initialRotation?: Vec3
     pixelSize?: number
     inspectDistance?: number
+    textureUrl?: string
+    textureFit?: 'cover' | 'contain' | 'stretch'
+    texturePixelated?: boolean
+    textureZ?: number
 }
 
 export type OutlinedGroupInspect = {
