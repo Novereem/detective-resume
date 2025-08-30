@@ -19,7 +19,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={1.75}/>
+            <ambientLight intensity={3}/>
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}

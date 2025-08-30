@@ -206,12 +206,12 @@ export default function ObjectInspectOverlay({
                 }}
             >
                 <Canvas
-                    camera={{ position: [0, 0, 3.2], fov: 50 }}
+                    camera={{position: [0, 0, 3.2], fov: 50}}
                     dpr={[1, 1]}
                     frameloop="demand"
-                    gl={{ antialias: false, powerPreference: 'low-power' }}
-                    style={{ imageRendering: 'pixelated' }}
-                    onCreated={({ gl, invalidate }) => {
+                    gl={{antialias: false, powerPreference: 'low-power'}}
+                    style={{imageRendering: 'pixelated'}}
+                    onCreated={({gl, invalidate}) => {
                         invalidateRef.current = invalidate
                         canvasElRef.current = gl.domElement as HTMLCanvasElement
 
@@ -229,8 +229,8 @@ export default function ObjectInspectOverlay({
                         }
                     }}
                 >
-                    <ambientLight intensity={1.5} />
-                    <directionalLight position={[2, 3, 4]} intensity={1} />
+                    <ambientLight intensity={3}/>
+                    <directionalLight position={[2, 5, 7]}/>
 
                     <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
                         <group ref={contentRef} position={offset}>
@@ -306,7 +306,7 @@ export default function ObjectInspectOverlay({
                         enablePan={false}
                         onChange={() => invalidateRef.current?.()}
                     />
-                    {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize} /> : null}
+                    {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize}/> : null}
                 </Canvas>
             </div>
         </div>
