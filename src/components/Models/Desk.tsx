@@ -1,25 +1,19 @@
+'use client'
 import React, { memo, useMemo } from 'react'
-import { ThreeElements } from '@react-three/fiber'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
-import { InspectState, Vec3 } from '@/shaders/inspectTypes'
+import { Vec3 } from '@/shaders/inspectTypes'
 
-type OnInspect = (s: InspectState) => void
+type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts'>
 
-type DeskProps = ThreeElements['group'] & {
+type DeskProps = Inherited & {
     topSize?: [number, number, number]
     legRadius?: number
     legHeight?: number
-    color?: string
-    outlineColor?: string
-    hoverColor?: string
-    outlineScale?: number
     outlinePerPart?: {
         worldThickness?: number
         topScale?: number
         legScale?: number
     }
-    onInspect?: OnInspect
-    inspectPixelSize?: number
 }
 
 export const Desk = memo(function Desk({
@@ -33,48 +27,55 @@ export const Desk = memo(function Desk({
                                            outlinePerPart,
                                            onInspect,
                                            inspectPixelSize,
-                                           ...props
+                                           ...rest
                                        }: DeskProps) {
     const [w, h, d] = topSize
-    const legX = w / 2 - legRadius * 2
-    const legZ = d / 2 - legRadius * 2
+    const legX = (w / 2) - legRadius * 2
+    const legZ = (d / 2) - legRadius * 2
 
-    const hitboxSize: Vec3 = [w + 0.06, legHeight + h + 0.06, d + 0.06]
+    const topScale = outlinePerPart?.topScale ?? outlineScale
+    const legScale = outlinePerPart?.legScale ?? outlineScale
+
+    const hitboxSize: Vec3 = [w + 0.2, legHeight + h + 0.1, d + 0.2]
     const hitboxCenter: Vec3 = [0, (legHeight + h) / 2, 0]
 
-    // radii for world-thickness → scale conversion (same logic you used before)
-    const rTop = Math.hypot(w/2, h/2, d/2)
-    const rLeg = Math.hypot(legRadius, legHeight/2)
-    const t = outlinePerPart?.worldThickness
+    const parts = useMemo<PartSpec[]>(() => {
+        const p: PartSpec[] = []
 
-    const topScale = outlinePerPart?.topScale ?? (t ? 1 + t / rTop : outlineScale)
-    const legScale = outlinePerPart?.legScale ?? (t ? 1 + t / rLeg : outlineScale)
-
-    const parts = useMemo<PartSpec[]>(() => ([
-        {
+        // Table top
+        p.push({
+            id: 'top',
             geometry: <boxGeometry args={[w, h, d]} />,
             color,
             outlineColor,
             outlineScale: topScale,
             position: [0, legHeight + h / 2, 0],
-        },
-        ...[
+        })
+
+        // 4 legs
+        ;[
             [-legX,  legZ],
             [ legX,  legZ],
             [-legX, -legZ],
             [ legX, -legZ],
-        ].map(([x, z]) => ({
-            geometry: <cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />,
-            color,
-            outlineColor,
-            outlineScale: legScale,
-            position: [x, legHeight / 2, z] as Vec3,
-        })),
-    ]), [w,h,d,color,outlineColor,topScale,legScale,legRadius,legHeight,legX,legZ])
+        ].forEach(([x, z]) => {
+            p.push({
+                id: 'leg',
+                geometry: <cylinderGeometry args={[legRadius, legRadius, legHeight, 12]} />,
+                color,
+                outlineColor,
+                outlineScale: legScale,
+                position: [x, legHeight / 2, z] as Vec3,
+                rotation: [0, 0, 0],
+            })
+        })
+
+        return p
+    }, [w, h, d, legHeight, legRadius, legX, legZ, color, outlineColor, topScale, legScale])
 
     return (
         <ModelGroup
-            {...props}
+            {...rest}
             parts={parts}
             hitbox={{ size: hitboxSize, center: hitboxCenter }}
             color={color}

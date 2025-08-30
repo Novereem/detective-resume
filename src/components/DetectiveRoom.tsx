@@ -10,6 +10,7 @@ import { InspectState } from '@/shaders/inspectTypes'
 import {PixelateNearestFX} from "@/shaders/PixelateNearestFX";
 import { Desk } from '@/components/Models/Desk'
 import {Mug} from "@/components/Models/Mug";
+import { deskMaterials, mugMaterials } from "@/components/Materials/detectiveRoomMats";
 
 function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     const { scene } = useThree()
@@ -18,7 +19,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={0.75}/>
+            <ambientLight intensity={1.75}/>
             <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
@@ -74,25 +75,27 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
             <Desk
                 position={[0, 0, -3]}
                 rotation={[0, Math.PI / 6, 0]}
-                color="#000"
+                color="#fff"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
                 outlineScale={6.56}
                 outlinePerPart={{ topScale: 1.04, legScale: 1.1 }}
                 onInspect={openInspect as any}
                 inspectPixelSize={4}
+                materialsById={deskMaterials}
             />
 
             <Mug
                 position={[0, 0.77, -3]}
                 rotation={[0, Math.PI / 6, 0]}
-                color="#5797ff"
+                color="#fff"
                 outlineColor="#fff"
                 hoverColor="#ff3b30"
                 outlineThickness={0.008}
                 inspectDistance={0.5}
                 onInspect={openInspect}
                 inspectPixelSize={3}
+                materialsById={mugMaterials}
             />
 
             <OrbitControls enablePan={false} enableRotate/>
@@ -103,7 +106,7 @@ function Scene({ openInspect }: { openInspect: (s: InspectState) => void }) {
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize] = React.useState(4)
+    const [roomPixelSize] = React.useState(3)
 
     return (
         <div style={{ position: 'fixed', inset: 0 }}>

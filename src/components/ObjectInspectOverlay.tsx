@@ -229,7 +229,7 @@ export default function ObjectInspectOverlay({
                         }
                     }}
                 >
-                    <ambientLight intensity={1} />
+                    <ambientLight intensity={1.5} />
                     <directionalLight position={[2, 3, 4]} intensity={1} />
 
                     <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
@@ -257,6 +257,11 @@ export default function ObjectInspectOverlay({
                                             position={p.position}
                                             rotation={p.rotation}
                                             scale={p.scale}
+                                            textureUrl={p.textureUrl}
+                                            texturePixelated={p.texturePixelated}
+                                            metalness={p.metalness}
+                                            roughness={p.roughness}
+                                            disablePointer
                                         />
                                     ))}
                                 </>

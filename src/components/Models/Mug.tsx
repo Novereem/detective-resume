@@ -25,11 +25,13 @@ export const Mug = memo(function Mug({
 
     const parts = useMemo<PartSpec[]>(() => [
         {
+            id: 'body',
             geometry: <cylinderGeometry args={[radius, radius, height, segments]} />,
             position: [0, height / 2, 0] as Vec3,
             boundingRadius: rBody,
         },
         {
+            id: 'handle',
             geometry: <torusGeometry args={[radius * 0.7, thickness * 0.7, 16, Math.max(24, segments)]} />,
             position: [radius * 0.9, height / 2, 0] as Vec3,
             rotation: [Math.PI / 2, 0, 0] as Vec3,
@@ -46,6 +48,7 @@ export const Mug = memo(function Mug({
         <ModelGroup
             {...rest}
             parts={parts}
+            materialsById={rest.materialsById}
             hitbox={defaultHitbox}
             initialRotation={initialRotation}
         />

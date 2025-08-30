@@ -43,6 +43,10 @@ export type OutlinedGroupInspect = {
         position?: Vec3
         rotation?: Vec3
         scale?: number | Vec3
+        textureUrl?: string
+        texturePixelated?: boolean
+        metalness?: number
+        roughness?: number
     }>
 }
 

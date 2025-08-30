@@ -5,6 +5,7 @@ import { Outlined } from '@/shaders/OutlinedMesh'
 import { InspectState, OutlinedGroupInspect, Vec3 } from '@/shaders/inspectTypes'
 
 export type PartSpec = {
+    id?: string
     geometry: React.ReactElement
     color?: string
     outlineColor?: string
@@ -16,6 +17,19 @@ export type PartSpec = {
     position?: Vec3
     rotation?: Vec3
     scale?: number | Vec3
+    textureUrl?: string
+    texturePixelated?: boolean
+    metalness?: number
+    roughness?: number
+}
+
+export type PartMaterialOverride = {
+    color?: string
+    outlineColor?: string
+    textureUrl?: string
+    texturePixelated?: boolean
+    metalness?: number
+    roughness?: number
 }
 
 type ModelGroupProps = ThreeElements['group'] & {
@@ -32,6 +46,7 @@ type ModelGroupProps = ThreeElements['group'] & {
     outlineThickness?: number
     outlineWorldThickness?: number
     outlineScale?: number
+    materialsById?: Record<string, PartMaterialOverride>
 }
 
 export function ModelGroup({
@@ -48,6 +63,7 @@ export function ModelGroup({
                                outlineWorldThickness,
                                outlineScale = 1.035,
                                inspectDistance,
+                               materialsById,
                                ...groupProps
                            }: ModelGroupProps) {
     const [hovered, setHovered] = React.useState(false)
@@ -70,16 +86,23 @@ export function ModelGroup({
         initialRotation,
         pixelSize: inspectPixelSize,
         inspectDistance,
-        parts: parts.map(p => ({
-            geometry: p.geometry,
-            color: p.color ?? color,
-            outlineColor: p.outlineColor ?? outlineColor,
-            outlineScale: resolveScale(p),
-            position: p.position,
-            rotation: p.rotation,
-            scale: p.scale,
-        })),
-    }), [parts, color, outlineColor, initialRotation, inspectPixelSize, inspectDistance, resolveScale])
+        parts: parts.map(p => {
+            const ov = p.id ? materialsById?.[p.id] : undefined
+            return {
+                geometry: p.geometry,
+                color: ov?.color ?? p.color ?? color,
+                outlineColor: ov?.outlineColor ?? p.outlineColor ?? outlineColor,
+                outlineScale: resolveScale(p),
+                position: p.position,
+                rotation: p.rotation,
+                scale: p.scale,
+                textureUrl: ov?.textureUrl ?? p.textureUrl,
+                texturePixelated: ov?.texturePixelated ?? p.texturePixelated,
+                metalness: ov?.metalness ?? p.metalness,
+                roughness: ov?.roughness ?? p.roughness,
+            }
+        }),
+    }), [parts, color, outlineColor, initialRotation, inspectPixelSize, inspectDistance, resolveScale, materialsById])
 
     const bind = disablePointer ? {} : {
         onPointerOver: (e: any) => { e.stopPropagation(); setHovered(true) },
@@ -90,26 +113,40 @@ export function ModelGroup({
     return (
         <group {...groupProps} {...bind}>
             {hitbox && (
-                <mesh position={hitbox.center ?? [0, 0, 0]} raycast={disablePointer ? undefined : undefined}>
+                <mesh position={hitbox.center ?? [0, 0, 0]}>
                     <boxGeometry args={hitbox.size} />
                     <meshBasicMaterial transparent opacity={0} depthWrite={false} />
                 </mesh>
             )}
-            {parts.map((p, i) => (
-                <Outlined
-                    key={i}
-                    disablePointer
-                    hovered={!disablePointer && hovered}
-                    geometry={p.geometry}
-                    color={p.color ?? color}
-                    outlineColor={p.outlineColor ?? outlineColor}
-                    hoverColor={p.hoverColor ?? hoverColor}
-                    outlineScale={resolveScale(p)}
-                    position={p.position}
-                    rotation={p.rotation}
-                    scale={p.scale}
-                />
-            ))}
+            {parts.map((p, i) => {
+                const ov = p.id ? materialsById?.[p.id] : undefined
+                const effColor = ov?.color ?? p.color ?? color
+                const effOutline = ov?.outlineColor ?? p.outlineColor ?? outlineColor
+                const effTex = ov?.textureUrl ?? p.textureUrl
+                const effPix = ov?.texturePixelated ?? p.texturePixelated
+                const effMetal = ov?.metalness ?? p.metalness
+                const effRough = ov?.roughness ?? p.roughness
+
+                return (
+                    <Outlined
+                        key={i}
+                        disablePointer
+                        hovered={!disablePointer && hovered}
+                        geometry={p.geometry}
+                        color={effColor}
+                        outlineColor={effOutline}
+                        hoverColor={p.hoverColor ?? hoverColor}
+                        outlineScale={resolveScale(p)}
+                        position={p.position}
+                        rotation={p.rotation}
+                        scale={p.scale}
+                        textureUrl={effTex}
+                        texturePixelated={effPix}
+                        metalness={effMetal}
+                        roughness={effRough}
+                    />
+                )
+            })}
         </group>
     )
 }

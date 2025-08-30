@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import React from 'react'
 import { useCursor } from '@react-three/drei'
 import { InspectState, OutlinedInspect } from './inspectTypes'
+import { useManagedTexture } from '@/shaders/useManagedTexture'
 
 type CommonTransform = {
     position?: [number, number, number]
@@ -21,6 +22,10 @@ type OutlinedProps = CommonTransform & {
     inspectOverrides?: Partial<OutlinedInspect>
     hovered?: boolean
     disablePointer?: boolean
+    textureUrl?: string
+    texturePixelated?: boolean
+    metalness?: number
+    roughness?: number
 }
 
 export function Outlined({
@@ -38,6 +43,10 @@ export function Outlined({
     inspectOverrides = {initialRotation: [0.2, 0.6, 0]},
     hovered,
     disablePointer = false,
+    textureUrl,
+    texturePixelated,
+    metalness,
+    roughness,
 }: OutlinedProps) {
 
     const [localHover, setLocalHover] = React.useState(false)
@@ -72,6 +81,12 @@ export function Outlined({
             }
             : {}
 
+    const tex = useManagedTexture(textureUrl, {
+        minFilter: texturePixelated ? THREE.NearestFilter : THREE.LinearFilter,
+        magFilter: texturePixelated ? THREE.NearestFilter : THREE.LinearFilter,
+        generateMipmaps: !texturePixelated,
+    })
+
     return (
         <group position={position} rotation={rotation} scale={scale} {...bind}>
             <group scale={outlineScale}>
@@ -91,7 +106,13 @@ export function Outlined({
 
             <mesh>
                 {React.cloneElement(geometry)}
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial
+                    key={tex ? 'std-with-map' : 'std-no-map'}
+                    color={color}
+                    map={tex ?? null}
+                    metalness={metalness ?? 0}
+                    roughness={roughness ?? 1}
+                />
             </mesh>
         </group>
     )
