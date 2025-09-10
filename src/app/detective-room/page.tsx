@@ -26,7 +26,7 @@ export default function DetectiveRoomPage() {
     const { isLoading, pending } = useTextureLoading()
 
     const [overlayVisible, setOverlayVisible] = React.useState(true)
-    const [opacity, setOpacity] = React.useState(1) // start black; we'll fade to 0
+    const [opacity, setOpacity] = React.useState(1)
     const hideTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
     React.useEffect(() => {

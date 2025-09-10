@@ -2,6 +2,18 @@ import React from 'react'
 
 export type Vec3 = [number, number, number]
 
+export type TextPuzzle = {
+    type: 'text'
+    id?: string
+    prompt?: string
+    answers: Array<string | RegExp>
+    normalize?: 'none' | 'trim' | 'lower' | 'trim-lower'
+    feedback?: {
+        correct?: string
+        incorrect?: string
+    }
+}
+
 export type OutlinedInspect = {
     kind: 'outlined'
     geometry: React.ReactElement
@@ -50,4 +62,9 @@ export type OutlinedGroupInspect = {
     }>
 }
 
-export type InspectState = OutlinedInspect | FramedInspect | OutlinedGroupInspect
+
+/** Any inspect state can optionally carry a puzzle definition */
+export type InspectState =
+    (OutlinedInspect | FramedInspect | OutlinedGroupInspect) & {
+    puzzle?: TextPuzzle
+}

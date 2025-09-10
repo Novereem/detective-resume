@@ -20,8 +20,6 @@ function RecenterOnce({
     resetToken: unknown
 }) {
     const done = React.useRef(false)
-
-    // reset when a new object is being inspected
     React.useEffect(() => { done.current = false }, [resetToken])
 
     const computeBox = React.useCallback(() => {
@@ -73,7 +71,6 @@ function ResetControlsOnChange({
     target?: [number, number, number]
 }) {
     const { camera } = useThree()
-
     React.useEffect(() => {
         const controls = controlsRef.current
         if (!controls) return
@@ -82,7 +79,6 @@ function ResetControlsOnChange({
         controls.update()
         invalidate()
     }, [resetToken])
-
     return null
 }
 
@@ -93,6 +89,7 @@ type Props = {
     durationMs?: number
     pixelSize?: number
     camDistance?: number
+    onSolved?: (ctx: { state: InspectState }) => void
 }
 
 export default function ObjectInspectOverlay({
@@ -101,7 +98,8 @@ export default function ObjectInspectOverlay({
                                                  onClose,
                                                  durationMs = 500,
                                                  pixelSize: defaultPixelSize = 1,
-                                                 camDistance = 3.2
+                                                 camDistance = 3.2,
+                                                 onSolved,
                                              }: Props) {
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
@@ -116,8 +114,7 @@ export default function ObjectInspectOverlay({
 
     // pixel size
     const effectivePixelSize = state?.pixelSize ?? defaultPixelSize
-
-    // camera distance of object
+    // camera distance
     const effectiveCamDist   = state?.inspectDistance ?? camDistance
 
     React.useEffect(() => {
@@ -142,7 +139,6 @@ export default function ObjectInspectOverlay({
         invalidateRef.current?.()
     }, [])
 
-    // when content changes, center it next tick
     React.useLayoutEffect(() => {
         if (renderState) setOffset([0, 0, 0])
     }, [renderState])
@@ -157,13 +153,99 @@ export default function ObjectInspectOverlay({
 
     const controlsRef = React.useRef<OrbitControlsImpl | null>(null)
 
-    // Esc to close
+    // Close on ESC
     React.useEffect(() => {
         if (!open) return
         const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
     }, [open, onClose])
+
+    const puzzle = renderState?.puzzle?.type === 'text' ? renderState.puzzle : undefined
+    const [answer, setAnswer] = React.useState('')
+    const [status, setStatus] = React.useState<'idle' | 'correct' | 'incorrect'>('idle')
+    const inputRef = React.useRef<HTMLInputElement | null>(null)
+    const cardRef = React.useRef<HTMLDivElement | null>(null)
+
+    React.useEffect(() => {
+        if (!open) return
+        const body = document.body
+        const scrollY = window.scrollY
+
+        const prev = {
+            position: body.style.position,
+            top: body.style.top,
+            width: body.style.width,
+            overflow: body.style.overflow,
+        }
+
+        body.style.position = 'fixed'
+        body.style.top = `-${scrollY}px`
+        body.style.width = '100%'
+        body.style.overflow = 'hidden'
+
+        return () => {
+            body.style.position = prev.position
+            body.style.top = prev.top
+            body.style.width = prev.width
+            body.style.overflow = prev.overflow
+            window.scrollTo(0, scrollY)
+        }
+    }, [open])
+
+    React.useEffect(() => {
+        if (!visible) return
+
+        setAnswer('')
+        setStatus('idle')
+
+        const node = cardRef.current
+        if (!node) return
+
+        const onEnd = (e: TransitionEvent) => {
+            if (e.propertyName === 'transform') {
+                if (puzzle) inputRef.current?.focus()
+                node.removeEventListener('transitionend', onEnd)
+            }
+        }
+
+        node.addEventListener('transitionend', onEnd)
+        return () => node.removeEventListener('transitionend', onEnd)
+    }, [visible, puzzle?.id])
+
+    const normalize = React.useCallback((s: string) => {
+        const mode = puzzle?.normalize ?? 'trim-lower'
+        let v = s
+        if (mode === 'trim' || mode === 'trim-lower') v = v.trim()
+        if (mode === 'lower' || mode === 'trim-lower') v = v.toLowerCase()
+        return v
+    }, [puzzle?.normalize])
+
+    const submitAnswer = React.useCallback(() => {
+        if (!puzzle || !renderState) return
+        const strAnswers = puzzle.answers.filter(a => typeof a === 'string') as string[]
+        const rxAnswers  = puzzle.answers.filter(a => a instanceof RegExp) as RegExp[]
+
+        const raw = answer
+        const norm = normalize(answer)
+
+        const strOk = strAnswers.some(a => normalize(a) === norm)
+        const rxOk  = rxAnswers.some(rx => rx.test(raw))
+
+        const ok = strOk || rxOk
+        setStatus(ok ? 'correct' : 'incorrect')
+
+        if (ok && renderState) {
+            onSolved?.({ state: renderState })
+        }
+    }, [answer, puzzle, normalize, renderState, onSolved])
+
+    const onKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            submitAnswer()
+        }
+    }, [submitAnswer])
 
     return (
         <div
@@ -191,6 +273,7 @@ export default function ObjectInspectOverlay({
             />
 
             <div
+                ref={cardRef}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     width: 'min(80vw, 820px)',
@@ -201,8 +284,16 @@ export default function ObjectInspectOverlay({
                     background: 'rgba(18,18,18,0.6)',
                     backdropFilter: 'blur(2px)',
                     WebkitBackdropFilter: 'blur(2px)',
-                    transform: visible ? 'translateY(0)' : 'translateY(calc(100vh + 24px))',
+
+                    // Smooth slide-in
+                    transform: visible ? 'translateY(0) translateZ(0)' : 'translateY(calc(100vh + 24px)) translateZ(0)',
                     transition: `transform ${durationMs}ms cubic-bezier(.22,.8,.36,1)`,
+
+                    // Compositing hints
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+
+                    position: 'relative',
                 }}
             >
                 <Canvas
@@ -308,6 +399,72 @@ export default function ObjectInspectOverlay({
                     />
                     {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize}/> : null}
                 </Canvas>
+
+                {puzzle && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            padding: '12px 14px',
+                            background:
+                                status === 'correct'
+                                    ? 'rgba(0,128,0,0.25)'
+                                    : status === 'incorrect'
+                                        ? 'rgba(128,0,0,0.25)'
+                                        : 'rgba(0,0,0,0.55)',
+                            borderTop: '1px solid rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            gap: 10,
+                            alignItems: 'center',
+                            backdropFilter: 'blur(2px)',
+                        }}
+                    >
+                        <div style={{color: '#ddd', fontSize: 14, whiteSpace: 'nowrap'}}>
+                            {puzzle.prompt ?? 'Type your answer:'}
+                        </div>
+                        <input
+                            ref={inputRef}
+                            value={answer}
+                            onChange={(e) => {
+                                setAnswer(e.target.value);
+                                setStatus('idle')
+                            }}
+                            onKeyDown={onKeyDown}
+                            placeholder="Your answer…"
+                            style={{
+                                flex: 1,
+                                background: 'rgba(255,255,255,0.06)',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                color: '#fff',
+                                padding: '8px 10px',
+                                borderRadius: 8,
+                                outline: 'none',
+                                fontSize: 14,
+                            }}
+                        />
+                        <button
+                            onClick={submitAnswer}
+                            disabled={!answer.trim()}
+                            style={{
+                                background: !answer.trim() ? 'rgba(255,255,255,0.12)' : '#fff',
+                                color: !answer.trim() ? 'rgba(255,255,255,0.55)' : '#111',
+                                border: 'none',
+                                borderRadius: 8,
+                                padding: '8px 12px',
+                                cursor: !answer.trim() ? 'not-allowed' : 'pointer',
+                                fontWeight: 600,
+                            }}
+                        >
+                            Confirm
+                        </button>
+                        <div style={{minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 13}}>
+                            {status === 'correct' && (puzzle.feedback?.correct ?? 'Correct!')}
+                            {status === 'incorrect' && (puzzle.feedback?.incorrect ?? 'Try again')}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )
