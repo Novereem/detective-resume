@@ -12,10 +12,10 @@ import { Mug } from "@/components/Models/Mug"
 import {corkBoardMaterials, deskMaterials, mugMaterials} from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {Pin} from "@/components/Models/Pin";
+import {LightBulb} from "@/components/Models/LightBulb";
 
 type V3 = [number, number, number]
 
-/** Free-look controls (drag LMB to look), driven by a shared quaternion goal */
 function FreeLookControls({
                               enabled = true,
                               lookSensitivity = 0.0022,
@@ -146,6 +146,54 @@ function PlayerMover({
     return null
 }
 
+type ZoomMode = 'fov' | 'dolly'
+
+function MouseZoom({
+                       enabled = true,
+                       mode: modeProp = 'fov',
+                       fovMin = 50,
+                       fovMax = 100,
+                       fovSpeed = 0.04,   // higher = faster FOV zoom
+                       dollySpeed = 0.002 // higher = faster dolly
+                   }: {
+    enabled?: boolean
+    mode?: ZoomMode
+    fovMin?: number
+    fovMax?: number
+    fovSpeed?: number
+    dollySpeed?: number
+}) {
+    const { camera, gl } = useThree()
+    const mode = modeProp
+
+    React.useEffect(() => {
+        const el = gl.domElement
+        const onWheel = (e: WheelEvent) => {
+            if (!enabled) return
+            // avoid page scroll
+            e.preventDefault()
+
+            if (mode === 'fov') {
+                const persp = camera as THREE.PerspectiveCamera
+                // wheel up (negative deltaY) => zoom in
+                persp.fov = THREE.MathUtils.clamp(persp.fov + e.deltaY * fovSpeed, fovMin, fovMax)
+                persp.updateProjectionMatrix()
+            } else {
+                // Dolly along forward vector
+                const dir = new THREE.Vector3()
+                camera.getWorldDirection(dir)
+                // wheel up => move forward
+                camera.position.addScaledVector(dir, e.deltaY * dollySpeed)
+            }
+        }
+
+        el.addEventListener('wheel', onWheel, { passive: false })
+        return () => el.removeEventListener('wheel', onWheel as any)
+    }, [enabled, mode, fovMin, fovMax, fovSpeed, dollySpeed, gl, camera])
+
+    return null
+}
+
 function Scene({
                    openInspect,
                    requestMove,
@@ -174,28 +222,116 @@ function Scene({
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={2}/>
-            <directionalLight position={[2, 5, 7]}/>
+            <ambientLight intensity={0.2}/>
 
-            {/* floor */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
-                <FramedPlane
-                    width={10}
-                    height={10}
-                    color="#000"
-                    borderColor="#fff"
-                    hoverColor="#ff3b30"
-                    canInteract={false}
-                    border={0.06}
-                    textureUrl="/textures/light_concrete.jpg"
-                    textureFit="stretch"
-                />
-            </mesh>
+            <group>
+                {/* floor */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={10}
+                        textureUrl="/textures/dark_planks.jpg"
+                        textureFit="contain"
+                        border={0}
+                        color="#777"
+                        hoverColor="#ff3b30"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
 
-            <mesh raycast={() => null} position={[10, 0, 0]}>
-                <planeGeometry args={[10, 10]}/>
-                <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
-            </mesh>
+                    />
+                </mesh>
+
+                {/* roof */}
+                <mesh rotation={[-Math.PI / 2, Math.PI, Math.PI]} position={[0,5,0]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={10}
+                        textureUrl="/textures/rainbow_metal.jpg"
+                        textureFit="stretch"
+                        border={0}
+                        color="#777"
+                        hoverColor="#ff3b30"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+
+                    />
+                </mesh>
+
+                {/* back wall */}
+                <mesh position={[0, 2.5, 5]} rotation={[-Math.PI, 0, 0]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={5}
+                        textureUrl="/textures/light_concrete.jpg"
+                        textureFit="stretch"
+                        border={0}
+                        color="#777"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                    />
+                </mesh>
+
+                {/* front wall */}
+                <mesh position={[0, 2.5, -5]} rotation={[0, 0, Math.PI]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={5}
+                        textureUrl="/textures/light_concrete.jpg"
+                        textureFit="stretch"
+                        border={0}
+                        color="#777"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                    />
+                </mesh>
+
+                {/* left wall */}
+                <mesh position={[-5, 2.5, 0]} rotation={[-Math.PI, (Math.PI / 2), 0 ]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={5}
+                        textureUrl="/textures/light_concrete.jpg"
+                        textureFit="stretch"
+                        border={0}
+                        color="#777"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                    />
+                </mesh>
+
+                {/* right wall */}
+                <mesh position={[5, 2.5, 0]} rotation={[-Math.PI, Math.PI + (Math.PI / 2), 0 ]} raycast={() => null}>
+                    <FramedPlane
+                        width={10}
+                        height={5}
+                        textureUrl="/textures/light_concrete.jpg"
+                        textureFit="stretch"
+                        border={0}
+                        color="#777"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                    />
+                </mesh>
+            </group>
+
 
             <group onContextMenu={rcGoAt([-3, 1, -2], DEFAULT_OFFSET)}>
                 <Outlined
@@ -205,40 +341,29 @@ function Scene({
                     outlineColor="#fff"
                     hoverColor="#ff3b30"
                     outlineScale={1.04}
-                    position={[-3, 1, -2]}
+                    position={[-6, 1, -2]}
                     onInspect={openInspect}
                 />
             </group>
 
-            <group onContextMenu={rcGoAt([3, 1, -2], DEFAULT_OFFSET)}>
-                <Outlined
-                    geometry={<torusKnotGeometry args={[0.55, 0.18, 128, 16]}/>}
-                    color="#000"
-                    outlineColor="#fff"
-                    hoverColor="#ff3b30"
-                    outlineScale={1.04}
-                    position={[3, 1, -2]}
-                    onInspect={openInspect}
-                />
-            </group>
-
-            <group rotation={[0, 0, 0.2]} position={[0, 2, 0]}
-                   onContextMenu={rcGoAt([0, 2, 0], DEFAULT_OFFSET)}>
+            <group rotation={[Math.PI, 0 , 3]} position={[0.2, 1.3, 4.6]}
+                   onContextMenu={rcGoAt([0.2, 1.3, 4.5], [0 , 0, -1.4])}>
                 <FramedPlane
-                    width={1}
-                    height={1}
+                    width={0.17}
+                    height={0.2}
                     color="#000"
                     borderColor="#fff"
                     hoverColor="#ff3b30"
-                    border={0.035}
+                    border={0.01}
                     canInteract
+                    inspectDistance={0.4}
                     onInspect={(p) =>
                         openInspect({
                             ...p,
                             puzzle: {
                                 type: 'text',
                                 id: 'frame-code',
-                                prompt: 'What is the hidden word on the photo?',
+                                prompt: 'What is the name of this popular medical drama from the 2000s?',
                                 answers: ['house', /house\s*md/i],
                                 normalize: 'trim-lower',
                                 feedback: {correct: 'Nice find!', incorrect: 'Not quite—look closer.'},
@@ -246,41 +371,44 @@ function Scene({
                         })
                     }
                     inspectOverrides={{pixelSize: 1}}
-                    textureUrl="/textures/testimage.jpg"
+                    textureUrl="/textures/house_szn1.jpg"
                     textureFit="stretch"
                 />
             </group>
 
-            <group onContextMenu={rcGo([0.8, 1.1, -1.2], [0.5, 0.75, -2.4])}>
+            <group onContextMenu={rcGo([0, 1, 3], [0, 0, 4.71])}>
                 <Desk
-                    position={[0, 0, -3]}
+                    position={[0, 0, 4.2]}
                     rotation={[0, Math.PI / 6, 0]}
                     color="#fff"
                     outlineScale={6.56}
                     outlinePerPart={{topScale: 1.04, legScale: 1.1}}
-                    onInspect={openInspect as any}
-                    inspectPixelSize={1}
+                    // onInspect={openInspect as any}
+                    inspectPixelSize={3}
                     materialsById={deskMaterials}
+                    disableOutline={true}
+                    inspectDisableOutline={true}
                 />
             </group>
 
-            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2])}>
+            <group onContextMenu={rcGo([0, 1.2, 3], [0, 1, 6])}>
                 <CorkBoard
-                    position={[0, 1.2, -2]}
+                    position={[0, 1.2, 4.7]}
                     rotation={[0, 0.1, 0]}
                     onInspect={openInspect}
                     color="#fff"
                     materialsById={corkBoardMaterials}
                     inspectDistance={1}
                     inspectPixelSize={3}
+                    disableOutline={true}
+                    inspectDisableOutline={true}
                 />
             </group>
 
-            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2.2])}>
+            <group>
                 <Pin
-                    position={[0, 1.45, -4.4]}
-                    rotation={[0, 0.1, 0]}
-                    onInspect={openInspect}
+                    position={[0.2, 1.37, 4.6]}
+                    rotation={[Math.PI + (Math.PI / 2), 0, 0]}
                     materialsById={corkBoardMaterials}
                     inspectDistance={0.2}
                     inspectPixelSize={3}
@@ -289,9 +417,29 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcGo([0.2, 1.05, -4.7], [0.15, 0.77, -2.85])}>
+            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2.2])}>
+                <LightBulb
+                    position={[0, 2, 4.3]}
+                    rotation={[0, 0, Math.PI]}
+                    materialsById={{
+                        base:   { color: '#b8bcc2', metalness: 0.85, roughness: 0.3 },
+                        tip:    { color: '#c5c9cf', metalness: 0.9,  roughness: 0.2 },
+                        collar: { color: '#ededed', metalness: 0.05, roughness: 0.65 },
+                        neck:   { color: '#dcdcdc', metalness: 0.0,  roughness: 0.9  },
+                        postL:  { color: '#b9bcc0' },
+                        postR:  { color: '#b9bcc0' },
+                        filament:{ color: '#ffcc55' },
+                    }}
+                    disableOutline
+                    inspectDisableOutline
+                    enableLight
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <group onContextMenu={rcGo([-0.2, 1.3, 3.8], [0, 0.4, 4.6])}>
                 <Mug
-                    position={[0, 0.77, -3]}
+                    position={[-0.2, 0.77, 4.2]}
                     rotation={[0, Math.PI / 6, 0]}
                     color="#fff"
                     outlineThickness={0.008}
@@ -302,10 +450,10 @@ function Scene({
                             puzzle: {
                                 type: 'text',
                                 id: 'mug-initials',
-                                prompt: 'Whose initials are on the mug?',
-                                answers: ['NO', /N\.?\s*O\.?/i],
+                                prompt: 'What is this weird object supposed to be',
+                                answers: ['a mug', 'mug', 'what?'],
                                 normalize: 'trim-lower',
-                                feedback: {correct: 'Correct!', incorrect: 'Check the engraving.'},
+                                feedback: {correct: 'Correct!', incorrect: 'This is a tricky one!'},
                             },
                         })
                     }
@@ -332,7 +480,7 @@ export default function DetectiveRoom() {
             <div style={{ position: 'absolute', inset: 0 }}>
                 <Canvas
                     dpr={[1, 1.25]}
-                    camera={{ position: [0, 2, -5], fov: 100 }}
+                    camera={{ position: [0, 1, 3], fov: 80, rotation: [0 ,Math.PI, 0] }}
                     gl={{
                         antialias: false, alpha: false, depth: true, stencil: false,
                         powerPreference: 'high-performance', preserveDrawingBuffer: false,
@@ -341,6 +489,7 @@ export default function DetectiveRoom() {
                 >
                     <Scene openInspect={setInspect} requestMove={setMoveReq} />
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
+                    <MouseZoom enabled={moveReq === null} mode="fov" />
                     <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
                     <PixelateNearestFX size={roomPixelSize} />
                 </Canvas>
