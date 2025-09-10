@@ -26,6 +26,7 @@ type OutlinedProps = CommonTransform & {
     texturePixelated?: boolean
     metalness?: number
     roughness?: number
+    disableOutline?: boolean
 }
 
 export function Outlined({
@@ -47,6 +48,7 @@ export function Outlined({
     texturePixelated,
     metalness,
     roughness,
+    disableOutline = false,
 }: OutlinedProps) {
 
     const [localHover, setLocalHover] = React.useState(false)
@@ -89,20 +91,22 @@ export function Outlined({
 
     return (
         <group position={position} rotation={rotation} scale={scale} {...bind}>
-            <group scale={outlineScale}>
-                <mesh raycast={() => null}>
-                    {React.cloneElement(geometry)}
-                    <meshBasicMaterial
-                        color={currentOutline}
-                        side={THREE.BackSide}
-                        polygonOffset
-                        polygonOffsetFactor={-1}
-                        polygonOffsetUnits={1}
-                        depthWrite
-                        depthTest
-                    />
-                </mesh>
-            </group>
+            {!disableOutline && (
+                <group scale={outlineScale}>
+                    <mesh raycast={() => null}>
+                        {React.cloneElement(geometry)}
+                        <meshBasicMaterial
+                            color={currentOutline}
+                            side={THREE.BackSide}
+                            polygonOffset
+                            polygonOffsetFactor={-1}
+                            polygonOffsetUnits={1}
+                            depthWrite
+                            depthTest
+                        />
+                    </mesh>
+                </group>
+            )}
 
             <mesh>
                 {React.cloneElement(geometry)}

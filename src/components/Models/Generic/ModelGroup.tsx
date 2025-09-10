@@ -47,6 +47,8 @@ type ModelGroupProps = ThreeElements['group'] & {
     outlineWorldThickness?: number
     outlineScale?: number
     materialsById?: Record<string, PartMaterialOverride>
+    disableOutline?: boolean
+    inspectDisableOutline?: boolean
 }
 
 export function ModelGroup({
@@ -64,6 +66,8 @@ export function ModelGroup({
                                outlineScale = 1.035,
                                inspectDistance,
                                materialsById,
+                               disableOutline = false,
+                               inspectDisableOutline = false,
                                ...groupProps
                            }: ModelGroupProps) {
     const [hovered, setHovered] = React.useState(false)
@@ -86,6 +90,7 @@ export function ModelGroup({
         initialRotation,
         pixelSize: inspectPixelSize,
         inspectDistance,
+        inspectDisableOutline,
         parts: parts.map(p => {
             const ov = p.id ? materialsById?.[p.id] : undefined
             return {
@@ -102,7 +107,7 @@ export function ModelGroup({
                 roughness: ov?.roughness ?? p.roughness,
             }
         }),
-    }), [parts, color, outlineColor, initialRotation, inspectPixelSize, inspectDistance, resolveScale, materialsById])
+    }), [parts, color, outlineColor, initialRotation, inspectPixelSize, inspectDistance, resolveScale, materialsById, inspectDisableOutline])
 
     const bind = disablePointer ? {} : {
         onPointerOver: (e: any) => { e.stopPropagation(); setHovered(true) },
@@ -144,6 +149,7 @@ export function ModelGroup({
                         texturePixelated={effPix}
                         metalness={effMetal}
                         roughness={effRough}
+                        disableOutline={disableOutline}
                     />
                 )
             })}

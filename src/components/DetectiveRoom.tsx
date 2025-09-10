@@ -9,7 +9,9 @@ import { InspectState } from '@/shaders/inspectTypes'
 import { PixelateNearestFX } from "@/shaders/PixelateNearestFX"
 import { Desk } from '@/components/Models/Desk'
 import { Mug } from "@/components/Models/Mug"
-import { deskMaterials, mugMaterials } from "@/components/Materials/detectiveRoomMats"
+import {corkBoardMaterials, deskMaterials, mugMaterials} from "@/components/Materials/detectiveRoomMats"
+import {CorkBoard} from "@/components/Models/CorkBoard";
+import {Pin} from "@/components/Models/Pin";
 
 type V3 = [number, number, number]
 
@@ -172,8 +174,8 @@ function Scene({
     return (
         <>
             {/* lights */}
-            <ambientLight intensity={3} />
-            <directionalLight position={[2, 5, 7]} />
+            <ambientLight intensity={2}/>
+            <directionalLight position={[2, 5, 7]}/>
 
             {/* floor */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
@@ -185,17 +187,19 @@ function Scene({
                     hoverColor="#ff3b30"
                     canInteract={false}
                     border={0.06}
+                    textureUrl="/textures/light_concrete.jpg"
+                    textureFit="stretch"
                 />
             </mesh>
 
             <mesh raycast={() => null} position={[10, 0, 0]}>
-                <planeGeometry args={[10, 10]} />
-                <meshStandardMaterial color="#333" side={THREE.DoubleSide} />
+                <planeGeometry args={[10, 10]}/>
+                <meshStandardMaterial color="#333" side={THREE.DoubleSide}/>
             </mesh>
 
             <group onContextMenu={rcGoAt([-3, 1, -2], DEFAULT_OFFSET)}>
                 <Outlined
-                    geometry={<boxGeometry args={[1, 1, 1]} />}
+                    geometry={<boxGeometry args={[1, 1, 1]}/>}
                     rotation={[0.5, 0, 0]}
                     color="#000"
                     outlineColor="#fff"
@@ -208,7 +212,7 @@ function Scene({
 
             <group onContextMenu={rcGoAt([3, 1, -2], DEFAULT_OFFSET)}>
                 <Outlined
-                    geometry={<torusKnotGeometry args={[0.55, 0.18, 128, 16]} />}
+                    geometry={<torusKnotGeometry args={[0.55, 0.18, 128, 16]}/>}
                     color="#000"
                     outlineColor="#fff"
                     hoverColor="#ff3b30"
@@ -218,8 +222,8 @@ function Scene({
                 />
             </group>
 
-            <group rotation={[0, 0, 0.2]} position={[0, 1, -2]}
-                   onContextMenu={rcGoAt([0, 1, -2], DEFAULT_OFFSET)}>
+            <group rotation={[0, 0, 0.2]} position={[0, 2, 0]}
+                   onContextMenu={rcGoAt([0, 2, 0], DEFAULT_OFFSET)}>
                 <FramedPlane
                     width={1}
                     height={1}
@@ -237,11 +241,11 @@ function Scene({
                                 prompt: 'What is the hidden word on the photo?',
                                 answers: ['house', /house\s*md/i],
                                 normalize: 'trim-lower',
-                                feedback: { correct: 'Nice find!', incorrect: 'Not quite—look closer.' },
+                                feedback: {correct: 'Nice find!', incorrect: 'Not quite—look closer.'},
                             },
                         })
                     }
-                    inspectOverrides={{ pixelSize: 1 }}
+                    inspectOverrides={{pixelSize: 1}}
                     textureUrl="/textures/testimage.jpg"
                     textureFit="stretch"
                 />
@@ -252,13 +256,36 @@ function Scene({
                     position={[0, 0, -3]}
                     rotation={[0, Math.PI / 6, 0]}
                     color="#fff"
-                    outlineColor="#fff"
-                    hoverColor="#ff3b30"
                     outlineScale={6.56}
-                    outlinePerPart={{ topScale: 1.04, legScale: 1.1 }}
+                    outlinePerPart={{topScale: 1.04, legScale: 1.1}}
                     onInspect={openInspect as any}
                     inspectPixelSize={1}
                     materialsById={deskMaterials}
+                />
+            </group>
+
+            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2])}>
+                <CorkBoard
+                    position={[0, 1.2, -2]}
+                    rotation={[0, 0.1, 0]}
+                    onInspect={openInspect}
+                    color="#fff"
+                    materialsById={corkBoardMaterials}
+                    inspectDistance={1}
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2.2])}>
+                <Pin
+                    position={[0, 1.45, -4.4]}
+                    rotation={[0, 0.1, 0]}
+                    onInspect={openInspect}
+                    materialsById={corkBoardMaterials}
+                    inspectDistance={0.2}
+                    inspectPixelSize={3}
+                    disableOutline={true}
+                    inspectDisableOutline={true}
                 />
             </group>
 
@@ -267,8 +294,6 @@ function Scene({
                     position={[0, 0.77, -3]}
                     rotation={[0, Math.PI / 6, 0]}
                     color="#fff"
-                    outlineColor="#fff"
-                    hoverColor="#ff3b30"
                     outlineThickness={0.008}
                     inspectDistance={0.5}
                     onInspect={(p) =>
@@ -280,7 +305,7 @@ function Scene({
                                 prompt: 'Whose initials are on the mug?',
                                 answers: ['NO', /N\.?\s*O\.?/i],
                                 normalize: 'trim-lower',
-                                feedback: { correct: 'Correct!', incorrect: 'Check the engraving.' },
+                                feedback: {correct: 'Correct!', incorrect: 'Check the engraving.'},
                             },
                         })
                     }
@@ -288,6 +313,7 @@ function Scene({
                     materialsById={mugMaterials}
                 />
             </group>
+
         </>
     )
 }
@@ -295,7 +321,7 @@ function Scene({
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize] = React.useState(3)
+    const [roomPixelSize] = React.useState(2.7)
 
     // deterministic movement/orientation
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)

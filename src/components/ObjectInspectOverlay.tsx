@@ -332,6 +332,7 @@ export default function ObjectInspectOverlay({
                                     outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
                                     outlineScale={(renderState as any).outlineScale ?? 1.035}
                                     canInteract={false}
+                                    disableOutline={(renderState as any).inspectDisableOutline}
                                 />
                             )}
 
@@ -353,6 +354,7 @@ export default function ObjectInspectOverlay({
                                             metalness={p.metalness}
                                             roughness={p.roughness}
                                             disablePointer
+                                            disableOutline={(renderState as any).inspectDisableOutline}
                                         />
                                     ))}
                                 </>

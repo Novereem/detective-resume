@@ -67,4 +67,5 @@ export type OutlinedGroupInspect = {
 export type InspectState =
     (OutlinedInspect | FramedInspect | OutlinedGroupInspect) & {
     puzzle?: TextPuzzle
+    inspectDisableOutline?: boolean
 }
