@@ -14,7 +14,7 @@ import {CorkBoard} from "@/components/Models/CorkBoard";
 import {Pin} from "@/components/Models/Pin";
 import {LightBulb} from "@/components/Models/LightBulb";
 
-type V3 = [number, number, number]
+type Vec3 = [number, number, number]
 
 function FreeLookControls({
                               enabled = true,
@@ -91,8 +91,8 @@ function FreeLookControls({
 }
 
 type MoveRequest = {
-    camera: V3
-    lookAt: V3
+    camera: Vec3
+    lookAt: Vec3
 }
 
 function PlayerMover({
@@ -153,8 +153,8 @@ function MouseZoom({
                        mode: modeProp = 'fov',
                        fovMin = 50,
                        fovMax = 100,
-                       fovSpeed = 0.04,   // higher = faster FOV zoom
-                       dollySpeed = 0.002 // higher = faster dolly
+                       fovSpeed = 0.04,
+                       dollySpeed = 0.002
                    }: {
     enabled?: boolean
     mode?: ZoomMode
@@ -170,19 +170,15 @@ function MouseZoom({
         const el = gl.domElement
         const onWheel = (e: WheelEvent) => {
             if (!enabled) return
-            // avoid page scroll
             e.preventDefault()
 
             if (mode === 'fov') {
                 const persp = camera as THREE.PerspectiveCamera
-                // wheel up (negative deltaY) => zoom in
                 persp.fov = THREE.MathUtils.clamp(persp.fov + e.deltaY * fovSpeed, fovMin, fovMax)
                 persp.updateProjectionMatrix()
             } else {
-                // Dolly along forward vector
                 const dir = new THREE.Vector3()
                 camera.getWorldDirection(dir)
-                // wheel up => move forward
                 camera.position.addScaledVector(dir, e.deltaY * dollySpeed)
             }
         }
@@ -201,29 +197,135 @@ function Scene({
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
 }) {
-    const { scene } = useThree()
+    const { scene, camera } = useThree()
     scene.background = new THREE.Color('#3c3c3c')
 
+    type Vec3 = [number, number, number]
+    type V3Like =
+        | Vec3
+        | THREE.Vector3
+        | ((ctx: {
+        event: any
+        object?: THREE.Object3D
+        camera: THREE.PerspectiveCamera
+        target: THREE.Vector3
+        currentEye: THREE.Vector3
+    }) => Vec3 | THREE.Vector3)
 
-    const rcGo = (camera: V3, lookAt: V3) => (e: any) => {
-        e?.nativeEvent?.preventDefault?.()
-        e?.stopPropagation?.()
-        requestMove({ camera, lookAt })
+    type FocusOpts = {
+        eye?: V3Like
+        lookAt?: V3Like
+
+        distance?: number
+        minDist?: number
+        maxDist?: number
+        keepHeight?: boolean
+        fit?: boolean
+        usePoint?: boolean
+
+        bounds?: { min: Vec3; max: Vec3 }
     }
 
-    const rcGoAt = (lookAt: V3, offset: V3) => rcGo(
-        [lookAt[0] + offset[0], lookAt[1] + offset[1], lookAt[2] + offset[2]],
-        lookAt
-    )
+    const rcFocus = (opts: FocusOpts = {}) => {
+        const {
+            eye,
+            lookAt,
+            distance,
+            minDist = 0.8,
+            maxDist = 3.5,
+            keepHeight = true,
+            fit = true,
+            usePoint = true,
+            bounds,
+        } = opts
 
-    // universal offset
-    const DEFAULT_OFFSET: V3 = [0, 0.75, 2.2]
+        const toV3 = (v: Vec3 | THREE.Vector3) =>
+            Array.isArray(v) ? new THREE.Vector3(v[0], v[1], v[2]) : v.clone?.() ?? new THREE.Vector3()
+
+        const resolve = (
+            v: V3Like | undefined,
+            ctx: {
+                event: any
+                object?: THREE.Object3D
+                camera: THREE.PerspectiveCamera
+                target: THREE.Vector3
+                currentEye: THREE.Vector3
+            }
+        ) => {
+            if (!v) return undefined
+            if (typeof v === 'function') return toV3(v(ctx) as any)
+            return toV3(v as any)
+        }
+
+        return (e: any) => {
+            e?.nativeEvent?.preventDefault?.()
+            e?.stopPropagation?.()
+
+            const cam = camera as THREE.PerspectiveCamera
+            const camPos = cam.position.clone()
+
+            const target = new THREE.Vector3()
+            if (usePoint && e?.point) {
+                target.copy(e.point)
+            } else if (e?.object) {
+                const obj: THREE.Object3D = e.object
+                obj.updateWorldMatrix(true, true)
+                const box = new THREE.Box3().setFromObject(obj)
+                if (!box.isEmpty()) box.getCenter(target)
+                else obj.getWorldPosition(target)
+            }
+
+            const currDist = camPos.distanceTo(target)
+            let d = distance ?? THREE.MathUtils.clamp(currDist, minDist, maxDist)
+
+            if (fit && e?.object) {
+                const box = new THREE.Box3().setFromObject(e.object)
+                const size = new THREE.Vector3()
+                box.getSize(size)
+                const largest = Math.max(size.x, size.y, size.z)
+                const fovRad = THREE.MathUtils.degToRad(cam.fov)
+                const fitDist = (largest / 2) / Math.tan(fovRad / 2)
+                d = Math.max(d, Math.min(fitDist * 1.15, maxDist))
+            }
+
+            let dir = camPos.clone().sub(target)
+            if (dir.lengthSq() < 1e-6) cam.getWorldDirection(dir).multiplyScalar(-1)
+            else dir.normalize()
+
+            const smartEye = target.clone().addScaledVector(dir, d)
+            if (keepHeight) smartEye.y = camPos.y
+
+            const ctx = { event: e, object: e?.object, camera: cam, target, currentEye: camPos }
+            let finalEye = resolve(eye, ctx) ?? smartEye
+            let finalLook = resolve(lookAt, ctx) ?? target
+
+            if (bounds) {
+                const vmin = new THREE.Vector3(...bounds.min)
+                const vmax = new THREE.Vector3(...bounds.max)
+                finalEye.clamp(vmin, vmax)
+            }
+
+            requestMove({
+                camera: finalEye.toArray() as Vec3,
+                lookAt: finalLook.toArray() as Vec3,
+            })
+        }
+    }
+
+    const ANCHOR = {
+        bulb: { eye: [ 0.6, 1.6,  3.3] as Vec3, lookAt: [0, 2, 4.3] as Vec3 },
+        desk: { eye: [ 0, 1.3, 3.2] as Vec3, lookAt: [0, 0.8, 4.2] as Vec3 },
+        board: { eye: [0, 1.3, 3.2] as Vec3, lookAt: [0, 1.2, 4.7] as Vec3 },
+        mug: { eye: [-0.2, 1.3, 3.2] as Vec3, lookAt: [-0.2, 0.77, 4.2] as Vec3 },
+        houseFrame: { eye: [0.2, 1.3, 3.6] as Vec3, lookAt: [0.2, 1.3, 4.6] as Vec3 },
+    }
 
     return (
         <>
             {/* lights */}
             <ambientLight intensity={0.2}/>
 
+            {/* room walls and floors */}
             <group>
                 {/* floor */}
                 <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
@@ -332,22 +434,8 @@ function Scene({
                 </mesh>
             </group>
 
-
-            <group onContextMenu={rcGoAt([-3, 1, -2], DEFAULT_OFFSET)}>
-                <Outlined
-                    geometry={<boxGeometry args={[1, 1, 1]}/>}
-                    rotation={[0.5, 0, 0]}
-                    color="#000"
-                    outlineColor="#fff"
-                    hoverColor="#ff3b30"
-                    outlineScale={1.04}
-                    position={[-6, 1, -2]}
-                    onInspect={openInspect}
-                />
-            </group>
-
             <group rotation={[Math.PI, 0 , 3]} position={[0.2, 1.3, 4.6]}
-                   onContextMenu={rcGoAt([0.2, 1.3, 4.5], [0 , 0, -1.4])}>
+                   onContextMenu={rcFocus(ANCHOR.houseFrame)}>
                 <FramedPlane
                     width={0.17}
                     height={0.2}
@@ -376,7 +464,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcGo([0, 1, 3], [0, 0, 4.71])}>
+            <group onContextMenu={rcFocus(ANCHOR.desk)}>
                 <Desk
                     position={[0, 0, 4.2]}
                     rotation={[0, Math.PI / 6, 0]}
@@ -391,7 +479,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcGo([0, 1.2, 3], [0, 1, 6])}>
+            <group onContextMenu={rcFocus(ANCHOR.board)}>
                 <CorkBoard
                     position={[0, 1.2, 4.7]}
                     rotation={[0, 0.1, 0]}
@@ -417,18 +505,18 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcGo([0, 1.5, -4.7], [0, 1.2, -2.2])}>
+            <group onContextMenu={rcFocus(ANCHOR.bulb)}>
                 <LightBulb
                     position={[0, 2, 4.3]}
                     rotation={[0, 0, Math.PI]}
                     materialsById={{
-                        base:   { color: '#b8bcc2', metalness: 0.85, roughness: 0.3 },
-                        tip:    { color: '#c5c9cf', metalness: 0.9,  roughness: 0.2 },
-                        collar: { color: '#ededed', metalness: 0.05, roughness: 0.65 },
-                        neck:   { color: '#dcdcdc', metalness: 0.0,  roughness: 0.9  },
-                        postL:  { color: '#b9bcc0' },
-                        postR:  { color: '#b9bcc0' },
-                        filament:{ color: '#ffcc55' },
+                        base: {color: '#b8bcc2', metalness: 0.85, roughness: 0.3},
+                        tip: {color: '#c5c9cf', metalness: 0.9, roughness: 0.2},
+                        collar: {color: '#ededed', metalness: 0.05, roughness: 0.65},
+                        neck: {color: '#dcdcdc', metalness: 0.0, roughness: 0.9},
+                        postL: {color: '#b9bcc0'},
+                        postR: {color: '#b9bcc0'},
+                        filament: {color: '#ffcc55'},
                     }}
                     disableOutline
                     inspectDisableOutline
@@ -437,7 +525,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcGo([-0.2, 1.3, 3.8], [0, 0.4, 4.6])}>
+            <group onContextMenu={rcFocus(ANCHOR.mug)}>
                 <Mug
                     position={[-0.2, 0.77, 4.2]}
                     rotation={[0, Math.PI / 6, 0]}
@@ -471,7 +559,6 @@ export default function DetectiveRoom() {
     const defaultInspectPixelSize = 3
     const [roomPixelSize] = React.useState(2.7)
 
-    // deterministic movement/orientation
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
 
