@@ -9,10 +9,18 @@ import { InspectState } from '@/shaders/inspectTypes'
 import { PixelateNearestFX } from "@/shaders/PixelateNearestFX"
 import { Desk } from '@/components/Models/Desk'
 import { Mug } from "@/components/Models/Mug"
-import {corkBoardMaterials, deskMaterials, mugMaterials} from "@/components/Materials/detectiveRoomMats"
+import {
+    corkBoardMaterials,
+    deskMaterials,
+    metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
+    mugMaterials
+} from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {Pin} from "@/components/Models/Pin";
 import {LightBulb} from "@/components/Models/LightBulb";
+import {MetalCabinet} from "@/components/Models/MetalCabinet";
+import {MetalDeskTop} from "@/components/Models/MetalDeskTop";
+import {MetalDrawer} from "@/components/Models/MetalDrawer";
 
 type Vec3 = [number, number, number]
 
@@ -313,11 +321,11 @@ function Scene({
     }
 
     const ANCHOR = {
-        bulb: { eye: [ 0.6, 1.6,  3.3] as Vec3, lookAt: [0, 2, 4.3] as Vec3 },
-        desk: { eye: [ 0, 1.3, 3.2] as Vec3, lookAt: [0, 0.8, 4.2] as Vec3 },
-        board: { eye: [0, 1.3, 3.2] as Vec3, lookAt: [0, 1.2, 4.7] as Vec3 },
-        mug: { eye: [-0.2, 1.3, 3.2] as Vec3, lookAt: [-0.2, 0.77, 4.2] as Vec3 },
-        houseFrame: { eye: [0.2, 1.3, 3.6] as Vec3, lookAt: [0.2, 1.3, 4.6] as Vec3 },
+        bulb: { eye: [ 0.6, 1.6,  3.3] as Vec3, position: [0, 2, 4.3] as Vec3 },
+        desk: { eye: [ 0, 1.3, 3.2] as Vec3, position: [0, 0, 4.2] as Vec3 },
+        board: { eye: [0, 1.3, 3.2] as Vec3, position: [0, 1.2, 4.7] as Vec3 },
+        mug: { eye: [-0.2, 1.3, 3.2] as Vec3, position: [-0.2, 0.77, 4.2] as Vec3 },
+        houseFrame: { eye: [0.2, 1.3, 3.6] as Vec3, position: [0.2, 1.3, 4.6] as Vec3 },
     }
 
     return (
@@ -434,7 +442,7 @@ function Scene({
                 </mesh>
             </group>
 
-            <group rotation={[Math.PI, 0 , 3]} position={[0.2, 1.3, 4.6]}
+            <group rotation={[Math.PI, 0 , 3]} position={ANCHOR.houseFrame.position}
                    onContextMenu={rcFocus(ANCHOR.houseFrame)}>
                 <FramedPlane
                     width={0.17}
@@ -464,24 +472,24 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.desk)}>
-                <Desk
-                    position={[0, 0, 4.2]}
-                    rotation={[0, Math.PI / 6, 0]}
-                    color="#fff"
-                    outlineScale={6.56}
-                    outlinePerPart={{topScale: 1.04, legScale: 1.1}}
-                    // onInspect={openInspect as any}
-                    inspectPixelSize={3}
-                    materialsById={deskMaterials}
-                    disableOutline={true}
-                    inspectDisableOutline={true}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.desk)}>*/}
+            {/*    <Desk*/}
+            {/*        position={ANCHOR.desk.position}*/}
+            {/*        rotation={[0, Math.PI / 6, 0]}*/}
+            {/*        color="#fff"*/}
+            {/*        outlineScale={6.56}*/}
+            {/*        outlinePerPart={{topScale: 1.04, legScale: 1.1}}*/}
+            {/*        // onInspect={openInspect as any}*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*        materialsById={deskMaterials}*/}
+            {/*        disableOutline={true}*/}
+            {/*        inspectDisableOutline={true}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.board)}>
                 <CorkBoard
-                    position={[0, 1.2, 4.7]}
+                    position={ANCHOR.board.position}
                     rotation={[0, 0.1, 0]}
                     onInspect={openInspect}
                     color="#fff"
@@ -507,7 +515,7 @@ function Scene({
 
             <group onContextMenu={rcFocus(ANCHOR.bulb)}>
                 <LightBulb
-                    position={[0, 2, 4.3]}
+                    position={ANCHOR.bulb.position}
                     rotation={[0, 0, Math.PI]}
                     materialsById={{
                         base: {color: '#b8bcc2', metalness: 0.85, roughness: 0.3},
@@ -527,7 +535,7 @@ function Scene({
 
             <group onContextMenu={rcFocus(ANCHOR.mug)}>
                 <Mug
-                    position={[-0.2, 0.77, 4.2]}
+                    position={ANCHOR.mug.position}
                     rotation={[0, Math.PI / 6, 0]}
                     color="#fff"
                     outlineThickness={0.008}
@@ -548,6 +556,62 @@ function Scene({
                     inspectPixelSize={3}
                     materialsById={mugMaterials}
                 />
+            </group>
+
+            {/* metal desk: two cabinets + top + drawers */}
+            <group onContextMenu={rcFocus(ANCHOR.desk)} position={ANCHOR.desk.position} rotation={[0, Math.PI , 0]}>
+                {/*
+    Cabinet params (match model defaults)
+    w=0.44, h=0.70, d=0.60, wall=0.018
+  */}
+                <MetalCabinet
+                    position={[-0.48, 0, 0]}
+                    materialsById={metalCabinetMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                />
+                <MetalCabinet
+                    position={[+0.48, 0, 0]}
+                    materialsById={metalCabinetMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                />
+
+                {/* top spans both cabinets */}
+                <MetalDeskTop
+                    position={[0, 0.70, 0]}
+                    materialsById={metalDeskTopMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                />
+
+                {/*
+                Drawers (3 per cabinet). Drawer origin = bottom center.
+                Inner height ~= 0.70 - 2*0.018 = 0.664 → slot ≈ 0.221.
+              */}
+                {[-0.48, +0.48].map((x) => {
+                    const cabW = 0.44, cabH = 0.70, cabD = 0.60, wall = 0.018
+                    const innerH = cabH - 2 * wall
+                    const slotH = innerH / 3
+                    const drawerW = cabW - 2 * wall
+                    const drawerH = slotH - 0.02
+                    const drawerD = cabD - 0.012
+
+                    return (
+                        <group key={x} position={[x, 0, 0]}>
+                            {[0,1,2].map(i => (
+                                <MetalDrawer
+                                    key={i}
+                                    size={[drawerW, drawerH, drawerD]}
+                                    position={[0, wall + i * slotH, 0]}
+                                    materialsById={metalDrawerMaterials}
+                                    disableOutline
+                                    inspectDisableOutline
+                                />
+                            ))}
+                        </group>
+                    )
+                })}
             </group>
 
         </>
