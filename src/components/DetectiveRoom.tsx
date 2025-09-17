@@ -500,8 +500,9 @@ function Scene({
                     outlinePerPart={{topScale: 1.04, legScale: 1.1}}
                     inspectPixelSize={3}
                     materialsById={deskMaterials}
-                    disableOutline={true}
+                    disableOutline={false}
                     inspectDisableOutline={true}
+                    visualizeHitbox={true}
                 />
             </group>
 
@@ -573,6 +574,7 @@ function Scene({
                     }
                     inspectPixelSize={3}
                     materialsById={mugMaterials}
+                    visualizeHitbox={true}
                 />
             </group>
 
