@@ -21,6 +21,7 @@ import {LightBulb} from "@/components/Models/LightBulb";
 import {MetalCabinet} from "@/components/Models/MetalCabinet";
 import {MetalDeskTop} from "@/components/Models/MetalDeskTop";
 import {MetalDrawer} from "@/components/Models/MetalDrawer";
+import {MetalDesk} from "@/components/Models/MetalDesk";
 
 type Vec3 = [number, number, number]
 
@@ -322,8 +323,10 @@ function Scene({
 
     const ANCHOR = {
         bulb: { eye: [ 0.6, 1.6,  3.3] as Vec3, position: [0, 2, 4.3] as Vec3 },
-        desk: { eye: [ 0, 1.3, 3.2] as Vec3, position: [0, 0, 4.2] as Vec3 },
-        board: { eye: [0, 1.3, 3.2] as Vec3, position: [0, 1.2, 4.7] as Vec3 },
+        desk1: { eye: [ 0.8, 1.1, 2.8] as Vec3, position: [1.6, 0, 4.3] as Vec3 },
+        desk2: { eye: [ -0.5, 1.1, 2.8] as Vec3, position: [-2, 0, 3] as Vec3 },
+        deskMetal: { eye: [ 0, 1.1, 2.8] as Vec3, position: [0, 0, 4.2] as Vec3 },
+        corkBoard: { eye: [0, 1.3, 3.2] as Vec3, position: [0, 1.3, 4.7] as Vec3 },
         mug: { eye: [-0.2, 1.3, 3.2] as Vec3, position: [-0.2, 0.77, 4.2] as Vec3 },
         houseFrame: { eye: [0.2, 1.3, 3.6] as Vec3, position: [0.2, 1.3, 4.6] as Vec3 },
     }
@@ -336,10 +339,10 @@ function Scene({
             {/* room walls and floors */}
             <group>
                 {/* floor */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 2.5]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
-                        height={10}
+                        width={5}
+                        height={5}
                         textureUrl="/textures/dark_planks.jpg"
                         textureFit="contain"
                         border={0}
@@ -355,10 +358,10 @@ function Scene({
                 </mesh>
 
                 {/* roof */}
-                <mesh rotation={[-Math.PI / 2, Math.PI, Math.PI]} position={[0,5,0]} raycast={() => null}>
+                <mesh rotation={[-Math.PI / 2, Math.PI, Math.PI]} position={[0, 2.5, 2.5]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
-                        height={10}
+                        width={5}
+                        height={5}
                         textureUrl="/textures/rainbow_metal.jpg"
                         textureFit="stretch"
                         border={0}
@@ -376,7 +379,7 @@ function Scene({
                 {/* back wall */}
                 <mesh position={[0, 2.5, 5]} rotation={[-Math.PI, 0, 0]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
+                        width={5}
                         height={5}
                         textureUrl="/textures/light_concrete.jpg"
                         textureFit="stretch"
@@ -391,9 +394,9 @@ function Scene({
                 </mesh>
 
                 {/* front wall */}
-                <mesh position={[0, 2.5, -5]} rotation={[0, 0, Math.PI]} raycast={() => null}>
+                <mesh position={[0, 2.5, 0]} rotation={[0, 0, Math.PI]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
+                        width={5}
                         height={5}
                         textureUrl="/textures/light_concrete.jpg"
                         textureFit="stretch"
@@ -408,9 +411,9 @@ function Scene({
                 </mesh>
 
                 {/* left wall */}
-                <mesh position={[-5, 2.5, 0]} rotation={[-Math.PI, (Math.PI / 2), 0 ]} raycast={() => null}>
+                <mesh position={[-2.5, 2.5, 2.5]} rotation={[-Math.PI, (Math.PI / 2), 0]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
+                        width={5}
                         height={5}
                         textureUrl="/textures/light_concrete.jpg"
                         textureFit="stretch"
@@ -425,9 +428,9 @@ function Scene({
                 </mesh>
 
                 {/* right wall */}
-                <mesh position={[5, 2.5, 0]} rotation={[-Math.PI, Math.PI + (Math.PI / 2), 0 ]} raycast={() => null}>
+                <mesh position={[2.5, 2.5, 2.5]} rotation={[-Math.PI, Math.PI + (Math.PI / 2), 0]} raycast={() => null}>
                     <FramedPlane
-                        width={10}
+                        width={5}
                         height={5}
                         textureUrl="/textures/light_concrete.jpg"
                         textureFit="stretch"
@@ -442,7 +445,7 @@ function Scene({
                 </mesh>
             </group>
 
-            <group rotation={[Math.PI, 0 , 3]} position={ANCHOR.houseFrame.position}
+            <group rotation={[Math.PI, 0, 3]} position={ANCHOR.houseFrame.position}
                    onContextMenu={rcFocus(ANCHOR.houseFrame)}>
                 <FramedPlane
                     width={0.17}
@@ -472,25 +475,40 @@ function Scene({
                 />
             </group>
 
-            {/*<group onContextMenu={rcFocus(ANCHOR.desk)}>*/}
-            {/*    <Desk*/}
-            {/*        position={ANCHOR.desk.position}*/}
-            {/*        rotation={[0, Math.PI / 6, 0]}*/}
-            {/*        color="#fff"*/}
-            {/*        outlineScale={6.56}*/}
-            {/*        outlinePerPart={{topScale: 1.04, legScale: 1.1}}*/}
-            {/*        // onInspect={openInspect as any}*/}
-            {/*        inspectPixelSize={3}*/}
-            {/*        materialsById={deskMaterials}*/}
-            {/*        disableOutline={true}*/}
-            {/*        inspectDisableOutline={true}*/}
-            {/*    />*/}
-            {/*</group>*/}
+            <group onContextMenu={rcFocus(ANCHOR.desk1)}>
+                <Desk
+                    position={ANCHOR.desk1.position}
+                    rotation={[0, 0, 0]}
+                    color="#fff"
+                    outlineScale={6.56}
+                    outlinePerPart={{topScale: 1.04, legScale: 1.1}}
+                    inspectPixelSize={3}
+                    materialsById={deskMaterials}
+                    disableOutline={true}
+                    inspectDisableOutline={true}
+                />
+            </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.board)}>
+            <group onContextMenu={rcFocus(ANCHOR.desk2)}>
+                <Desk
+                    position={ANCHOR.desk2.position}
+                    rotation={[0, Math.PI / 2, 0]}
+                    topSize={[1.7, 0.05, 0.6]}
+                    legHeight={0.65}
+                    color="#fff"
+                    outlineScale={6.56}
+                    outlinePerPart={{topScale: 1.04, legScale: 1.1}}
+                    inspectPixelSize={3}
+                    materialsById={deskMaterials}
+                    disableOutline={true}
+                    inspectDisableOutline={true}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.corkBoard)}>
                 <CorkBoard
-                    position={ANCHOR.board.position}
-                    rotation={[0, 0.1, 0]}
+                    position={ANCHOR.corkBoard.position}
+                    rotation={[0, 0, 0]}
                     onInspect={openInspect}
                     color="#fff"
                     materialsById={corkBoardMaterials}
@@ -558,62 +576,17 @@ function Scene({
                 />
             </group>
 
-            {/* metal desk: two cabinets + top + drawers */}
-            <group onContextMenu={rcFocus(ANCHOR.desk)} position={ANCHOR.desk.position} rotation={[0, Math.PI , 0]}>
-                {/*
-    Cabinet params (match model defaults)
-    w=0.44, h=0.70, d=0.60, wall=0.018
-  */}
-                <MetalCabinet
-                    position={[-0.48, 0, 0]}
-                    materialsById={metalCabinetMaterials}
-                    disableOutline
-                    inspectDisableOutline
+            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}
+                   rotation={[0, Math.PI, 0]}>
+                <MetalDesk
+                    topSize={[1.80, 0.04, 0.70]}
+                    materials={{
+                        top: metalDeskTopMaterials,
+                        cabinet: metalCabinetMaterials,
+                        drawer: metalDrawerMaterials
+                    }}
                 />
-                <MetalCabinet
-                    position={[+0.48, 0, 0]}
-                    materialsById={metalCabinetMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-
-                {/* top spans both cabinets */}
-                <MetalDeskTop
-                    position={[0, 0.70, 0]}
-                    materialsById={metalDeskTopMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-
-                {/*
-                Drawers (3 per cabinet). Drawer origin = bottom center.
-                Inner height ~= 0.70 - 2*0.018 = 0.664 → slot ≈ 0.221.
-              */}
-                {[-0.48, +0.48].map((x) => {
-                    const cabW = 0.44, cabH = 0.70, cabD = 0.60, wall = 0.018
-                    const innerH = cabH - 2 * wall
-                    const slotH = innerH / 3
-                    const drawerW = cabW - 2 * wall
-                    const drawerH = slotH - 0.02
-                    const drawerD = cabD - 0.012
-
-                    return (
-                        <group key={x} position={[x, 0, 0]}>
-                            {[0,1,2].map(i => (
-                                <MetalDrawer
-                                    key={i}
-                                    size={[drawerW, drawerH, drawerD]}
-                                    position={[0, wall + i * slotH, 0]}
-                                    materialsById={metalDrawerMaterials}
-                                    disableOutline
-                                    inspectDisableOutline
-                                />
-                            ))}
-                        </group>
-                    )
-                })}
             </group>
-
         </>
     )
 }

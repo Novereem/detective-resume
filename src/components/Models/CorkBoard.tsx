@@ -14,8 +14,8 @@ type CorkBoardProps = Inherited & {
 }
 
 export const CorkBoard = memo(function CorkBoard({
-                                                     width = 1.0,
-                                                     height = 0.7,
+                                                     width = 1.5,
+                                                     height = 1,
                                                      frameWidth = 0.06,
                                                      boardThickness = 0.02,
                                                      frameDepth = 0.03,

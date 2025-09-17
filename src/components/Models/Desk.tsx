@@ -17,9 +17,9 @@ type DeskProps = Inherited & {
 }
 
 export const Desk = memo(function Desk({
-                                           topSize = [1.2, 0.05, 0.6],
+                                           topSize = [1.3, 0.05, 0.6],
                                            legRadius = 0.03,
-                                           legHeight = 0.72,
+                                           legHeight = 0.60,
                                            color = '#222',
                                            outlineColor = '#fff',
                                            hoverColor = '#ff3b30',

@@ -27,6 +27,6 @@ export const metalDrawerMaterials: Record<string, PartMaterialOverride> = {
 }
 
 export const metalDeskTopMaterials: Record<string, PartMaterialOverride> = {
-    surface: { color: '#e9e9e9', roughness: 0.9, metalness: 0.02 }, // clean laminate
-    rim:     { textureUrl: '/textures/clear_metal.jpg', roughness: 0.25, metalness: 0.85 },
+    surface: { ...deskMaterials.top },
+    rim:     { textureUrl: '/textures/clear_metal.jpg', roughness: 0, metalness: 0.85 },
 }

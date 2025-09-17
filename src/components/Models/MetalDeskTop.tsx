@@ -6,7 +6,7 @@ import { Vec3 } from '@/shaders/inspectTypes'
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts'>
 
 export const MetalDeskTop = memo(function MetalDeskTop({
-                                                           size = [1.40, 0.04, 0.70] as [number, number, number], // w,t,d
+                                                           size = [1.60, 0.04, 0.70] as [number, number, number], // w,t,d
                                                            rim = { height: 0.022, thickness: 0.01, inset: 0 },
                                                            color = '#e9e9e9', // laminate look
                                                            outlineColor = '#fff',
