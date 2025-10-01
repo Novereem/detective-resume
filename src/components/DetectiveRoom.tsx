@@ -13,7 +13,7 @@ import {
     corkBoardMaterials,
     deskMaterials,
     metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
-    mugMaterials
+    mugMaterials, secretFileMaterials
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {Pin} from "@/components/Models/Pin";
@@ -22,6 +22,7 @@ import {MetalCabinet} from "@/components/Models/MetalCabinet";
 import {MetalDeskTop} from "@/components/Models/MetalDeskTop";
 import {MetalDrawer} from "@/components/Models/MetalDrawer";
 import {MetalDesk} from "@/components/Models/MetalDesk";
+import {SecretFile} from "@/components/Models/SecretFile";
 
 type Vec3 = [number, number, number]
 
@@ -589,6 +590,18 @@ function Scene({
                     }}
                 />
             </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0, 0.7, 3.4]}
+                   rotation={[0, Math.PI/4, 0]}>
+                <SecretFile
+                    onInspect={openInspect}
+                    materialsById={secretFileMaterials}
+                    frontOpen={Math.PI}
+                    inspectPixelSize={1}
+                    disableOutline={true}
+                />
+            </group>
+
         </>
     )
 }
@@ -596,7 +609,8 @@ function Scene({
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize] = React.useState(2.7)
+    //const [roomPixelSize] = React.useState(2.7)
+    const [roomPixelSize] = React.useState(1)
 
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())

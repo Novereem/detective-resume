@@ -30,3 +30,9 @@ export const metalDeskTopMaterials: Record<string, PartMaterialOverride> = {
     surface: { ...deskMaterials.top },
     rim:     { textureUrl: '/textures/clear_metal.jpg', roughness: 0, metalness: 0.85 },
 }
+
+export const secretFileMaterials: Record<string, PartMaterialOverride> = {
+    coverFront: { textureUrl: '/textures/top_secret.jpg', roughness: 0.85, metalness: 0.0 },
+    coverBack:  { textureUrl: '/textures/top_secret.jpg', roughness: 0.85, metalness: 0.0 },
+    // 'paper_0': { textureUrl: '/textures/paper_offwhite.jpg', roughness: 0.95, metalness: 0.0 },
+}
