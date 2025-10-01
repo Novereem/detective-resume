@@ -7,6 +7,30 @@ import { Outlined } from '@/shaders/OutlinedMesh'
 import { FramedPlane } from '@/shaders/FramedPlane'
 import { InspectState } from '@/shaders/inspectTypes'
 import { PixelateNearestFX } from '@/shaders/PixelateNearestFX'
+import { SecretFile } from '@/components/Models/SecretFile'
+
+function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
+    const invalidate = useThree((s) => s.invalidate)
+    const [angle, setAngle] = React.useState(0)
+
+    useFrame((_, dt) => {
+        const next = THREE.MathUtils.damp(angle, targetAngle, 6, dt)
+        if (Math.abs(next - angle) > 1e-4) {
+            setAngle(next)
+            invalidate()            // critical for frameloop="demand"
+        }
+    })
+
+    return (
+        <group>
+            <SecretFile
+                frontOpen={angle}
+                inspectPixelSize={1}
+                disableOutline
+            />
+        </group>
+    )
+}
 
 function RecenterOnce({
                           contentRef,
@@ -90,6 +114,7 @@ type Props = {
     pixelSize?: number
     camDistance?: number
     onSolved?: (ctx: { state: InspectState }) => void
+    onAction?: (action: 'secret-open' | 'secret-close', state: InspectState) => void
 }
 
 export default function ObjectInspectOverlay({
@@ -100,6 +125,7 @@ export default function ObjectInspectOverlay({
                                                  pixelSize: defaultPixelSize = 1,
                                                  camDistance = 3.2,
                                                  onSolved,
+                                                 onAction
                                              }: Props) {
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
@@ -247,6 +273,32 @@ export default function ObjectInspectOverlay({
         }
     }, [submitAnswer])
 
+    const [secretTarget, setSecretTarget] = React.useState(0)
+    React.useEffect(() => {
+        if (renderState) setSecretTarget(0)
+    }, [renderState])
+
+    const isInspectingSecretFile = React.useMemo(() => {
+        // 1) Prefer explicit metadata from DetectiveRoom
+        const metaType = (renderState as any)?.metadata?.type
+        if (metaType === 'secretfile') return true
+
+        // 2) Fallback: detect by parts ids (works with your ModelGroup output)
+        const parts = (renderState as any)?.parts
+        if (!Array.isArray(parts)) return false
+        const ids = new Set(parts.map((p: any) => String(p.id)))
+        const hasCovers = ids.has('coverBack') && ids.has('coverFront')
+
+        // Accept either 'paper-1' style or a plain 'paper' id
+        const hasPaper =
+            [...ids].some((id) => id.startsWith('paper-')) ||
+            ids.has('paper') ||
+            ids.has('page') ||
+            [...ids].some((id) => id.includes('paper'))
+
+        return hasCovers && hasPaper
+    }, [renderState])
+
     return (
         <div
             style={{
@@ -325,58 +377,64 @@ export default function ObjectInspectOverlay({
 
                     <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
                         <group ref={contentRef} position={offset}>
-                            {renderState?.kind === 'outlined' && (
-                                <Outlined
-                                    geometry={(renderState as any).geometry}
-                                    color={(renderState as any).color ?? '#808080'}
-                                    outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
-                                    outlineScale={(renderState as any).outlineScale ?? 1.035}
-                                    canInteract={false}
-                                    disableOutline={(renderState as any).inspectDisableOutline}
-                                />
-                            )}
-
-                            {renderState?.kind === 'outlinedGroup' && (
+                            {isInspectingSecretFile ? (
+                                <SecretFilePreview targetAngle={secretTarget}/>
+                            ) : (
                                 <>
-                                    {(renderState as any).parts.map((p: any, i: number) => (
+                                    {renderState?.kind === 'outlined' && (
                                         <Outlined
-                                            key={i}
-                                            geometry={p.geometry}
-                                            color={p.color ?? '#808080'}
-                                            outlineColor={p.outlineColor ?? '#ffffff'}
-                                            outlineScale={p.outlineScale ?? 1.035}
+                                            geometry={(renderState as any).geometry}
+                                            color={(renderState as any).color ?? '#808080'}
+                                            outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
+                                            outlineScale={(renderState as any).outlineScale ?? 1.035}
                                             canInteract={false}
-                                            position={p.position}
-                                            rotation={p.rotation}
-                                            scale={p.scale}
-                                            textureUrl={p.textureUrl}
-                                            texturePixelated={p.texturePixelated}
-                                            metalness={p.metalness}
-                                            roughness={p.roughness}
-                                            disablePointer
                                             disableOutline={(renderState as any).inspectDisableOutline}
                                         />
-                                    ))}
+                                    )}
+
+                                    {renderState?.kind === 'outlinedGroup' && (
+                                        <>
+                                            {(renderState as any).parts.map((p: any, i: number) => (
+                                                <Outlined
+                                                    key={i}
+                                                    geometry={p.geometry}
+                                                    color={p.color ?? '#808080'}
+                                                    outlineColor={p.outlineColor ?? '#ffffff'}
+                                                    outlineScale={p.outlineScale ?? 1.035}
+                                                    canInteract={false}
+                                                    position={p.position}
+                                                    rotation={p.rotation}
+                                                    scale={p.scale}
+                                                    textureUrl={p.textureUrl}
+                                                    texturePixelated={p.texturePixelated}
+                                                    metalness={p.metalness}
+                                                    roughness={p.roughness}
+                                                    disablePointer
+                                                    disableOutline={(renderState as any).inspectDisableOutline}
+                                                />
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {renderState &&
+                                        renderState.kind !== 'outlined' &&
+                                        renderState.kind !== 'outlinedGroup' && (
+                                            <FramedPlane
+                                                width={(renderState as any).width}
+                                                height={(renderState as any).height}
+                                                color={(renderState as any).color ?? '#333'}
+                                                borderColor={(renderState as any).borderColor ?? '#fff'}
+                                                border={(renderState as any).border ?? 0.05}
+                                                doubleSide={(renderState as any).doubleSide ?? true}
+                                                canInteract={false}
+                                                textureUrl={(renderState as any).textureUrl}
+                                                textureFit={(renderState as any).textureFit}
+                                                texturePixelated={(renderState as any).texturePixelated}
+                                                textureZ={(renderState as any).textureZ}
+                                            />
+                                        )}
                                 </>
                             )}
-
-                            {renderState &&
-                                renderState.kind !== 'outlined' &&
-                                renderState.kind !== 'outlinedGroup' && (
-                                    <FramedPlane
-                                        width={(renderState as any).width}
-                                        height={(renderState as any).height}
-                                        color={(renderState as any).color ?? '#333'}
-                                        borderColor={(renderState as any).borderColor ?? '#fff'}
-                                        border={(renderState as any).border ?? 0.05}
-                                        doubleSide={(renderState as any).doubleSide ?? true}
-                                        canInteract={false}
-                                        textureUrl={(renderState as any).textureUrl}
-                                        textureFit={(renderState as any).textureFit}
-                                        texturePixelated={(renderState as any).texturePixelated}
-                                        textureZ={(renderState as any).textureZ}
-                                    />
-                                )}
                         </group>
                     </group>
 
@@ -467,6 +525,14 @@ export default function ObjectInspectOverlay({
                         </div>
                     </div>
                 )}
+
+                {isInspectingSecretFile && (
+                    <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8 }}>
+                        <button onClick={() => setSecretTarget(Math.PI)}>Open</button>
+                        <button onClick={() => setSecretTarget(0)}>Close</button>
+                    </div>
+                )}
+
             </div>
         </div>
     )

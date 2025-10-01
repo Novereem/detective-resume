@@ -208,6 +208,12 @@ function Scene({
     requestMove: (req: MoveRequest) => void
 }) {
     const { scene, camera } = useThree()
+
+    const openInspectSecret = React.useCallback(
+        (p: InspectState) => openInspect({ ...(p as any), metadata: { type: 'secretfile' } }),
+        [openInspect]
+    )
+
     scene.background = new THREE.Color('#3c3c3c')
 
     type Vec3 = [number, number, number]
@@ -591,41 +597,41 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0, 0.7, 3.4]}
-                   rotation={[0, Math.PI/4, 0]}>
-                <SecretFile
-                    onInspect={openInspect}
-                    materialsById={secretFileMaterials}
-                    frontOpen={Math.PI*0.25}
-                    inspectPixelSize={1}
-                    disableOutline={true}
-                />
-            </group>
-            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0.3, 0.7, 3.4]}
-                   rotation={[0, Math.PI/4, 0]}>
-                <SecretFile
-                    onInspect={openInspect}
-                    materialsById={secretFileMaterials}
-                    frontOpen={Math.PI}
-                    inspectPixelSize={1}
-                    disableOutline={true}
-                />
-            </group>
-            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.3, 0.7, 3.4]}
-                   rotation={[0, Math.PI/4, 0]}>
-                <SecretFile
-                    onInspect={openInspect}
-                    materialsById={secretFileMaterials}
-                    frontOpen={Math.PI*0.75}
-                    inspectPixelSize={1}
-                    disableOutline={true}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0, 0.7, 3.4]}*/}
+            {/*       rotation={[0, Math.PI/4, 0]}>*/}
+            {/*    <SecretFile*/}
+            {/*        onInspect={openInspect}*/}
+            {/*        materialsById={secretFileMaterials}*/}
+            {/*        frontOpen={Math.PI*0.25}*/}
+            {/*        inspectPixelSize={1}*/}
+            {/*        disableOutline={true}*/}
+            {/*    />*/}
+            {/*</group>*/}
+            {/*<group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0.3, 0.7, 3.4]}*/}
+            {/*       rotation={[0, Math.PI/4, 0]}>*/}
+            {/*    <SecretFile*/}
+            {/*        onInspect={openInspect}*/}
+            {/*        materialsById={secretFileMaterials}*/}
+            {/*        frontOpen={Math.PI}*/}
+            {/*        inspectPixelSize={1}*/}
+            {/*        disableOutline={true}*/}
+            {/*    />*/}
+            {/*</group>*/}
+            {/*<group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.3, 0.7, 3.4]}*/}
+            {/*       rotation={[0, Math.PI/4, 0]}>*/}
+            {/*    <SecretFile*/}
+            {/*        onInspect={openInspect}*/}
+            {/*        materialsById={secretFileMaterials}*/}
+            {/*        frontOpen={Math.PI*0.75}*/}
+            {/*        inspectPixelSize={1}*/}
+            {/*        disableOutline={true}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.6, 0.7, 3.4]}
                    rotation={[0, Math.PI/4, 0]}>
                 <SecretFile
-                    onInspect={openInspect}
+                    onInspect={openInspectSecret}
                     materialsById={secretFileMaterials}
                     frontOpen={0}
                     inspectPixelSize={1}
@@ -640,8 +646,8 @@ function Scene({
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    //const [roomPixelSize] = React.useState(2.7)
-    const [roomPixelSize] = React.useState(1)
+    const [roomPixelSize] = React.useState(2.7)
+    //const [roomPixelSize] = React.useState(1)
 
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
