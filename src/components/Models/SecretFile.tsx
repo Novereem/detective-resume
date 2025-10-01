@@ -67,28 +67,70 @@ export const SecretFile = memo(function SecretFile({
 
         const hingeZ = 0
 
-        const a = frontOpen * 0.5 // page angle
-        const cosA = Math.cos(a)
-        const sinA = Math.sin(a)
+        const a1 = frontOpen * 0.5
+        const cosA = Math.cos(a1)
+        const sinA = Math.sin(a1)
 
         const xAddBase = innerW * ( -cosA * cosA + 0.5 + 0.5 * cosA )
-        const zAdd     = 0.5 * innerW * sinA
 
         const kMid = -0.044
-        const xWithMid = xAddBase + kMid * Math.sin(2 * a)
+        const xWithMid = xAddBase + kMid * Math.sin(2 * a1)
 
         const qQuarter = 0.02
-        const xAdd = xWithMid + qQuarter * Math.sin(4 * a)
+        const xAdd = xWithMid + qQuarter * Math.sin(4 * a1)
 
-        p.push({
-            id: 'paper',
-            geometry: hingeBox(innerW, innerH, pageThick, 0),
-            position: [hingeX + pageInset + xAdd, 0, hingeZ + zAdd] as Vec3,
-            rotation: [0, a, 0] as Vec3,
-            color: '#ffffff',
-            roughness: 0.95,
-            metalness: 0.0,
-        })
+        const poseForSide = (aSmall: number, side: 1 | -1) => {
+            const cosA = Math.cos(aSmall)
+            const sinA = Math.sin(aSmall)
+
+            const xAddBase = innerW * (-cosA * cosA + 0.5 + 0.5 * cosA)
+            const zAddBase = 0.5 * innerW * sinA
+
+            const skew = (kMid * Math.sin(2 * aSmall)) + (qQuarter * Math.sin(4 * aSmall))
+            const xAdd = xAddBase + side * skew
+
+            const zAdd = side * zAddBase
+
+            const ang = side * aSmall
+
+            return { xAdd, zAdd, ang }
+        }
+
+        const poseHinge = (ang: number) => {
+            const a = Math.max(0, Math.min(Math.PI - 1e-6, ang))
+            const dx = 0.5 * innerW * (1 - Math.cos(a))
+            const dz = 0.5 * innerW * Math.sin(a)
+            return { xAdd: dx, zAdd: dz, ang: a }
+        }
+
+        {
+            const a2 = (frontOpen * 0.5) * 0.2
+            const { xAdd, zAdd, ang } = poseForSide(a2, +1)
+            p.push({
+                id: 'paper-2',
+                geometry: hingeBox(innerW, innerH, pageThick, 0),
+                position: [hingeX + pageInset + xAdd - 0.005, 0, hingeZ + zAdd] as Vec3,
+                rotation: [0, ang, 0] as Vec3,
+                color: '#ffffff',
+                roughness: 0.95,
+                metalness: 0.0,
+            })
+        }
+
+        {
+            const a3 = Math.min(Math.PI - 0.001, 1.8 * a1)
+            const { xAdd, zAdd, ang } = poseHinge(a3)
+
+            p.push({
+                id: 'paper-3',
+                geometry: hingeBox(innerW, innerH, pageThick, 0),
+                position: [hingeX + pageInset + xAdd, 0, hingeZ + zAdd] as Vec3,
+                rotation: [0, ang, 0] as Vec3,
+                color: '#ffffff',
+                roughness: 0.95,
+                metalness: 0.0,
+            })
+        }
 
         const dx = 0.5 * w * (1 - Math.cos(frontOpen))
         const dz = 0.5 * w * Math.sin(frontOpen)

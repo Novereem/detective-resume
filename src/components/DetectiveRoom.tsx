@@ -596,7 +596,38 @@ function Scene({
                 <SecretFile
                     onInspect={openInspect}
                     materialsById={secretFileMaterials}
+                    frontOpen={Math.PI*0.25}
+                    inspectPixelSize={1}
+                    disableOutline={true}
+                />
+            </group>
+            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[0.3, 0.7, 3.4]}
+                   rotation={[0, Math.PI/4, 0]}>
+                <SecretFile
+                    onInspect={openInspect}
+                    materialsById={secretFileMaterials}
                     frontOpen={Math.PI}
+                    inspectPixelSize={1}
+                    disableOutline={true}
+                />
+            </group>
+            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.3, 0.7, 3.4]}
+                   rotation={[0, Math.PI/4, 0]}>
+                <SecretFile
+                    onInspect={openInspect}
+                    materialsById={secretFileMaterials}
+                    frontOpen={Math.PI*0.75}
+                    inspectPixelSize={1}
+                    disableOutline={true}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.6, 0.7, 3.4]}
+                   rotation={[0, Math.PI/4, 0]}>
+                <SecretFile
+                    onInspect={openInspect}
+                    materialsById={secretFileMaterials}
+                    frontOpen={0}
                     inspectPixelSize={1}
                     disableOutline={true}
                 />
