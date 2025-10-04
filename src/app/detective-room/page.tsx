@@ -1,7 +1,7 @@
 'use client'
 import dynamic from 'next/dynamic'
 import React from 'react'
-import { useTextureLoading } from '@/shaders/useTextureLoading'
+import { useTextureLoading } from '@/components/Textures/useTextureLoading'
 import { NotificationsProvider, NotificationsViewport } from '@/components/Notifications'
 
 function StaticLoader({ message }: { message: string }) {

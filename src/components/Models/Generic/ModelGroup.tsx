@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
-import { Outlined } from '@/shaders/OutlinedMesh'
+import { Outlined } from '@/components/Primitives/Outlined'
 import { InspectState, OutlinedGroupInspect, Vec3 } from '@/shaders/inspectTypes'
 import * as THREE from 'three'
 

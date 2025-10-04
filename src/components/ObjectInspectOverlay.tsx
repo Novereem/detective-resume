@@ -3,12 +3,13 @@ import {Canvas, useFrame, useThree} from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import * as THREE from 'three'
-import { Outlined } from '@/shaders/OutlinedMesh'
-import { FramedPlane } from '@/shaders/FramedPlane'
-import { InspectState } from '@/shaders/inspectTypes'
-import { PixelateNearestFX } from '@/shaders/PixelateNearestFX'
+import { Outlined } from '@/components/Primitives/Outlined'
+import { FramedPlane } from '@/components/Primitives/FramedPlane'
+import type { InspectState } from '@/components/Types/inspectModels'
+import { PixelateNearestFX } from '@/components/Effects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
 import {secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
+import {InspectOverlayProps} from "@/components/Types/inspect";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)
@@ -113,17 +114,6 @@ function ResetControlsOnChange({
     return null
 }
 
-type Props = {
-    open: boolean
-    state: InspectState | null
-    onClose: () => void
-    durationMs?: number
-    pixelSize?: number
-    camDistance?: number
-    onSolved?: (ctx: { state: InspectState }) => void
-    onAction?: (action: 'secret-open' | 'secret-close', state: InspectState) => void
-}
-
 function HoverButton({
                          onClick,
                          opening,
@@ -197,8 +187,8 @@ export default function ObjectInspectOverlay({
                                                  pixelSize: defaultPixelSize = 1,
                                                  camDistance = 3.2,
                                                  onSolved,
-                                                 onAction
-                                             }: Props) {
+                                                 onAction,
+                                             }: InspectOverlayProps) {
     const [renderState, setRenderState] = React.useState<InspectState | null>(null)
     const [visible, setVisible] = React.useState(false)
 

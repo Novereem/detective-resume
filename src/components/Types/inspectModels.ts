@@ -1,6 +1,5 @@
 import React from 'react'
-
-export type Vec3 = [number, number, number]
+import type { Vec3 } from '@/components/Types/room'
 
 export type TextPuzzle = {
     type: 'text'
@@ -62,10 +61,9 @@ export type OutlinedGroupInspect = {
     }>
 }
 
-
 /** Any inspect state can optionally carry a puzzle definition */
 export type InspectState =
-    (OutlinedInspect | FramedInspect | OutlinedGroupInspect) & {
+    | (OutlinedInspect | FramedInspect | OutlinedGroupInspect) & {
     puzzle?: TextPuzzle
     inspectDisableOutline?: boolean
 }

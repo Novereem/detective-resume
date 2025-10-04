@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { subscribeTextureLoading } from './TextureManager'
+import {subscribeTextureLoading} from "@/components/Textures/TextureManager";
 
 export function useTextureLoading() {
     const [state, setState] = React.useState({ pending: 0, inFlight: 0, queued: 0 })

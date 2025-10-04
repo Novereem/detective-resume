@@ -1,13 +1,5 @@
 import * as THREE from 'three'
-
-type LoadOpts = {
-    colorSpace?: THREE.ColorSpace
-    minFilter?: THREE.TextureFilter
-    magFilter?: THREE.MagnificationTextureFilter
-    wrapS?: THREE.Wrapping
-    wrapT?: THREE.Wrapping
-    generateMipmaps?: boolean
-}
+import type { LoadOpts, LoadState } from '@/components/Types/textures'
 
 const DEFAULT: LoadOpts = {
     colorSpace: THREE.SRGBColorSpace,
@@ -28,7 +20,6 @@ const MAX = 2
 const q: Array<() => void> = []
 
 let pending = 0
-type LoadState = { pending: number; inFlight: number; queued: number }
 const listeners = new Set<(s: LoadState) => void>()
 const emit = () => {
     const s = { pending, inFlight, queued: q.length }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as THREE from 'three'
-import { loadManagedTexture, releaseManagedTexture } from './TextureManager'
+import { loadManagedTexture, releaseManagedTexture } from '@/components/Textures/TextureManager'
 
 export function useManagedTexture(url?: string, opts?: Parameters<typeof loadManagedTexture>[1]) {
     const [tex, setTex] = React.useState<THREE.Texture | null>(null)

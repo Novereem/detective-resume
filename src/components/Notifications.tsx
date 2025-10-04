@@ -1,20 +1,8 @@
 'use client'
 import React from 'react'
+import type { Notification, NotificationsCtx, ToastPosition } from '@/components/Types/ui'
 
-type Notification = {
-    id: number
-    message: React.ReactNode
-    ttlMs: number
-}
-
-type Ctx = {
-    items: Notification[]
-    notify: (message: React.ReactNode, opts?: { ttlMs?: number }) => number
-    remove: (id: number) => void
-    clear: () => void
-}
-
-const NotificationsContext = React.createContext<Ctx | null>(null)
+const NotificationsContext = React.createContext<NotificationsCtx  | null>(null)
 
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = React.useState<Notification[]>([])
@@ -66,7 +54,7 @@ export function NotificationsViewport({
                                           position = 'top-left',
                                           maxWidth = 460,
                                       }: {
-    position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    position?: ToastPosition
     maxWidth?: number
 }) {
     const { items, remove } = useNotifications()
@@ -107,6 +95,7 @@ export function NotificationsViewport({
                             maxWidth,
                             width: 'fit-content',
                             color: '#fff',
+                            fontSize: 'x-large',
                             background: hovered ? 'rgba(37,37,37,0.78)' : 'rgba(0,0,0,0.65)',
                             border: '1px solid rgba(255,255,255,0.08)',
                             borderRadius: 10,

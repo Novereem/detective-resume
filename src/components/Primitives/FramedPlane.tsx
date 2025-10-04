@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import React from 'react'
 import { useCursor } from '@react-three/drei'
-import { InspectState, FramedInspect } from './inspectTypes'
-import { useManagedTexture } from './useManagedTexture'
+import type { InspectState, FramedInspect } from '@/components/Types/inspectModels'
+import { useManagedTexture } from '@/components/Textures/useManagedTexture'
 
 type CommonTransform = {
     position?: [number, number, number]
@@ -53,7 +53,6 @@ export function FramedPlane({
                                 textureFit = 'contain',
                                 texturePixelated = false,
                                 textureZ = 0.001,
-                                // NEW:
                                 lit = false,
                                 metalness = 0,
                                 roughness = 1,

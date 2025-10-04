@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import React from 'react'
 import { useCursor } from '@react-three/drei'
-import { InspectState, OutlinedInspect } from './inspectTypes'
-import { useManagedTexture } from '@/shaders/useManagedTexture'
+import type { InspectState, OutlinedInspect } from '@/components/Types/inspectModels'
+import { useManagedTexture } from '@/components/Textures/useManagedTexture'
 
 type CommonTransform = {
     position?: [number, number, number]

@@ -3,9 +3,9 @@ import * as React from 'react'
 import * as THREE from 'three'
 import { Billboard } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+import {PoofEffectProps} from "@/components/Types/effects";
 
 function rngFromSeed(seed: number) {
-    // mulberry32 – tiny deterministic PRNG
     return function () {
         let t = (seed += 0x6D2B79F5)
         t = Math.imul(t ^ (t >>> 15), t | 1)
@@ -14,23 +14,18 @@ function rngFromSeed(seed: number) {
     }
 }
 
-export function PoofEffect({
-                               position = [0, 0, 0],
-                               count = 5,
-                               duration = 0.8,
-                               stagger = 0.06,
-                               jitterRadius = 0.06,    // NEW: how far to scatter each ring (meters)
-                               jitterSeed,             // NEW: optional seed for deterministic scatter
-                               onDone,
-                           }: {
-    position?: [number, number, number] | THREE.Vector3
-    count?: number
-    duration?: number
-    stagger?: number
-    jitterRadius?: number
-    jitterSeed?: number
-    onDone?: () => void
-}) {
+
+export function PoofEffect(props: PoofEffectProps) {
+    const {
+        position = [0, 0, 0],
+        count = 5,
+        duration = 0.8,
+        stagger = 0.06,
+        jitterRadius = 0.06,
+        jitterSeed,
+        onDone,
+    } = props
+
     const meshes = React.useRef<THREE.Mesh[]>([])
     const materials = React.useRef<THREE.MeshBasicMaterial[]>([])
     const start = React.useRef<number | null>(null)
@@ -39,19 +34,17 @@ export function PoofEffect({
         [count, stagger]
     )
 
-    // NEW: precompute tiny random XY offsets for each ring (once per mount/prop set)
     const jitters = React.useMemo(() => {
         const r = jitterSeed != null ? rngFromSeed(jitterSeed) : Math.random
         const arr: [number, number, number][] = []
         for (let i = 0; i < count; i++) {
-            // polar random in circle (uniform)
             const u = r()
             const v = r()
             const theta = 2 * Math.PI * u
             const radius = jitterRadius * Math.sqrt(v)
             const x = Math.cos(theta) * radius
             const y = Math.sin(theta) * radius
-            arr.push([x, y, 0]) // Billboard faces camera; local z not needed
+            arr.push([x, y, 0]) // Billboard faces camera
         }
         return arr
     }, [count, jitterRadius, jitterSeed])
@@ -62,7 +55,7 @@ export function PoofEffect({
 
         let anyAlive = false
         for (let i = 0; i < count; i++) {
-            const p = (t - offsets[i]) / duration // 0..1
+            const p = (t - offsets[i]) / duration
             const mesh = meshes.current[i]
             const mat = materials.current[i]
             if (!mesh || !mat) continue
@@ -74,7 +67,7 @@ export function PoofEffect({
             }
             if (p <= 1) {
                 anyAlive = true
-                const eased = Math.sin(Math.PI * p) // 0..1..0
+                const eased = Math.sin(Math.PI * p)
                 const scale = 0.05 + 0.35 * eased
                 mesh.scale.setScalar(scale)
                 mat.opacity = 1 - p
