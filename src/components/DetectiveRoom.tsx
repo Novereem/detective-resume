@@ -3,7 +3,6 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import React from 'react'
 import * as THREE from 'three'
 import { FramedPlane } from "@/shaders/FramedPlane"
-import { Outlined } from "@/shaders/OutlinedMesh"
 import ObjectInspectOverlay from "@/components/ObjectInspectOverlay"
 import { InspectState } from '@/shaders/inspectTypes'
 import { PixelateNearestFX } from "@/shaders/PixelateNearestFX"
@@ -18,11 +17,10 @@ import {
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {Pin} from "@/components/Models/Pin";
 import {LightBulb} from "@/components/Models/LightBulb";
-import {MetalCabinet} from "@/components/Models/MetalCabinet";
-import {MetalDeskTop} from "@/components/Models/MetalDeskTop";
-import {MetalDrawer} from "@/components/Models/MetalDrawer";
 import {MetalDesk} from "@/components/Models/MetalDesk";
 import {SecretFile} from "@/components/Models/SecretFile";
+import { useNotifications } from '@/components/Notifications'
+import {PoofEffect} from "@/components/PoofEffect";
 
 type Vec3 = [number, number, number]
 
@@ -200,17 +198,62 @@ function MouseZoom({
     return null
 }
 
+type SecretFileSpawn = {
+    id: string
+    pos: [number, number, number]
+    rot?: [number, number, number]
+    message: string
+    persistAfterOpen?: boolean
+}
+
+const INITIAL_FILES: SecretFileSpawn[] = [
+    {
+        id: 'sf-ransom',
+        pos: [-0.6, 0.7, 3.4],
+        rot: [0, Math.PI / 4, 0],
+        message: 'Case File: Ransom Note — new puzzle available.',
+        persistAfterOpen: false,
+    },
+    {
+        id: 'sf-badge',
+        pos: [0.4, 0.7, 3.1],
+        rot: [0, -Math.PI / 8, 0],
+        message: 'Case File: Missing Badge — investigate the lead.',
+        persistAfterOpen: true,
+    },
+]
+
+
+
 function Scene({
                    openInspect,
                    requestMove,
+                   files,
+                   poofs,
+                   onPoofDone,
                }: {
     openInspect: (s: InspectState) => void
-    requestMove: (req: MoveRequest) => void
+    requestMove: (req: { camera: [number, number, number]; lookAt: [number, number, number] }) => void
+    files: SecretFileSpawn[]
+    poofs: { id: string; pos: [number, number, number] }[]
+    onPoofDone: (id: string) => void
 }) {
+
     const { scene, camera } = useThree()
 
-    const openInspectSecret = React.useCallback(
-        (p: InspectState) => openInspect({ ...(p as any), metadata: { type: 'secretfile' } }),
+    const makeOpenInspectSecret = React.useCallback(
+        (file: SecretFileSpawn) =>
+            (p: InspectState) =>
+                openInspect({
+                    ...(p as any),
+                    metadata: {
+                        type: 'secretfile',
+                        id: file.id,
+                        notif: file.message,
+                        persistAfterOpen: !!file.persistAfterOpen,
+                        worldPos: file.pos,
+                    },
+                }),
         [openInspect]
     )
 
@@ -597,17 +640,22 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={[-0.6, 0.7, 3.4]}
-                   rotation={[0, Math.PI/4, 0]}>
-                <SecretFile
-                    onInspect={openInspectSecret}
-                    materialsById={secretFileMaterials}
-                    frontOpen={0}
-                    inspectPixelSize={2.5}
-                    inspectDistance={0.5}
-                    disableOutline={false}
-                />
-            </group>
+            {files.map((f) => (
+                <group key={f.id} position={f.pos} rotation={f.rot ?? [0, 0, 0]}>
+                    <SecretFile
+                        onInspect={makeOpenInspectSecret(f)}
+                        materialsById={secretFileMaterials}
+                        frontOpen={0}
+                        inspectPixelSize={2.5}
+                        inspectDistance={0.5}
+                        disableOutline={false}
+                    />
+                </group>
+            ))}
+
+            {poofs.map((p) => (
+                <PoofEffect key={p.id} position={p.pos} onDone={() => onPoofDone(p.id)} />
+            ))}
 
         </>
     )
@@ -622,9 +670,40 @@ export default function DetectiveRoom() {
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
 
+    const {notify} = useNotifications()
+
+    const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900;
+    const OVERLAY_CLOSE_ANIM_MS = 340;
+
+    React.useEffect(() => {
+        return () => {
+            if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
+            if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+        }
+    }, [])
+
+    const viewTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+    const deleteTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const [files, setFiles] = React.useState<SecretFileSpawn[]>(INITIAL_FILES)
+    const [poofs, setPoofs] = React.useState<{ id: string; pos: [number, number, number] }[]>([])
+
+    const removeFile = React.useCallback((id: string) => {
+        setFiles(prev => prev.filter(f => f.id !== id))
+    }, [])
+
+    const spawnPoof = React.useCallback((pos: [number, number, number]) => {
+        setPoofs(p => [...p, { id: `poof-${Math.random().toString(36).slice(2)}`, pos }])
+    }, [])
+
+    const removePoof = React.useCallback((id: string) => {
+        setPoofs(p => p.filter(x => x.id !== id))
+    }, [])
+
+
     return (
-        <div style={{ position: 'fixed', inset: 0 }} onContextMenu={(e) => e.preventDefault()}>
-            <div style={{ position: 'absolute', inset: 0 }}>
+        <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
+            <div style={{position: 'absolute', inset: 0}}>
                 <Canvas
                     dpr={[1, 1.25]}
                     camera={{ position: [0, 1, 3], fov: 80, rotation: [0 ,Math.PI, 0] }}
@@ -634,7 +713,11 @@ export default function DetectiveRoom() {
                     }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
-                    <Scene openInspect={setInspect} requestMove={setMoveReq} />
+                    <Scene openInspect={setInspect}
+                           requestMove={setMoveReq}
+                           files={files}
+                           poofs={poofs}
+                           onPoofDone={removePoof}/>
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
                     <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
@@ -649,6 +732,29 @@ export default function DetectiveRoom() {
                 pixelSize={defaultInspectPixelSize}
                 onSolved={({ state }) => {
                     // setInspect(null)
+                }}
+
+                onAction={(action, state) => {
+                    if (action !== 'secret-open') return
+                    const meta = (state as any)?.metadata ?? {}
+                    const { id, notif, persistAfterOpen, worldPos } = meta
+
+                    notify(notif ?? 'Secret file opened — new puzzle available.', { ttlMs: 10000 })
+
+                    // clear any existing timers to avoid overlaps if the user is fast
+                    if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
+                    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+
+                    if (!persistAfterOpen && id) {
+                        viewTimerRef.current = setTimeout(() => {
+                            setInspect(null)
+
+                            deleteTimerRef.current = setTimeout(() => {
+                                removeFile(id)
+                                if (worldPos) spawnPoof(worldPos)
+                            }, OVERLAY_CLOSE_ANIM_MS)
+                        }, SECRETFILE_VIEW_BEFORE_CLOSE_MS)
+                    }
                 }}
             />
         </div>

@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic'
 import React from 'react'
 import { useTextureLoading } from '@/shaders/useTextureLoading'
+import { NotificationsProvider, NotificationsViewport } from '@/components/Notifications'
 
 function StaticLoader({ message }: { message: string }) {
     return (
@@ -49,7 +50,7 @@ export default function DetectiveRoomPage() {
     }, [isLoading])
 
     return (
-        <>
+        <NotificationsProvider>
             {overlayVisible && (
                 <div
                     style={{
@@ -70,6 +71,7 @@ export default function DetectiveRoomPage() {
             )}
 
             <DetectiveRoom />
-        </>
+            <NotificationsViewport position="top-left" />
+        </NotificationsProvider>
     )
 }

@@ -124,6 +124,71 @@ type Props = {
     onAction?: (action: 'secret-open' | 'secret-close', state: InspectState) => void
 }
 
+function HoverButton({
+                         onClick,
+                         opening,
+                     }: {
+    onClick: () => void
+    opening: boolean
+}) {
+    const [hovered, setHovered] = React.useState(false)
+    const [active, setActive] = React.useState(false)
+    const [focused, setFocused] = React.useState(false)
+
+    const baseBg = '#474747'
+    const hoverBg = '#5a5a5a'
+    const activeBg = '#3f3f3f'
+
+    const bg = active ? activeBg : hovered ? hoverBg : baseBg
+    const border = hovered ? '1px solid #b0b0b0' : '1px solid #888'
+    const shadow =
+        active
+            ? '0 1px 6px rgba(0,0,0,0.35)'
+            : hovered
+                ? '0 6px 18px rgba(0,0,0,0.35)'
+                : '0 3px 12px rgba(0,0,0,0.25)'
+    const transform = active ? 'translateY(0px)' : hovered ? 'translateY(-1px)' : 'translateY(0)'
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => { setHovered(false); setActive(false) }}
+            onMouseDown={() => setActive(true)}
+            onMouseUp={() => setActive(false)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onClick()
+                }
+            }}
+            style={{
+                padding: '12px 20px',
+                borderRadius: 0,
+                border,
+                background: bg,
+                color: '#ffffff',
+                fontSize: 'large',
+                fontWeight: 'bold',
+                fontFamily: 'Times New Roman',
+                cursor: 'pointer',
+                transition: 'background 120ms ease, border-color 120ms ease, box-shadow 140ms ease, transform 120ms ease',
+                boxShadow: shadow,
+                transform,
+                outline: 'none',
+                ...(focused
+                    ? { boxShadow: `${shadow}, 0 0 0 2px rgba(255,255,255,0.75) inset` }
+                    : null),
+            }}
+            aria-label={opening ? 'Open secret file' : 'Close secret file'}
+        >
+            {opening ? 'Open' : 'Close'}
+        </button>
+    )
+}
+
 export default function ObjectInspectOverlay({
                                                  open,
                                                  state,
@@ -344,11 +409,9 @@ export default function ObjectInspectOverlay({
                     backdropFilter: 'blur(2px)',
                     WebkitBackdropFilter: 'blur(2px)',
 
-                    // Smooth slide-in
                     transform: visible ? 'translateY(0) translateZ(0)' : 'translateY(calc(100vh + 24px)) translateZ(0)',
                     transition: `transform ${durationMs}ms cubic-bezier(.22,.8,.36,1)`,
 
-                    // Compositing hints
                     willChange: 'transform',
                     backfaceVisibility: 'hidden',
 
@@ -534,13 +597,17 @@ export default function ObjectInspectOverlay({
                 )}
 
                 {isInspectingSecretFile && (
-                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                        <button
-                            onClick={() => setSecretTarget((prev) => (prev === 0 ? Math.PI : 0))}
-                            style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #888', background: '#fff', color: '#111' }}
-                        >
-                            {secretTarget === 0 ? 'Open' : 'Close'}
-                        </button>
+                    <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                        <HoverButton
+                            onClick={() => {
+                                const opening = secretTarget === 0
+                                setSecretTarget(opening ? Math.PI : 0)
+                                if (renderState && onAction) {
+                                    onAction(opening ? 'secret-open' : 'secret-close', renderState)
+                                }
+                            }}
+                            opening={secretTarget === 0}
+                        />
                     </div>
                 )}
 
