@@ -35,8 +35,8 @@ const ANCHOR = {
 }
 
 const INITIAL_FILES: SecretFileSpawn[] = [
-    { id: 'sf-ransom', pos: [-0.6, 0.7, 3.4], rot: [0, Math.PI / 4, 0], message: 'Case File: Ransom Note — new puzzle available.', persistAfterOpen: false },
-    { id: 'sf-badge',  pos: [ 0.4, 0.7, 3.1], rot: [0, -Math.PI / 8, 0], message: 'Case File: Missing Badge — investigate the lead.', persistAfterOpen: true },
+    { id: 'sf-ransom', pos: [-0.6, 0.7, 2.4], rot: [0, Math.PI / 4, 0], message: 'Case File: Ransom Note — new puzzle available.', persistAfterOpen: false },
+    { id: 'sf-badge',  pos: [ 0.4, 0.7, 2.1], rot: [0, -Math.PI / 8, 0], message: 'Case File: Missing Badge — investigate the lead.', persistAfterOpen: true },
 ]
 
 function Scene({
@@ -45,12 +45,14 @@ function Scene({
                    files,
                    poofs,
                    onPoofDone,
+                   drawerFileAlive,
                }: {
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
     files: SecretFileSpawn[]
     poofs: { id: string; pos: Vec3 }[]
     onPoofDone: (id: string) => void
+    drawerFileAlive: boolean
 }) {
     const { scene } = useThree()
     const rcFocus = useRightClickFocus(requestMove)
@@ -72,6 +74,30 @@ function Scene({
                 }),
         [openInspect]
     )
+
+    const makeOpenInspectFromRef = React.useCallback(
+        (
+            meta: { id: string; message: string; persistAfterOpen?: boolean },
+            objRef: { current: THREE.Object3D | null }
+        ) => (p: InspectState) => {
+            const wp = new THREE.Vector3()
+            objRef.current?.getWorldPosition(wp)
+            openInspect({
+                ...(p as any),
+                metadata: {
+                    type: 'secretfile',
+                    id: meta.id,
+                    notif: meta.message,
+                    persistAfterOpen: !!meta.persistAfterOpen,
+                    worldPos: [wp.x, wp.y, wp.z] as Vec3,
+                },
+            })
+        },
+        [openInspect]
+    )
+
+    const drawerFileRef = React.useRef<THREE.Object3D | null>(null)
+    const drawerMugRef  = React.useRef<THREE.Object3D | null>(null)
 
     return (
         <>
@@ -316,9 +342,21 @@ function Scene({
                     }
                     inspectPixelSize={3}
                     materialsById={mugMaterials}
-                    visualizeHitbox={true}
+                    visualizeHitbox={false}
                 />
             </group>
+
+            {/*<group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}*/}
+            {/*       rotation={[0, Math.PI, 0]}>*/}
+            {/*    <MetalDesk*/}
+            {/*        topSize={[1.80, 0.04, 0.70]}*/}
+            {/*        materials={{*/}
+            {/*            top: metalDeskTopMaterials,*/}
+            {/*            cabinet: metalCabinetMaterials,*/}
+            {/*            drawer: metalDrawerMaterials*/}
+            {/*        }}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}
                    rotation={[0, Math.PI, 0]}>
@@ -329,6 +367,53 @@ function Scene({
                         cabinet: metalCabinetMaterials,
                         drawer: metalDrawerMaterials
                     }}
+                    drawerContentOffset={[0, 0.012, -0.02]}
+                    drawerChildren={
+                        <>
+                            {drawerFileAlive && (
+                                <group ref={drawerFileRef} position={[-0.1, 0.055, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
+                                    <SecretFile
+                                        onInspect={makeOpenInspectFromRef(
+                                            { id: 'sf-in-drawer', message: 'Drawer File — new puzzle available.', persistAfterOpen: false },
+                                            drawerFileRef
+                                        )}
+                                        materialsById={secretFileMaterials}
+                                        frontOpen={0}
+                                        inspectPixelSize={2}
+                                        inspectDistance={0.45}
+                                        disableOutline={false}
+                                        visualizeHitbox={true}
+                                    />
+                                </group>
+                            )}
+
+                            {/*<group ref={drawerMugRef} position={[0.10, 0, 0.02]} rotation={[0, Math.PI / 10, 0]}>*/}
+                            {/*    <Mug*/}
+                            {/*        color="#fff"*/}
+                            {/*        outlineThickness={0.008}*/}
+                            {/*        inspectDistance={0.45}*/}
+                            {/*        onInspect={(p) =>*/}
+                            {/*            openInspect({*/}
+                            {/*                ...p,*/}
+                            {/*                puzzle: {*/}
+                            {/*                    type: 'text',*/}
+                            {/*                    id: 'drawer-mug',*/}
+                            {/*                    prompt: 'What item is hiding under the papers?',*/}
+                            {/*                    answers: ['file', 'secret file'],*/}
+                            {/*                    normalize: 'trim-lower',*/}
+                            {/*                    feedback: {*/}
+                            {/*                        correct: 'Nice—check the file.',*/}
+                            {/*                        incorrect: 'There is something else here.'*/}
+                            {/*                    },*/}
+                            {/*                },*/}
+                            {/*            })*/}
+                            {/*        }*/}
+                            {/*        inspectPixelSize={2}*/}
+                            {/*        materialsById={mugMaterials}*/}
+                            {/*    />*/}
+                            {/*</group>*/}
+                        </>
+                    }
                 />
             </group>
 
@@ -346,7 +431,7 @@ function Scene({
             ))}
 
             {poofs.map((p) => (
-                <PoofEffect key={p.id} position={p.pos} onDone={() => onPoofDone(p.id)} />
+                <PoofEffect key={p.id} position={p.pos} onDone={() => onPoofDone(p.id)}/>
             ))}
 
         </>
@@ -359,7 +444,7 @@ export default function DetectiveRoom() {
     const [roomPixelSize] = React.useState(2.7)
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
-    const { notify } = useNotifications()
+    const {notify} = useNotifications()
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
@@ -380,22 +465,29 @@ export default function DetectiveRoom() {
         setFiles(prev => prev.filter(f => f.id !== id))
     }, [])
     const spawnPoof = React.useCallback((pos: Vec3) => {
-        setPoofs(p => [...p, { id: `poof-${Math.random().toString(36).slice(2)}`, pos }])
+        setPoofs(p => [...p, {id: `poof-${Math.random().toString(36).slice(2)}`, pos}])
     }, [])
     const removePoof = React.useCallback((id: string) => {
         setPoofs(p => p.filter(x => x.id !== id))
     }, [])
 
+    const [drawerFileAlive, setDrawerFileAlive] = React.useState(true)
+
     return (
-        <div style={{ position: 'fixed', inset: 0 }} onContextMenu={(e) => e.preventDefault()}>
-            <div style={{ position: 'absolute', inset: 0 }}>
+        <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
+            <div style={{position: 'absolute', inset: 0}}>
                 <Canvas
                     dpr={[1, 1.25]}
-                    camera={{ position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0] }}
-                    gl={{ antialias: false, alpha: false, depth: true, stencil: false, powerPreference: 'high-performance', preserveDrawingBuffer: false }}
+                    camera={{position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0]}}
+                    gl={{
+                        antialias: false,
+                        alpha: false,
+                        depth: true,
+                        stencil: false,
+                        powerPreference: 'high-performance', preserveDrawingBuffer: false }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
-                    <Scene openInspect={setInspect} requestMove={setMoveReq} files={files} poofs={poofs} onPoofDone={removePoof}/>
+                    <Scene openInspect={setInspect} requestMove={setMoveReq} files={files} poofs={poofs} onPoofDone={removePoof} drawerFileAlive={drawerFileAlive}/>
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
                     <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
@@ -408,6 +500,7 @@ export default function DetectiveRoom() {
                 state={inspect}
                 onClose={() => setInspect(null)}
                 pixelSize={defaultInspectPixelSize}
+
                 onAction={(action, state) => {
                     if (action !== 'secret-open') return
                     const meta = (state as any)?.metadata ?? {}
@@ -415,14 +508,18 @@ export default function DetectiveRoom() {
 
                     notify(notif ?? 'Secret file opened — new puzzle available.', { ttlMs: 10000 })
 
-                    if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
-                    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
-
                     if (!persistAfterOpen && id) {
+                        if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
+                        if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+
                         viewTimerRef.current = setTimeout(() => {
                             setInspect(null)
                             deleteTimerRef.current = setTimeout(() => {
-                                removeFile(id)
+                                if (id === 'sf-in-drawer') {
+                                    setDrawerFileAlive(false)
+                                } else {
+                                    removeFile(id)
+                                }
                                 if (worldPos) spawnPoof(worldPos)
                             }, OVERLAY_CLOSE_ANIM_MS)
                         }, SECRETFILE_VIEW_BEFORE_CLOSE_MS)

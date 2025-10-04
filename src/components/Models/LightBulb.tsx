@@ -2,7 +2,7 @@
 import React, { memo, useMemo } from 'react'
 import * as THREE from 'three'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
-import { Vec3 } from '@/shaders/inspectTypes'
+import {Vec3} from "@/components/Types/room";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts'>
 

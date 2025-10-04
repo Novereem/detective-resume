@@ -28,6 +28,8 @@ type Props = {
     cabinet?: Mats
     drawer?: Mats
   }
+  drawerChildren?: React.ReactNode
+  drawerContentOffset?: Vec3
 }
 
 export function MetalDesk({
@@ -45,6 +47,8 @@ export function MetalDesk({
                             handleOffset,
                             openDistance = 0.25,
                             materials = {},
+                            drawerChildren,
+                            drawerContentOffset,
                           }: Props) {
   const [tw, , td] = topSize
   const [cw, ch, cd] = cabinetSize
@@ -105,7 +109,9 @@ export function MetalDesk({
                         inspectDisableOutline
                         outlineScale={1.2}
                         visualizeHitbox={false}
+                        contentOffset={drawerContentOffset}
                     />
+                      {drawerChildren}
                   </group>
               ) : (
                   <MetalDrawer
@@ -135,6 +141,7 @@ export function MetalDesk({
                   materialsById={materials.drawer}
                   disableOutline
                   inspectDisableOutline
+                  visualizeHitbox={false}
               />
           ))}
         </group>
