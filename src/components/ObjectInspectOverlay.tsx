@@ -8,25 +8,32 @@ import { FramedPlane } from '@/shaders/FramedPlane'
 import { InspectState } from '@/shaders/inspectTypes'
 import { PixelateNearestFX } from '@/shaders/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
+import {secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)
     const [angle, setAngle] = React.useState(0)
 
+    React.useEffect(() => {
+        invalidate()
+    }, [targetAngle, invalidate])
+
     useFrame((_, dt) => {
-        const next = THREE.MathUtils.damp(angle, targetAngle, 6, dt)
+        const dtClamped = Math.min(dt, 1 / 60)
+        const next = THREE.MathUtils.damp(angle, targetAngle, 6, dtClamped)
         if (Math.abs(next - angle) > 1e-4) {
             setAngle(next)
-            invalidate()            // critical for frameloop="demand"
+            invalidate()
         }
     })
 
     return (
-        <group>
+        <group rotation={[0, Math.PI, 0]}>
             <SecretFile
                 frontOpen={angle}
-                inspectPixelSize={1}
+                inspectPixelSize={3}
                 disableOutline
+                materialsById={secretFileMaterials}
             />
         </group>
     )
@@ -527,9 +534,13 @@ export default function ObjectInspectOverlay({
                 )}
 
                 {isInspectingSecretFile && (
-                    <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8 }}>
-                        <button onClick={() => setSecretTarget(Math.PI)}>Open</button>
-                        <button onClick={() => setSecretTarget(0)}>Close</button>
+                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
+                        <button
+                            onClick={() => setSecretTarget((prev) => (prev === 0 ? Math.PI : 0))}
+                            style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #888', background: '#fff', color: '#111' }}
+                        >
+                            {secretTarget === 0 ? 'Open' : 'Close'}
+                        </button>
                     </div>
                 )}
 

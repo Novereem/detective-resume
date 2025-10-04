@@ -107,7 +107,7 @@ export const SecretFile = memo(function SecretFile({
             const a2 = (frontOpen * 0.5) * 0.2
             const { xAdd, zAdd, ang } = poseForSide(a2, +1)
             p.push({
-                id: 'paper-2',
+                id: 'paper1',
                 geometry: hingeBox(innerW, innerH, pageThick, 0),
                 position: [hingeX + pageInset + xAdd - 0.005, 0, hingeZ + zAdd] as Vec3,
                 rotation: [0, ang, 0] as Vec3,
@@ -122,7 +122,7 @@ export const SecretFile = memo(function SecretFile({
             const { xAdd, zAdd, ang } = poseHinge(a3)
 
             p.push({
-                id: 'paper-3',
+                id: 'paper2',
                 geometry: hingeBox(innerW, innerH, pageThick, 0),
                 position: [hingeX + pageInset + xAdd, 0, hingeZ + zAdd] as Vec3,
                 rotation: [0, ang, 0] as Vec3,
