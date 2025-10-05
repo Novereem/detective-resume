@@ -75,26 +75,30 @@ function Scene({
         [openInspect]
     )
 
-    const makeOpenInspectFromRef = React.useCallback(
-        (
-            meta: { id: string; message: string; persistAfterOpen?: boolean },
-            objRef: { current: THREE.Object3D | null }
-        ) => (p: InspectState) => {
-            const wp = new THREE.Vector3()
-            objRef.current?.getWorldPosition(wp)
-            openInspect({
-                ...(p as any),
-                metadata: {
-                    type: 'secretfile',
-                    id: meta.id,
-                    notif: meta.message,
-                    persistAfterOpen: !!meta.persistAfterOpen,
-                    worldPos: [wp.x, wp.y, wp.z] as Vec3,
-                },
-            })
-        },
-        [openInspect]
-    )
+    const makeOpenInspectFromRef =
+            (meta: { id: string; message: string; persistAfterOpen?: boolean },
+             objRef: { current: THREE.Object3D | null }) =>
+                (p: InspectState) => {
+                    const worldPos = (() => {
+                        if (!objRef.current) return null
+                        objRef.current.updateWorldMatrix(true, true)
+                        const boxW = new THREE.Box3().setFromObject(objRef.current)
+                        if (boxW.isEmpty()) return null
+                        const c = boxW.getCenter(new THREE.Vector3())
+                        return [c.x, c.y, c.z] as Vec3
+                    })()
+
+                    openInspect({
+                        ...(p as any),
+                        metadata: {
+                            type: 'secretfile',
+                            id: meta.id,
+                            notif: meta.message,
+                            persistAfterOpen: !!meta.persistAfterOpen,
+                            worldPos,
+                        },
+                    })
+                }
 
     const drawerFileRef = React.useRef<THREE.Object3D | null>(null)
     const drawerMugRef  = React.useRef<THREE.Object3D | null>(null)
@@ -342,7 +346,7 @@ function Scene({
                     }
                     inspectPixelSize={3}
                     materialsById={mugMaterials}
-                    visualizeHitbox={false}
+                    visualizeHitbox={true}
                 />
             </group>
 
@@ -371,7 +375,7 @@ function Scene({
                     drawerChildren={
                         <>
                             {drawerFileAlive && (
-                                <group ref={drawerFileRef} position={[-0.1, 0.055, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
+                                <group ref={drawerFileRef} position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
                                     <SecretFile
                                         onInspect={makeOpenInspectFromRef(
                                             { id: 'sf-in-drawer', message: 'Drawer File — new puzzle available.', persistAfterOpen: false },
@@ -382,7 +386,7 @@ function Scene({
                                         inspectPixelSize={2}
                                         inspectDistance={0.45}
                                         disableOutline={false}
-                                        visualizeHitbox={true}
+                                        visualizeHitbox={false}
                                     />
                                 </group>
                             )}
@@ -410,6 +414,7 @@ function Scene({
                             {/*        }*/}
                             {/*        inspectPixelSize={2}*/}
                             {/*        materialsById={mugMaterials}*/}
+                            {/*        visualizeHitbox={true}*/}
                             {/*    />*/}
                             {/*</group>*/}
                         </>
@@ -426,6 +431,7 @@ function Scene({
                         inspectPixelSize={2.5}
                         inspectDistance={0.5}
                         disableOutline={false}
+                        visualizeHitbox={false}
                     />
                 </group>
             ))}

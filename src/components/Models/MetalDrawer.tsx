@@ -17,6 +17,7 @@ export const MetalDrawer = memo(function MetalDrawer({
                                                          initialRotation = [0.12, 0.6, 0] as Vec3,
                                                          children,
                                                          contentOffset,
+                                                         openProgress = 0,
                                                          ...rest
                                                      }: Inherited & {
     size?: [number, number, number]
@@ -27,7 +28,10 @@ export const MetalDrawer = memo(function MetalDrawer({
     hitboxMode?: 'drawer' | 'handle' | 'none'
     children?: React.ReactNode
     contentOffset?: Vec3
+    openProgress?: number
 }) {
+    const isOpen = (openProgress ?? 0) > 0.05
+    const canMove = typeof (rest as any)?.onPointerDown === 'function'
     const [trayW, trayH, d] = size
     const trayD = Math.max(0.05, d - frontThickness)
 
@@ -68,9 +72,10 @@ export const MetalDrawer = memo(function MetalDrawer({
     const hoff = handle.offset ?? 2 * boxThickness
     const out = facing
 
-    const drawerCenterZ = out * (frontThickness - d / 2)
-    const handleHitbox = { size: [hw + 0.01, Math.max(0.06, hr * 2), hd + 0.02] as Vec3, center: [0, trayH * 0.55, out * (frontThickness + hoff)] as Vec3 }
-    const drawerHitbox = { size: [trayW, trayH, d] as Vec3, center: [0, trayH / 2, drawerCenterZ] as Vec3 }
+    const handleHitbox = {
+        size: [hw + 0.01, Math.max(0.06, hr * 2), hd + 0.02] as Vec3,
+        center: [0, trayH * 0.55, out * (frontThickness + hoff)] as Vec3,
+    }
 
     const bodyParts = parts.filter(p => p.id !== 'handle')
     const handleParts = parts.filter(p => p.id === 'handle')
@@ -98,24 +103,29 @@ export const MetalDrawer = memo(function MetalDrawer({
                 outlineScale={outlineScale}
                 initialRotation={initialRotation}
                 disableOutline
-                disablePointer={hitboxMode !== 'none'}
-                {...(hitboxMode === 'drawer' ? {hitbox: drawerHitbox} : {})}
+                disablePointer={true}
                 materialsById={materialsById}
                 inspectDisableOutline={inspectDisableOutline}
                 {...restGroup}
+                {...(visualizeHitbox ? { visualizeHitbox, visualizeColor } : {})}
             />
             <ModelGroup
                 parts={handleParts}
                 color={color}
                 outlineScale={outlineScale}
                 initialRotation={initialRotation}
-                {...(hitboxMode === 'handle' ? {hitbox: handleHitbox} : {})}
-                {...(hitboxMode === 'handle' ? {onPointerDown} : {})}
-                {...(visualizeHitbox ? {visualizeHitbox, visualizeColor} : {})}
+                {...((hitboxMode === 'handle' || hitboxMode === 'drawer') ? { hitbox: handleHitbox, onPointerDown } : {})}
+                {...(
+                    canMove && (hitboxMode === 'handle' || hitboxMode === 'drawer')
+                    ? { hitbox: handleHitbox, onPointerDown }
+                    : {}
+                    )
+                }
+                {...(visualizeHitbox ? { visualizeHitbox, visualizeColor } : {})}
                 materialsById={materialsById}
-                inspectDisableOutline={inspectDisableOutline}
-                disableOutline={hitboxMode !== 'handle'}
-                disablePointer={hitboxMode !== 'handle'}
+                inspectDisableOutline={inspectDisableOutline || !canMove}
+                disableOutline={!canMove || hitboxMode === 'none'}
+                disablePointer={!canMove || hitboxMode === 'none'}
             />
 
             <group position={contentBase as Vec3}>

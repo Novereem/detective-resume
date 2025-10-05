@@ -4,6 +4,7 @@ import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import {Vec3} from "@/components/Types/room";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts'>
+type HitboxMode = 'auto' | 'manual' | 'none'
 
 export const SecretFile = memo(function SecretFile({
                                                        size = [0.23, 0.32, 0.018] as [number, number, number],
@@ -18,7 +19,7 @@ export const SecretFile = memo(function SecretFile({
                                                        hoverColor = '#ff3b30',
                                                        outlineScale = 1.035,
                                                        initialRotation = [0.08, 0.30, 0] as Vec3,
-                                                       hitboxMode = 'auto' as 'auto' | 'none',
+                                                       hitboxMode = 'auto',
                                                        ...rest
                                                    }: Inherited & {
     size?: [number, number, number]
@@ -28,7 +29,7 @@ export const SecretFile = memo(function SecretFile({
     pageHingeGap?: number
     frontOpen?: number
     backOpen?: number
-    hitboxMode?: 'auto' | 'none'
+    hitboxMode?: HitboxMode
 }) {
     const [w, h, t] = size
     const halfW = w / 2
@@ -150,7 +151,7 @@ export const SecretFile = memo(function SecretFile({
     }, [w, h, t, coverThick, pageThick, pageInset, pageHingeGap, frontOpen, backOpen, color, outlineColor])
 
     const hitbox =
-        hitboxMode === 'auto'
+        hitboxMode === 'manual'
             ? ({ size: [w, h, t] as Vec3, center: [0, 0, 0] as Vec3 })
             : undefined
 

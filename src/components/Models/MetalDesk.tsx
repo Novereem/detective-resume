@@ -91,8 +91,8 @@ export function MetalDesk({
 
   return (
       <group position={position} rotation={rotation}>
-        <MetalCabinet position={[-x, 0, 0]} materialsById={materials.cabinet} disableOutline inspectDisableOutline />
-        <MetalCabinet position={[ x, 0, 0]} materialsById={materials.cabinet} disableOutline inspectDisableOutline />
+        <MetalCabinet position={[-x, 0, 0]} materialsById={materials.cabinet} disableOutline inspectDisableOutline disablePointer={true}/>
+        <MetalCabinet position={[ x, 0, 0]} materialsById={materials.cabinet} disableOutline inspectDisableOutline disablePointer={true}/>
         <MetalDeskTop position={[0, ch, 0]} size={topSize} materialsById={materials.top} disableOutline inspectDisableOutline />
         <group position={[-x, 0, 0]}>
           {Array.from({ length: drawerCount }).map((_, i) =>
@@ -104,6 +104,7 @@ export function MetalDesk({
                         position={[0, wall + i * slotH, drawerZ]}
                         handle={{ offset: ho }}
                         hitboxMode="handle"
+                        openProgress={tRef.current}
                         onPointerDown={handleToggle}
                         materialsById={materials.drawer}
                         inspectDisableOutline
