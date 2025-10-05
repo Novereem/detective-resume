@@ -23,36 +23,19 @@ import {PoofEffect} from "@/components/PoofEffect";
 import {FreeLookControls, PlayerMover, MouseZoom, useRightClickFocus} from '@/components/PlayerControls'
 import type { Vec3, MoveRequest, SecretFileSpawn } from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
-
-const ANCHOR = {
-    bulb: { eye: [ 0.6, 1.6,  3.3] as Vec3, position: [0, 2, 4.3] as Vec3 },
-    desk1: { eye: [ 0.8, 1.1, 2.8] as Vec3, position: [1.6, 0, 4.3] as Vec3 },
-    desk2: { eye: [ -0.5, 1.1, 2.8] as Vec3, position: [-2, 0, 3] as Vec3 },
-    deskMetal: { eye: [ 0, 1.1, 2.8] as Vec3, position: [0, 0, 4.2] as Vec3 },
-    corkBoard: { eye: [0, 1.3, 3.2] as Vec3, position: [0, 1.3, 4.7] as Vec3 },
-    mug: { eye: [-0.2, 1.3, 3.2] as Vec3, position: [-0.2, 0.77, 4.2] as Vec3 },
-    houseFrame: { eye: [0.2, 1.3, 3.6] as Vec3, position: [0.2, 1.3, 4.6] as Vec3 },
-}
-
-const INITIAL_FILES: SecretFileSpawn[] = [
-    { id: 'sf-ransom', pos: [-0.6, 0.7, 2.4], rot: [0, Math.PI / 4, 0], message: 'Case File: Ransom Note — new puzzle available.', persistAfterOpen: false },
-    { id: 'sf-badge',  pos: [ 0.4, 0.7, 2.1], rot: [0, -Math.PI / 8, 0], message: 'Case File: Missing Badge — investigate the lead.', persistAfterOpen: true },
-]
+import { ANCHOR } from "@/components/Game/anchors"
+import { useGameState, useGameActions } from "@/components/Game/state"
 
 function Scene({
-                   openInspect,
-                   requestMove,
-                   files,
-                   poofs,
-                   onPoofDone,
-                   drawerFileAlive,
+                   openInspect, requestMove, files, poofs, onPoofDone, drawers, puzzles,
                }: {
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
     files: SecretFileSpawn[]
     poofs: { id: string; pos: Vec3 }[]
     onPoofDone: (id: string) => void
-    drawerFileAlive: boolean
+    drawers: Record<string, { fileAlive?: boolean }>
+    puzzles: Record<string, boolean>
 }) {
     const { scene } = useThree()
     const rcFocus = useRightClickFocus(requestMove)
@@ -75,33 +58,63 @@ function Scene({
         [openInspect]
     )
 
-    const makeOpenInspectFromRef =
-            (meta: { id: string; message: string; persistAfterOpen?: boolean },
-             objRef: { current: THREE.Object3D | null }) =>
-                (p: InspectState) => {
-                    const worldPos = (() => {
-                        if (!objRef.current) return null
-                        objRef.current.updateWorldMatrix(true, true)
-                        const boxW = new THREE.Box3().setFromObject(objRef.current)
-                        if (boxW.isEmpty()) return null
-                        const c = boxW.getCenter(new THREE.Vector3())
-                        return [c.x, c.y, c.z] as Vec3
-                    })()
+    const makeOpenInspectFromAnchor =
+        (meta: { id: string; message: string; persistAfterOpen?: boolean },
+         pos: Vec3 | null) =>
+            (p: InspectState) =>
+                openInspect({
+                    ...(p as any),
+                    metadata: {
+                        type: 'secretfile',
+                        id: meta.id,
+                        notif: meta.message,
+                        persistAfterOpen: !!meta.persistAfterOpen,
+                        worldPos: pos ?? null,
+                    },
+                })
 
-                    openInspect({
-                        ...(p as any),
-                        metadata: {
-                            type: 'secretfile',
-                            id: meta.id,
-                            notif: meta.message,
-                            persistAfterOpen: !!meta.persistAfterOpen,
-                            worldPos,
-                        },
-                    })
-                }
-
-    const drawerFileRef = React.useRef<THREE.Object3D | null>(null)
-    const drawerMugRef  = React.useRef<THREE.Object3D | null>(null)
+    const renderPuzzles = () => {
+        const nodes: React.ReactNode[] = []
+        if (puzzles["puzzle-house"]) {
+            nodes.push(
+                <group key="puzzle-house" position={ANCHOR.deskTopSpawn.position as Vec3}
+                       rotation={(ANCHOR.deskTopSpawn.rotation ?? [0,0,0]) as Vec3}
+                onContextMenu={rcFocus(ANCHOR.houseFrame)}>
+                    <FramedPlane
+                        width={0.17}
+                        height={0.2}
+                        color="#000"
+                        borderColor="#fff"
+                        hoverColor="#ff3b30"
+                        border={0.01}
+                        canInteract
+                        inspectDistance={0.4}
+                        onInspect={(p) =>
+                            openInspect({
+                                ...p,
+                                puzzle: {
+                                    type: 'text',
+                                    id: 'frame-code-desk',
+                                    prompt: 'What is the name of this popular medical drama from the 2000s?',
+                                    answers: ['house', /house\s*md/i],
+                                    normalize: 'trim-lower',
+                                    feedback: { correct: 'Nice find!', incorrect: 'Not quite—look closer.' },
+                                },
+                            })
+                        }
+                        inspectOverrides={{ pixelSize: 1 }}
+                        textureUrl="/textures/house_szn1.jpg"
+                        textureFit="stretch"
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                    />
+                </group>
+            )
+        }
+        return nodes
+    }
 
     return (
         <>
@@ -350,18 +363,6 @@ function Scene({
                 />
             </group>
 
-            {/*<group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}*/}
-            {/*       rotation={[0, Math.PI, 0]}>*/}
-            {/*    <MetalDesk*/}
-            {/*        topSize={[1.80, 0.04, 0.70]}*/}
-            {/*        materials={{*/}
-            {/*            top: metalDeskTopMaterials,*/}
-            {/*            cabinet: metalCabinetMaterials,*/}
-            {/*            drawer: metalDrawerMaterials*/}
-            {/*        }}*/}
-            {/*    />*/}
-            {/*</group>*/}
-
             <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}
                    rotation={[0, Math.PI, 0]}>
                 <MetalDesk
@@ -374,13 +375,14 @@ function Scene({
                     drawerContentOffset={[0, 0.012, -0.02]}
                     drawerChildren={
                         <>
-                            {drawerFileAlive && (
-                                <group ref={drawerFileRef} position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
+                            {!!drawers["leftTop"]?.fileAlive && (
+                                <group position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
                                     <SecretFile
-                                        onInspect={makeOpenInspectFromRef(
+                                        onInspect={makeOpenInspectFromAnchor(
                                             { id: 'sf-in-drawer', message: 'Drawer File — new puzzle available.', persistAfterOpen: false },
-                                            drawerFileRef
+                                            ANCHOR.drawerLeftTopContent.position
                                         )}
+
                                         materialsById={secretFileMaterials}
                                         frontOpen={0}
                                         inspectPixelSize={2}
@@ -390,37 +392,12 @@ function Scene({
                                     />
                                 </group>
                             )}
-
-                            {/*<group ref={drawerMugRef} position={[0.10, 0, 0.02]} rotation={[0, Math.PI / 10, 0]}>*/}
-                            {/*    <Mug*/}
-                            {/*        color="#fff"*/}
-                            {/*        outlineThickness={0.008}*/}
-                            {/*        inspectDistance={0.45}*/}
-                            {/*        onInspect={(p) =>*/}
-                            {/*            openInspect({*/}
-                            {/*                ...p,*/}
-                            {/*                puzzle: {*/}
-                            {/*                    type: 'text',*/}
-                            {/*                    id: 'drawer-mug',*/}
-                            {/*                    prompt: 'What item is hiding under the papers?',*/}
-                            {/*                    answers: ['file', 'secret file'],*/}
-                            {/*                    normalize: 'trim-lower',*/}
-                            {/*                    feedback: {*/}
-                            {/*                        correct: 'Nice—check the file.',*/}
-                            {/*                        incorrect: 'There is something else here.'*/}
-                            {/*                    },*/}
-                            {/*                },*/}
-                            {/*            })*/}
-                            {/*        }*/}
-                            {/*        inspectPixelSize={2}*/}
-                            {/*        materialsById={mugMaterials}*/}
-                            {/*        visualizeHitbox={true}*/}
-                            {/*    />*/}
-                            {/*</group>*/}
                         </>
                     }
                 />
             </group>
+
+            {renderPuzzles()}
 
             {files.map((f) => (
                 <group key={f.id} position={f.pos} rotation={f.rot ?? [0, 0, 0]}>
@@ -464,20 +441,8 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const [files, setFiles] = React.useState<SecretFileSpawn[]>(INITIAL_FILES)
-    const [poofs, setPoofs] = React.useState<{ id: string; pos: Vec3 }[]>([])
-
-    const removeFile = React.useCallback((id: string) => {
-        setFiles(prev => prev.filter(f => f.id !== id))
-    }, [])
-    const spawnPoof = React.useCallback((pos: Vec3) => {
-        setPoofs(p => [...p, {id: `poof-${Math.random().toString(36).slice(2)}`, pos}])
-    }, [])
-    const removePoof = React.useCallback((id: string) => {
-        setPoofs(p => p.filter(x => x.id !== id))
-    }, [])
-
-    const [drawerFileAlive, setDrawerFileAlive] = React.useState(true)
+    const {files, poofs, drawers, puzzles} = useGameState()
+    const {removePoof, handleSecretOpen} = useGameActions()
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
@@ -493,7 +458,15 @@ export default function DetectiveRoom() {
                         powerPreference: 'high-performance', preserveDrawingBuffer: false }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
-                    <Scene openInspect={setInspect} requestMove={setMoveReq} files={files} poofs={poofs} onPoofDone={removePoof} drawerFileAlive={drawerFileAlive}/>
+                    <Scene
+                        openInspect={setInspect}
+                        requestMove={setMoveReq}
+                        files={files}
+                        poofs={poofs}
+                        onPoofDone={removePoof}
+                        drawers={drawers}
+                        puzzles={puzzles}
+                    />
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
                     <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
@@ -521,12 +494,7 @@ export default function DetectiveRoom() {
                         viewTimerRef.current = setTimeout(() => {
                             setInspect(null)
                             deleteTimerRef.current = setTimeout(() => {
-                                if (id === 'sf-in-drawer') {
-                                    setDrawerFileAlive(false)
-                                } else {
-                                    removeFile(id)
-                                }
-                                if (worldPos) spawnPoof(worldPos)
+                                handleSecretOpen({ id, worldPos })
                             }, OVERLAY_CLOSE_ANIM_MS)
                         }, SECRETFILE_VIEW_BEFORE_CLOSE_MS)
                     }
