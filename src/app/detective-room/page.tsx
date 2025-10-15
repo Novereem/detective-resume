@@ -28,9 +28,12 @@ export default function DetectiveRoomPage() {
 
     const [overlayVisible, setOverlayVisible] = React.useState(true)
     const [opacity, setOpacity] = React.useState(1)
+    const [booted, setBooted] = React.useState(false)
     const hideTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
     React.useEffect(() => {
+        if (booted) return
+
         if (isLoading) {
             if (hideTimer.current) { clearTimeout(hideTimer.current); hideTimer.current = null }
             setOverlayVisible(true)
@@ -40,14 +43,17 @@ export default function DetectiveRoomPage() {
         if (!hideTimer.current) {
             hideTimer.current = setTimeout(() => {
                 setOpacity(0)
-                setTimeout(() => setOverlayVisible(false), FADE_MS)
+                setTimeout(() => {
+                    setOverlayVisible(false)
+                    setBooted(true)
+                }, FADE_MS)
                 hideTimer.current = null
             }, HIDE_DELAY_MS)
         }
         return () => {
             if (hideTimer.current) { clearTimeout(hideTimer.current); hideTimer.current = null }
         }
-    }, [isLoading])
+    }, [isLoading, booted])
 
     return (
         <NotificationsProvider>
@@ -66,11 +72,11 @@ export default function DetectiveRoomPage() {
                         transition: `opacity ${FADE_MS}ms ease`,
                     }}
                 >
-                    <p>Loading detective room…{isLoading && pending > 0 ? ` (${pending})` : ''}</p>
+                    <p>Loading detective room. . . {!booted && isLoading && pending > 0 ? ` (${pending})` : ''}</p>
                 </div>
             )}
 
-            <DetectiveRoom />
+            <DetectiveRoom/>
             <NotificationsViewport position="top-left" />
         </NotificationsProvider>
     )

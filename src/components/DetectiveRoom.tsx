@@ -1,5 +1,5 @@
 'use client'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import React from 'react'
 import * as THREE from 'three'
 import { FramedPlane } from "@/components/Primitives/FramedPlane"
@@ -14,7 +14,6 @@ import {
     mugMaterials, secretFileMaterials
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
-import {Pin} from "@/components/Models/Pin";
 import {LightBulb} from "@/components/Models/LightBulb";
 import {MetalDesk} from "@/components/Models/MetalDesk";
 import {SecretFile} from "@/components/Models/SecretFile";
@@ -25,9 +24,11 @@ import type { Vec3, MoveRequest, SecretFileSpawn } from '@/components/Types/room
 import {InspectState} from "@/components/Types/inspectModels";
 import { ANCHOR } from "@/components/Game/anchors"
 import { useGameState, useGameActions } from "@/components/Game/state"
+import {PUZZLES} from "@/components/Game/puzzleRegistry";
+import {PuzzleNode} from "@/components/PuzzleNode";
 
 function Scene({
-                   openInspect, requestMove, files, poofs, onPoofDone, drawers, puzzles,
+                   openInspect, requestMove, files, poofs, onPoofDone, drawers, puzzles, pinnedPuzzles,
                }: {
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
@@ -36,6 +37,7 @@ function Scene({
     onPoofDone: (id: string) => void
     drawers: Record<string, { fileAlive?: boolean }>
     puzzles: Record<string, boolean>
+    pinnedPuzzles: Record<string, boolean>
 }) {
     const { scene } = useThree()
     const rcFocus = useRightClickFocus(requestMove)
@@ -73,48 +75,18 @@ function Scene({
                     },
                 })
 
-    const renderPuzzles = () => {
-        const nodes: React.ReactNode[] = []
-        if (puzzles["puzzle-house"]) {
-            nodes.push(
-                <group key="puzzle-house" position={ANCHOR.deskTopSpawn.position as Vec3}
-                       rotation={(ANCHOR.deskTopSpawn.rotation ?? [0,0,0]) as Vec3}
-                onContextMenu={rcFocus(ANCHOR.houseFrame)}>
-                    <FramedPlane
-                        width={0.17}
-                        height={0.2}
-                        color="#000"
-                        borderColor="#fff"
-                        hoverColor="#ff3b30"
-                        border={0.01}
-                        canInteract
-                        inspectDistance={0.4}
-                        onInspect={(p) =>
-                            openInspect({
-                                ...p,
-                                puzzle: {
-                                    type: 'text',
-                                    id: 'frame-code-desk',
-                                    prompt: 'What is the name of this popular medical drama from the 2000s?',
-                                    answers: ['house', /house\s*md/i],
-                                    normalize: 'trim-lower',
-                                    feedback: { correct: 'Nice find!', incorrect: 'Not quite—look closer.' },
-                                },
-                            })
-                        }
-                        inspectOverrides={{ pixelSize: 1 }}
-                        textureUrl="/textures/house_szn1.jpg"
-                        textureFit="stretch"
-                        lit
-                        roughness={1}
-                        metalness={0}
-                        receiveShadow
-                    />
-                </group>
-            )
-        }
-        return nodes
-    }
+    const renderPuzzles = React.useCallback(() => {
+        return Object.values(PUZZLES).map((def) => (
+            <PuzzleNode
+                key={def.puzzleId}
+                def={def}
+                available={puzzles[def.puzzleId]}
+                pinned={pinnedPuzzles[def.puzzleId]}
+                openInspect={openInspect}
+                rcFocus={rcFocus}
+            />
+        ))
+    }, [puzzles, pinnedPuzzles, openInspect, rcFocus])
 
     return (
         <>
@@ -230,36 +202,6 @@ function Scene({
                 </mesh>
             </group>
 
-            <group rotation={[Math.PI, 0, 3]} position={ANCHOR.houseFrame.position}
-                   onContextMenu={rcFocus(ANCHOR.houseFrame)}>
-                <FramedPlane
-                    width={0.17}
-                    height={0.2}
-                    color="#000"
-                    borderColor="#fff"
-                    hoverColor="#ff3b30"
-                    border={0.01}
-                    canInteract
-                    inspectDistance={0.4}
-                    onInspect={(p) =>
-                        openInspect({
-                            ...p,
-                            puzzle: {
-                                type: 'text',
-                                id: 'frame-code',
-                                prompt: 'What is the name of this popular medical drama from the 2000s?',
-                                answers: ['house', /house\s*md/i],
-                                normalize: 'trim-lower',
-                                feedback: {correct: 'Nice find!', incorrect: 'Not quite—look closer.'},
-                            },
-                        })
-                    }
-                    inspectOverrides={{pixelSize: 1}}
-                    textureUrl="/textures/house_szn1.jpg"
-                    textureFit="stretch"
-                />
-            </group>
-
             <group onContextMenu={rcFocus(ANCHOR.desk1)}>
                 <Desk
                     position={ANCHOR.desk1.position}
@@ -299,18 +241,6 @@ function Scene({
                     color="#fff"
                     materialsById={corkBoardMaterials}
                     inspectDistance={1}
-                    inspectPixelSize={3}
-                    disableOutline={true}
-                    inspectDisableOutline={true}
-                />
-            </group>
-
-            <group>
-                <Pin
-                    position={[0.2, 1.37, 4.6]}
-                    rotation={[Math.PI + (Math.PI / 2), 0, 0]}
-                    materialsById={corkBoardMaterials}
-                    inspectDistance={0.2}
                     inspectPixelSize={3}
                     disableOutline={true}
                     inspectDisableOutline={true}
@@ -397,6 +327,7 @@ function Scene({
                 />
             </group>
 
+            {/* render the puzzles */}
             {renderPuzzles()}
 
             {files.map((f) => (
@@ -428,6 +359,9 @@ export default function DetectiveRoom() {
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
     const {notify} = useNotifications()
+    const [pinnedPuzzles, setPinnedPuzzles] = React.useState<Record<string, boolean>>({})
+    const SOLVE_ID_TO_PUZZLE: Record<string, string> = Object.values(PUZZLES)
+        .reduce((acc, def) => { acc[def.solvedFromInspectId] = def.puzzleId; return acc }, {} as Record<string,string>)
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
@@ -466,6 +400,7 @@ export default function DetectiveRoom() {
                         onPoofDone={removePoof}
                         drawers={drawers}
                         puzzles={puzzles}
+                        pinnedPuzzles={pinnedPuzzles}
                     />
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
@@ -479,6 +414,18 @@ export default function DetectiveRoom() {
                 state={inspect}
                 onClose={() => setInspect(null)}
                 pixelSize={defaultInspectPixelSize}
+
+                onSolved={({ state }) => {
+                    const solvedId = (state as any)?.puzzle?.id as string | undefined
+                    const puzzleId = solvedId ? SOLVE_ID_TO_PUZZLE[solvedId] : undefined
+                    if (!puzzleId) return
+
+                    setPinnedPuzzles(prev => ({ ...prev, [puzzleId]: true }))
+                    notify('Pinned to cork board!', { ttlMs: 6000 })
+
+                    const ms = (typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)
+                    setTimeout(() => setInspect(null), ms)
+                }}
 
                 onAction={(action, state) => {
                     if (action !== 'secret-open') return

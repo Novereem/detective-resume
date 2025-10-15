@@ -1,4 +1,4 @@
-import type { InspectState } from '@/shaders/inspectTypes'
+import type { InspectState} from "@/components/Types/inspectModels";
 
 export type InspectAction = 'secret-open' | 'secret-close'
 

@@ -1,6 +1,7 @@
 import { ANCHOR } from "./anchors"
 import type { Vec3, SecretFileSpawn } from "@/components/Types/room"
 import * as React from "react"
+import {PUZZLES} from "@/components/Game/puzzleRegistry";
 
 type Listener = () => void
 
@@ -21,6 +22,9 @@ class GameState {
         files: [
             { id: "sf-ransom", pos: [-0.6, 0.7, 2.4], rot: [0, Math.PI/4, 0], message: "Case File: Ransom Note", persistAfterOpen: false },
             { id: "sf-badge",  pos: [ 0.4, 0.7, 2.1], rot: [0,-Math.PI/8, 0], message: "Case File: Missing Badge", persistAfterOpen: true  },
+
+            { id: "sf-photo-clue", pos: ANCHOR.deskTopSpawn.position, rot: ANCHOR.deskTopSpawn.rotation,
+                message: "Photo Clue — new puzzle available.", persistAfterOpen: false, unlocksPuzzleId: "puzzle-photo-clue" },
         ],
         drawers: {
             leftTop: { fileAlive: true },
@@ -67,32 +71,45 @@ class GameState {
     }
 
     setPuzzle(id: PuzzleKey, alive: boolean) {
+        const prev = this.snapshot.puzzles[id]
+
         this.snapshot = { ...this.snapshot, puzzles: { ...this.snapshot.puzzles, [id]: alive } }
+        if (!prev && alive) {
+            const def = PUZZLES[id]
+            const anchor = def ? ANCHOR[def.deskAnchorKey] : null
+            if (anchor?.position) {
+                this.spawnPoof(anchor.position)
+            }
+        }
         this.emit()
     }
 
     handleSecretOpen(meta: { id: string; worldPos?: Vec3 | null }) {
         const { id, worldPos } = meta
+        const file = this.snapshot.files.find(f => f.id === id)
 
-        if (id === "sf-in-drawer") {
-            this.setDrawer("leftTop", { fileAlive: false })
-            this.setPuzzle("puzzle-house", true)
+        const puzzleId = file?.unlocksPuzzleId as PuzzleKey | undefined
 
-            this.spawnPoof(ANCHOR.deskTopSpawn.position)
-
-            this.spawnPoof(worldPos ?? ANCHOR.drawerLeftTopContent.position)
-            return
+        if (puzzleId) {
+            this.setPuzzle(puzzleId, true)
         }
 
-        if (id === "sf-ransom") {
+        const shouldPoofOpen = file?.poofOnOpen !== false
+        if (shouldPoofOpen) {
+            const p = worldPos ?? file?.pos
+            if (p) this.spawnPoof(p)
+        }
+
+        if (file && file.persistAfterOpen !== true) {
             this.removeFile(id)
-            if (worldPos) this.spawnPoof(worldPos)
-            return
         }
 
-        if (id === "sf-badge") {
-            if (worldPos) this.spawnPoof(worldPos)
-            return
+        switch (id) {
+            case "sf-in-drawer":
+                this.setDrawer("leftTop", { fileAlive: false })
+                break
+            default:
+                break
         }
     }
 }

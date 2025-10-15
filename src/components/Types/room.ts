@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import {PuzzleKey} from "@/components/Game/state";
 
 export type Vec3 = [number, number, number]
 
@@ -13,6 +14,8 @@ export type SecretFileSpawn = {
     rot?: Vec3
     message: string
     persistAfterOpen?: boolean
+    unlocksPuzzleId?: PuzzleKey
+    poofOnOpen?: boolean
 }
 
 export type V3Like =
