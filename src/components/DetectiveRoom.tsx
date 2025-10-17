@@ -24,36 +24,35 @@ import type {Vec3, MoveRequest, SecretFileSpawn, DrawerFileLike} from '@/compone
 import {InspectState} from "@/components/Types/inspectModels";
 import { ANCHOR } from "@/components/Game/anchors"
 import { useGameState, useGameActions } from "@/components/Game/state"
-import {PUZZLES} from "@/components/Game/puzzleRegistry";
 import {PuzzleNode} from "@/components/PuzzleNode";
+import {DrawerFileSpawn, PositionedSecretFile} from "@/components/Game/state.data";
 
 function Scene({
-                   openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers, puzzles, pinnedPuzzles,
+                   openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
                }: {
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
-    files: SecretFileSpawn[]
-    drawerFiles: { id: string; drawerKey: string; message?: string; persistAfterOpen?: boolean }[]
+    files: PositionedSecretFile[]
+    drawerFiles: DrawerFileSpawn[]
     poofs: { id: string; pos: Vec3 }[]
     onPoofDone: (id: string) => void
     drawers: Record<string, { fileAlive?: boolean }>
-    puzzles: Record<string, boolean>
-    pinnedPuzzles: Record<string, boolean>
 }) {
     const { scene } = useThree()
     const rcFocus = useRightClickFocus(requestMove)
+    const { puzzlesConfig, puzzleStatus } = useGameState()
 
     scene.background = new THREE.Color('#3c3c3c')
 
     const makeOpenInspectSecret = React.useCallback(
-        (file: SecretFileSpawn) =>
+        (file: PositionedSecretFile) =>
             (p: InspectState) =>
                 openInspect({
                     ...(p as any),
                     metadata: {
                         type: 'secretfile',
                         id: file.id,
-                        notif: file.message,
+                        notif: file.message ?? "",
                         persistAfterOpen: !!file.persistAfterOpen,
                         worldPos: file.pos,
                     },
@@ -61,10 +60,25 @@ function Scene({
         [openInspect]
     )
 
-    const makeOpenInspectFromAnchor =
-        (meta: { id: string; message: string; persistAfterOpen?: boolean },
-         pos: Vec3 | null) =>
-            (p: InspectState) =>
+    const nodeMapRef = React.useRef(new Map<string, THREE.Object3D>())
+
+    const refFor = React.useCallback((key: string) => (node: THREE.Object3D | null) => {
+        if (node) nodeMapRef.current.set(key, node)
+        else nodeMapRef.current.delete(key)
+    }, [])
+
+    const worldCenterOf = (node: THREE.Object3D): Vec3 => {
+        node.updateWorldMatrix(true, true)
+        const box = new THREE.Box3().setFromObject(node)
+        const c = box.getCenter(new THREE.Vector3())
+        return [c.x, c.y, c.z]
+    }
+
+    const makeOpenInspectFromKey =
+        (meta: { id: string; message: string; persistAfterOpen?: boolean }, key: string) =>
+            (p: InspectState) => {
+                const node = nodeMapRef.current.get(key) || null
+                const worldPos: Vec3 | null = node ? worldCenterOf(node) : null
                 openInspect({
                     ...(p as any),
                     metadata: {
@@ -72,9 +86,11 @@ function Scene({
                         id: meta.id,
                         notif: meta.message,
                         persistAfterOpen: !!meta.persistAfterOpen,
-                        worldPos: pos ?? null,
+                        worldPos,
                     },
                 })
+            }
+
 
     function useDrawerFileIndex(drawerFiles: DrawerFileLike[]) {
         return React.useMemo(() => {
@@ -86,18 +102,29 @@ function Scene({
     const { byId } = useDrawerFileIndex(drawerFiles)
 
     const renderPuzzles = React.useCallback(() => {
-        return Object.values(PUZZLES).map((def) => (
+        return Object.values(puzzlesConfig).map((cfg) => (
             <PuzzleNode
-                key={def.puzzleId}
-                def={def}
-                available={puzzles[def.puzzleId]}
-                pinned={pinnedPuzzles[def.puzzleId]}
+                key={cfg.id}
+                def={{
+                    puzzleId: cfg.id,
+                    solvedFromInspectId: cfg.solvedFromInspectId,
+                    deskAnchorKey: cfg.deskAnchorKey,
+                    wallAnchorKey: cfg.wallAnchorKey,
+                }}
+                view={{
+                    kind: 'framed',
+                    frame: { width: cfg.view.width, height: cfg.view.height, border: cfg.view.border },
+                    textureUrl: cfg.view.textureUrl,
+                    inspect: cfg.view.inspect,
+                }}
+                available={!!puzzleStatus[cfg.id]?.available}
+                pinned={!!puzzleStatus[cfg.id]?.pinned}
                 openInspect={openInspect}
                 rcFocus={rcFocus}
+                rotationOffsetWhenPinned={cfg.view.rotateY180WhenPinned ? [0, Math.PI, 0] : [0, 0, 0]}
             />
         ))
-    }, [puzzles, pinnedPuzzles, openInspect, rcFocus])
-
+    }, [puzzlesConfig, puzzleStatus, openInspect, rcFocus])
     return (
         <>
             {/* lights */}
@@ -317,19 +344,15 @@ function Scene({
                         <>
                             {!!byId["sf-in-drawer"] &&
                                 !!drawers[byId["sf-in-drawer"].drawerKey]?.fileAlive && (
-                                    <group
-                                        key={byId["sf-in-drawer"].id}
-                                        position={[-0.12, 0.07, 0]}
-                                        rotation={[-Math.PI / 2, 0, 0.1]}
-                                    >
+                                    <group ref={refFor(byId["sf-in-drawer"].id)} key={byId["sf-in-drawer"].id} position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
                                         <SecretFile
-                                            onInspect={makeOpenInspectFromAnchor(
+                                            onInspect={makeOpenInspectFromKey(
                                                 {
                                                     id: byId["sf-in-drawer"].id,
                                                     message: byId["sf-in-drawer"].message ?? "",
                                                     persistAfterOpen: byId["sf-in-drawer"].persistAfterOpen,
                                                 },
-                                                ANCHOR.drawerLeftTopContent.position
+                                                byId["sf-in-drawer"].id
                                             )}
                                             materialsById={secretFileMaterials}
                                             frontOpen={0}
@@ -339,8 +362,7 @@ function Scene({
                                             visualizeHitbox={false}
                                         />
                                     </group>
-                                )
-                            }
+                                )}
                         </>
                     }
                 />
@@ -378,9 +400,6 @@ export default function DetectiveRoom() {
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
     const {notify} = useNotifications()
-    const [pinnedPuzzles, setPinnedPuzzles] = React.useState<Record<string, boolean>>({})
-    const SOLVE_ID_TO_PUZZLE: Record<string, string> = Object.values(PUZZLES)
-        .reduce((acc, def) => { acc[def.solvedFromInspectId] = def.puzzleId; return acc }, {} as Record<string,string>)
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
@@ -394,8 +413,8 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const {files, drawer_files, poofs, drawers, puzzles} = useGameState()
-    const {removePoof, handleSecretOpen} = useGameActions()
+    const { files, drawer_files, poofs, drawers } = useGameState()
+    const { removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle } = useGameActions()
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
@@ -419,8 +438,6 @@ export default function DetectiveRoom() {
                         poofs={poofs}
                         onPoofDone={removePoof}
                         drawers={drawers}
-                        puzzles={puzzles}
-                        pinnedPuzzles={pinnedPuzzles}
                     />
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
@@ -437,10 +454,10 @@ export default function DetectiveRoom() {
 
                 onSolved={({ state }) => {
                     const solvedId = (state as any)?.puzzle?.id as string | undefined
-                    const puzzleId = solvedId ? SOLVE_ID_TO_PUZZLE[solvedId] : undefined
+                    const puzzleId = solvedId ? solveIdToPuzzle[solvedId] : undefined
                     if (!puzzleId) return
 
-                    setPinnedPuzzles(prev => ({ ...prev, [puzzleId]: true }))
+                    pinPuzzle(puzzleId, true)
                     notify('Pinned to cork board!', { ttlMs: 6000 })
 
                     const ms = (typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)

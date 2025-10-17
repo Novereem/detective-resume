@@ -18,6 +18,6 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
 
     deskTopSpawn: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
     deskTopSpawn2: { eye: [0.2, 1.3, 3.6], position: [0.62, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
-    drawerLeftTopContent: { eye: [ 0.8, 1.1, 2.8], position: [0.12, 0.66, 4.18] },
+    drawerLeftTopContent: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 3.2] },
 
 }
