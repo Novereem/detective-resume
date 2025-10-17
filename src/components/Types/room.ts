@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import {PuzzleKey} from "@/components/Game/state";
+import {DrawerKey, PuzzleKey} from "@/components/Game/state";
 
 export type Vec3 = [number, number, number]
 
@@ -16,6 +16,22 @@ export type SecretFileSpawn = {
     persistAfterOpen?: boolean
     unlocksPuzzleId?: PuzzleKey
     poofOnOpen?: boolean
+}
+
+export type DrawerFileSpawn = {
+    id: string
+    drawerKey: DrawerKey
+    message?: string
+    persistAfterOpen?: boolean
+    unlocksPuzzleId?: PuzzleKey
+    poofOnOpen?: boolean
+}
+
+export type DrawerFileLike = {
+    id: string;
+    drawerKey: string;
+    message?: string;
+    persistAfterOpen?: boolean
 }
 
 export type V3Like =

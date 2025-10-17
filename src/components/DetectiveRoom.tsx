@@ -20,7 +20,7 @@ import {SecretFile} from "@/components/Models/SecretFile";
 import { useNotifications } from '@/components/Notifications'
 import {PoofEffect} from "@/components/PoofEffect";
 import {FreeLookControls, PlayerMover, MouseZoom, useRightClickFocus} from '@/components/PlayerControls'
-import type { Vec3, MoveRequest, SecretFileSpawn } from '@/components/Types/room'
+import type {Vec3, MoveRequest, SecretFileSpawn, DrawerFileLike} from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
 import { ANCHOR } from "@/components/Game/anchors"
 import { useGameState, useGameActions } from "@/components/Game/state"
@@ -28,11 +28,12 @@ import {PUZZLES} from "@/components/Game/puzzleRegistry";
 import {PuzzleNode} from "@/components/PuzzleNode";
 
 function Scene({
-                   openInspect, requestMove, files, poofs, onPoofDone, drawers, puzzles, pinnedPuzzles,
+                   openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers, puzzles, pinnedPuzzles,
                }: {
     openInspect: (s: InspectState) => void
     requestMove: (req: MoveRequest) => void
     files: SecretFileSpawn[]
+    drawerFiles: { id: string; drawerKey: string; message?: string; persistAfterOpen?: boolean }[]
     poofs: { id: string; pos: Vec3 }[]
     onPoofDone: (id: string) => void
     drawers: Record<string, { fileAlive?: boolean }>
@@ -74,6 +75,15 @@ function Scene({
                         worldPos: pos ?? null,
                     },
                 })
+
+    function useDrawerFileIndex(drawerFiles: DrawerFileLike[]) {
+        return React.useMemo(() => {
+            const byId: Record<string, DrawerFileLike> = {}
+            for (const f of drawerFiles) byId[f.id] = f
+            return { byId }
+        }, [drawerFiles])
+    }
+    const { byId } = useDrawerFileIndex(drawerFiles)
 
     const renderPuzzles = React.useCallback(() => {
         return Object.values(PUZZLES).map((def) => (
@@ -305,23 +315,32 @@ function Scene({
                     drawerContentOffset={[0, 0.012, -0.02]}
                     drawerChildren={
                         <>
-                            {!!drawers["leftTop"]?.fileAlive && (
-                                <group position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
-                                    <SecretFile
-                                        onInspect={makeOpenInspectFromAnchor(
-                                            { id: 'sf-in-drawer', message: 'Drawer File — new puzzle available.', persistAfterOpen: false },
-                                            ANCHOR.drawerLeftTopContent.position
-                                        )}
-
-                                        materialsById={secretFileMaterials}
-                                        frontOpen={0}
-                                        inspectPixelSize={2}
-                                        inspectDistance={0.45}
-                                        disableOutline={false}
-                                        visualizeHitbox={false}
-                                    />
-                                </group>
-                            )}
+                            {!!byId["sf-in-drawer"] &&
+                                !!drawers[byId["sf-in-drawer"].drawerKey]?.fileAlive && (
+                                    <group
+                                        key={byId["sf-in-drawer"].id}
+                                        position={[-0.12, 0.07, 0]}
+                                        rotation={[-Math.PI / 2, 0, 0.1]}
+                                    >
+                                        <SecretFile
+                                            onInspect={makeOpenInspectFromAnchor(
+                                                {
+                                                    id: byId["sf-in-drawer"].id,
+                                                    message: byId["sf-in-drawer"].message ?? "",
+                                                    persistAfterOpen: byId["sf-in-drawer"].persistAfterOpen,
+                                                },
+                                                ANCHOR.drawerLeftTopContent.position
+                                            )}
+                                            materialsById={secretFileMaterials}
+                                            frontOpen={0}
+                                            inspectPixelSize={2}
+                                            inspectDistance={0.45}
+                                            disableOutline={false}
+                                            visualizeHitbox={false}
+                                        />
+                                    </group>
+                                )
+                            }
                         </>
                     }
                 />
@@ -375,7 +394,7 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const {files, poofs, drawers, puzzles} = useGameState()
+    const {files, drawer_files, poofs, drawers, puzzles} = useGameState()
     const {removePoof, handleSecretOpen} = useGameActions()
 
     return (
@@ -396,6 +415,7 @@ export default function DetectiveRoom() {
                         openInspect={setInspect}
                         requestMove={setMoveReq}
                         files={files}
+                        drawerFiles={drawer_files}
                         poofs={poofs}
                         onPoofDone={removePoof}
                         drawers={drawers}

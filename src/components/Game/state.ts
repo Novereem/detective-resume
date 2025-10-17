@@ -1,5 +1,5 @@
 import { ANCHOR } from "./anchors"
-import type { Vec3, SecretFileSpawn } from "@/components/Types/room"
+import type {Vec3, SecretFileSpawn, DrawerFileSpawn} from "@/components/Types/room"
 import * as React from "react"
 import {PUZZLES} from "@/components/Game/puzzleRegistry";
 
@@ -12,6 +12,7 @@ type DrawerState = { fileAlive?: boolean }
 
 type GameSnapshot = {
     files: SecretFileSpawn[]
+    drawer_files: DrawerFileSpawn[]
     drawers: Record<DrawerKey, DrawerState>
     puzzles: Record<PuzzleKey, boolean>
     poofs: { id: string; pos: Vec3 }[]
@@ -23,8 +24,18 @@ class GameState {
             { id: "sf-ransom", pos: [-0.6, 0.7, 2.4], rot: [0, Math.PI/4, 0], message: "Case File: Ransom Note", persistAfterOpen: false },
             { id: "sf-badge",  pos: [ 0.4, 0.7, 2.1], rot: [0,-Math.PI/8, 0], message: "Case File: Missing Badge", persistAfterOpen: true  },
 
-            { id: "sf-photo-clue", pos: ANCHOR.deskTopSpawn.position, rot: ANCHOR.deskTopSpawn.rotation,
+            { id: "sf-photo-clue", pos: ANCHOR.deskTopSpawn2.position, rot: ANCHOR.deskTopSpawn2.rotation,
                 message: "Photo Clue — new puzzle available.", persistAfterOpen: false, unlocksPuzzleId: "puzzle-photo-clue" },
+        ],
+        drawer_files: [
+            {
+                id: "sf-in-drawer",
+                drawerKey: "leftTop",
+                message: "Drawer File — new puzzle available.",
+                persistAfterOpen: false,
+                unlocksPuzzleId: "puzzle-house",
+                poofOnOpen: true,
+            },
         ],
         drawers: {
             leftTop: { fileAlive: true },
@@ -70,6 +81,11 @@ class GameState {
         this.emit()
     }
 
+    removeDrawerFile(id: string) {
+        this.snapshot = { ...this.snapshot, drawer_files: this.snapshot.drawer_files.filter(f => f.id !== id) }
+        this.emit()
+    }
+
     setPuzzle(id: PuzzleKey, alive: boolean) {
         const prev = this.snapshot.puzzles[id]
 
@@ -86,31 +102,25 @@ class GameState {
 
     handleSecretOpen(meta: { id: string; worldPos?: Vec3 | null }) {
         const { id, worldPos } = meta
-        const file = this.snapshot.files.find(f => f.id === id)
 
-        const puzzleId = file?.unlocksPuzzleId as PuzzleKey | undefined
+        const file   = this.snapshot.files.find(f => f.id === id)
+        const dfile  = this.snapshot.drawer_files.find(f => f.id === id)
 
-        if (puzzleId) {
-            this.setPuzzle(puzzleId, true)
-        }
+        const puzzleId = (file?.unlocksPuzzleId ?? dfile?.unlocksPuzzleId) as PuzzleKey | undefined
+        if (puzzleId) this.setPuzzle(puzzleId, true)
 
-        const shouldPoofOpen = file?.poofOnOpen !== false
+        const shouldPoofOpen =
+            (file ? file.poofOnOpen !== false : true) &&
+            (dfile ? dfile.poofOnOpen !== false : true)
         if (shouldPoofOpen) {
             const p = worldPos ?? file?.pos
             if (p) this.spawnPoof(p)
         }
 
-        if (file && file.persistAfterOpen !== true) {
-            this.removeFile(id)
-        }
+        if (file && file.persistAfterOpen !== true) this.removeFile(id)
+        if (dfile && dfile.persistAfterOpen !== true) this.removeDrawerFile?.(id)
 
-        switch (id) {
-            case "sf-in-drawer":
-                this.setDrawer("leftTop", { fileAlive: false })
-                break
-            default:
-                break
-        }
+        if (dfile) this.setDrawer(dfile.drawerKey, { fileAlive: false })
     }
 }
 
