@@ -9,6 +9,7 @@ export const asFileId   = <T extends string>(s: T) => s as unknown as SecretFile
 export const PZ = {
     House: asPuzzleId("puzzle-house"),
     PhotoClue: asPuzzleId("puzzle-photo-clue"),
+    FrameBlue: asPuzzleId("puzzle-frame-blue"),
 } as const
 
 export const FileId = {
@@ -53,6 +54,7 @@ export type PuzzleConfig = {
     deskAnchorKey: AnchorKey
     wallAnchorKey: AnchorKey
     view: FramedViewConfig
+    connectsTo?: PuzzleId[]
 }
 
 export type PuzzleStatus = {
@@ -111,11 +113,12 @@ export const initialSnapshot: GameSnapshot = {
             solvedFromInspectId: "photo-red-circle",
             deskAnchorKey: "deskTopSpawn",
             wallAnchorKey: "photoClueFrame",
+            connectsTo: [PZ.FrameBlue],
             view: {
                 kind: "framed",
                 width: 0.20, height: 0.20, border: 0.012,
-                textureUrl: "/textures/photo_red_circle.jpg",
-                textureFit: "contain",
+                textureUrl: "/textures/testimage.jpg",
+                textureFit: "stretch",
                 rotateY180WhenPinned: true,
                 inspect: {
                     type: "text",
@@ -127,10 +130,36 @@ export const initialSnapshot: GameSnapshot = {
                 }
             }
         },
+
+        [PZ.FrameBlue]: {
+            id: PZ.FrameBlue,
+            solvedFromInspectId: "frame-code",
+            deskAnchorKey: "testPuzzle3",
+            wallAnchorKey: "photoBlueFrame",
+            view: {
+                kind: "framed",
+                width: 0.17,
+                height: 0.20,
+                border: 0.01,
+                textureUrl: "/textures/paper_collages_whites.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                inspect: {
+                    type: "text",
+                    id: "frame-code",
+                    prompt: "Please type the answer: blue",
+                    answers: ["blue"],
+                    normalize: "trim-lower",
+                    feedback: { correct: "Very good!", incorrect: "Ahem..." },
+                }
+            }
+        },
     },
 
     puzzleStatus: {
         [PZ.House]:     { available: false, pinned: false },
         [PZ.PhotoClue]: { available: false, pinned: false },
+
+        [PZ.FrameBlue]: { available: true, pinned: false },
     },
 }

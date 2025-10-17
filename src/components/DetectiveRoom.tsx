@@ -20,12 +20,13 @@ import {SecretFile} from "@/components/Models/SecretFile";
 import { useNotifications } from '@/components/Notifications'
 import {PoofEffect} from "@/components/PoofEffect";
 import {FreeLookControls, PlayerMover, MouseZoom, useRightClickFocus} from '@/components/PlayerControls'
-import type {Vec3, MoveRequest, SecretFileSpawn, DrawerFileLike} from '@/components/Types/room'
+import type {Vec3, MoveRequest, DrawerFileLike} from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
 import { ANCHOR } from "@/components/Game/anchors"
 import { useGameState, useGameActions } from "@/components/Game/state"
 import {PuzzleNode} from "@/components/PuzzleNode";
 import {DrawerFileSpawn, PositionedSecretFile} from "@/components/Game/state.data";
+import RedStringsEffect from "@/components/RedStringsEffect";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -304,31 +305,31 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.mug)}>
-                <Mug
-                    position={ANCHOR.mug.position}
-                    rotation={[0, Math.PI / 6, 0]}
-                    color="#fff"
-                    outlineThickness={0.008}
-                    inspectDistance={0.5}
-                    onInspect={(p) =>
-                        openInspect({
-                            ...p,
-                            puzzle: {
-                                type: 'text',
-                                id: 'mug-initials',
-                                prompt: 'What is this weird object supposed to be',
-                                answers: ['a mug', 'mug', 'what?'],
-                                normalize: 'trim-lower',
-                                feedback: {correct: 'Correct!', incorrect: 'This is a tricky one!'},
-                            },
-                        })
-                    }
-                    inspectPixelSize={3}
-                    materialsById={mugMaterials}
-                    visualizeHitbox={true}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
+            {/*    <Mug*/}
+            {/*        position={ANCHOR.mug.position}*/}
+            {/*        rotation={[0, Math.PI / 6, 0]}*/}
+            {/*        color="#fff"*/}
+            {/*        outlineThickness={0.008}*/}
+            {/*        inspectDistance={0.5}*/}
+            {/*        onInspect={(p) =>*/}
+            {/*            openInspect({*/}
+            {/*                ...p,*/}
+            {/*                puzzle: {*/}
+            {/*                    type: 'text',*/}
+            {/*                    id: 'mug-initials',*/}
+            {/*                    prompt: 'What is this weird object supposed to be',*/}
+            {/*                    answers: ['a mug', 'mug', 'what?'],*/}
+            {/*                    normalize: 'trim-lower',*/}
+            {/*                    feedback: {correct: 'Correct!', incorrect: 'This is a tricky one!'},*/}
+            {/*                },*/}
+            {/*            })*/}
+            {/*        }*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*        materialsById={mugMaterials}*/}
+            {/*        visualizeHitbox={true}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.deskMetal)} position={ANCHOR.deskMetal.position}
                    rotation={[0, Math.PI, 0]}>
@@ -344,7 +345,8 @@ function Scene({
                         <>
                             {!!byId["sf-in-drawer"] &&
                                 !!drawers[byId["sf-in-drawer"].drawerKey]?.fileAlive && (
-                                    <group ref={refFor(byId["sf-in-drawer"].id)} key={byId["sf-in-drawer"].id} position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
+                                    <group ref={refFor(byId["sf-in-drawer"].id)} key={byId["sf-in-drawer"].id}
+                                           position={[-0.12, 0.07, 0]} rotation={[-Math.PI / 2, 0, 0.1]}>
                                         <SecretFile
                                             onInspect={makeOpenInspectFromKey(
                                                 {
@@ -370,6 +372,16 @@ function Scene({
 
             {/* render the puzzles */}
             {renderPuzzles()}
+
+            {/* render the red strings */}
+            <RedStringsEffect
+                zoom={1.3}
+                vRepeat={2}
+                contrast={1.6}
+                brightness={0.15}
+                baseUnit={0.08}
+                radius={0.0035}
+            />
 
             {files.map((f) => (
                 <group key={f.id} position={f.pos} rotation={f.rot ?? [0, 0, 0]}>
@@ -413,8 +425,8 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const { files, drawer_files, poofs, drawers } = useGameState()
-    const { removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle } = useGameActions()
+    const {files, drawer_files, poofs, drawers} = useGameState()
+    const {removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle} = useGameActions()
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
