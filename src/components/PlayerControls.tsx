@@ -253,3 +253,35 @@ export function useRightClickFocus(requestMove: (req: MoveRequest) => void) {
         [camera, resolve, requestMove]
     )
 }
+
+export function CameraPoseBridge({
+                                     posRef,
+                                     lookAtRef,
+                                 }: {
+    posRef: React.MutableRefObject<Vec3>
+    lookAtRef: React.MutableRefObject<Vec3>
+}) {
+    const { camera } = useThree()
+    const tmp = React.useMemo(() => ({
+        dir: new THREE.Vector3(),
+        look: new THREE.Vector3(),
+    }), [])
+
+    useFrame(() => {
+        posRef.current = [camera.position.x, camera.position.y, camera.position.z]
+        camera.getWorldDirection(tmp.dir)
+        tmp.look.copy(camera.position).add(tmp.dir)
+        lookAtRef.current = [tmp.look.x, tmp.look.y, tmp.look.z]
+    })
+    return null
+}
+
+export function requestZoomPeek(
+    setMoveReq: (req: MoveRequest) => void,
+    to: MoveRequest,
+    back: MoveRequest,
+    ms = 200
+) {
+    setMoveReq(to)
+    setTimeout(() => setMoveReq(back), ms)
+}

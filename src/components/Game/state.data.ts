@@ -61,6 +61,7 @@ export type PuzzleStatus = {
     available: boolean
     pinned: boolean
     solved?: boolean
+    solvedAnswer?: string
 }
 
 export type GameSnapshot = {

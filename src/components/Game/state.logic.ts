@@ -71,10 +71,19 @@ export class GameState {
         this.emit()
     }
 
-    pinPuzzle = (id: PuzzleId, on: boolean) => {
+    pinPuzzle = (id: PuzzleId, pinned: boolean, solvedAnswer?: string) => {
+        const prev = this._snapshot.puzzleStatus[id] ?? { available: false, pinned: false }
         this._snapshot = {
             ...this._snapshot,
-            puzzleStatus: { ...this._snapshot.puzzleStatus, [id]: { ...this._snapshot.puzzleStatus[id], pinned: on } }
+            puzzleStatus: {
+                ...this._snapshot.puzzleStatus,
+                [id]: {
+                    ...prev,
+                    pinned,
+                    solved: pinned ? true : prev.solved,
+                    solvedAnswer: pinned ? (solvedAnswer ?? prev.solvedAnswer) : prev.solvedAnswer,
+                },
+            },
         }
         this.emit()
     }

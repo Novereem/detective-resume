@@ -19,7 +19,13 @@ import {MetalDesk} from "@/components/Models/MetalDesk";
 import {SecretFile} from "@/components/Models/SecretFile";
 import { useNotifications } from '@/components/Notifications'
 import {PoofEffect} from "@/components/PoofEffect";
-import {FreeLookControls, PlayerMover, MouseZoom, useRightClickFocus} from '@/components/PlayerControls'
+import {
+    FreeLookControls,
+    PlayerMover,
+    MouseZoom,
+    useRightClickFocus,
+    CameraPoseBridge
+} from '@/components/PlayerControls'
 import type {Vec3, MoveRequest, DrawerFileLike} from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
 import { ANCHOR } from "@/components/Game/anchors"
@@ -27,6 +33,7 @@ import { useGameState, useGameActions } from "@/components/Game/state"
 import {PuzzleNode} from "@/components/PuzzleNode";
 import {DrawerFileSpawn, PositionedSecretFile} from "@/components/Game/state.data";
 import RedStringsEffect from "@/components/RedStringsEffect";
+import { requestZoomPeek } from '@/components/PlayerControls'
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -120,6 +127,9 @@ function Scene({
                 }}
                 available={!!puzzleStatus[cfg.id]?.available}
                 pinned={!!puzzleStatus[cfg.id]?.pinned}
+                solved={!!puzzleStatus[cfg.id]?.solved}
+                solvedAnswer={puzzleStatus[cfg.id]?.solvedAnswer}
+
                 openInspect={openInspect}
                 rcFocus={rcFocus}
                 rotationOffsetWhenPinned={cfg.view.rotateY180WhenPinned ? [0, Math.PI, 0] : [0, 0, 0]}
@@ -415,6 +425,7 @@ export default function DetectiveRoom() {
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
+    const PUZZLE_SOLVE_ZOOM_MS = 900;
 
     const viewTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const deleteTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -425,8 +436,11 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const {files, drawer_files, poofs, drawers} = useGameState()
+    const {files, drawer_files, poofs, drawers, puzzlesConfig } = useGameState()
     const {removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle} = useGameActions()
+
+    const prevCamPosRef = React.useRef<Vec3>([0, 1, 3])
+    const prevLookAtRef = React.useRef<Vec3>([0, 1, 4])
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
@@ -455,6 +469,7 @@ export default function DetectiveRoom() {
                     <MouseZoom enabled={moveReq === null} mode="fov" />
                     <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
                     <PixelateNearestFX size={roomPixelSize} />
+                    <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
                 </Canvas>
             </div>
 
@@ -464,16 +479,38 @@ export default function DetectiveRoom() {
                 onClose={() => setInspect(null)}
                 pixelSize={defaultInspectPixelSize}
 
-                onSolved={({ state }) => {
-                    const solvedId = (state as any)?.puzzle?.id as string | undefined
-                    const puzzleId = solvedId ? solveIdToPuzzle[solvedId] : undefined
+                onSolved={({ state, answer }) => {
+                    const solvedId  = (state as any)?.puzzle?.id as string | undefined
+                    const puzzleId  = solvedId ? solveIdToPuzzle[solvedId] : undefined
                     if (!puzzleId) return
 
-                    pinPuzzle(puzzleId, true)
+                    pinPuzzle(puzzleId, true, typeof answer === 'string' ? answer : undefined)
                     notify('Pinned to cork board!', { ttlMs: 6000 })
 
-                    const ms = (typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)
-                    setTimeout(() => setInspect(null), ms)
+                    const VIEW_MS = typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number'
+                        ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000
+                    const CLOSE_ANIM_MS = typeof OVERLAY_CLOSE_ANIM_MS === 'number'
+                        ? OVERLAY_CLOSE_ANIM_MS : 300
+
+                    if (viewTimerRef.current)   clearTimeout(viewTimerRef.current)
+                    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+
+                    viewTimerRef.current = setTimeout(() => {
+                        setInspect(null)
+
+                        setTimeout(() => {
+                            const cfg = puzzlesConfig[puzzleId]
+                            const a = cfg ? ANCHOR[cfg.wallAnchorKey] : undefined
+                            if (a?.eye && a?.position) {
+                                requestZoomPeek(
+                                    setMoveReq,
+                                    { camera: a.eye as Vec3,      lookAt: a.position as Vec3 },
+                                    { camera: prevCamPosRef.current, lookAt: prevLookAtRef.current },
+                                    PUZZLE_SOLVE_ZOOM_MS
+                                )
+                            }
+                        }, CLOSE_ANIM_MS)
+                    }, VIEW_MS)
                 }}
 
                 onAction={(action, state) => {
@@ -484,15 +521,15 @@ export default function DetectiveRoom() {
                     notify(notif ?? 'Secret file opened — new puzzle available.', { ttlMs: 10000 })
 
                     if (!persistAfterOpen && id) {
-                        if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
+                        if (viewTimerRef.current)   clearTimeout(viewTimerRef.current)
                         if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
 
                         viewTimerRef.current = setTimeout(() => {
                             setInspect(null)
                             deleteTimerRef.current = setTimeout(() => {
                                 handleSecretOpen({ id, worldPos })
-                            }, OVERLAY_CLOSE_ANIM_MS)
-                        }, SECRETFILE_VIEW_BEFORE_CLOSE_MS)
+                            }, typeof OVERLAY_CLOSE_ANIM_MS === 'number' ? OVERLAY_CLOSE_ANIM_MS : 300)
+                        }, typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)
                     }
                 }}
             />

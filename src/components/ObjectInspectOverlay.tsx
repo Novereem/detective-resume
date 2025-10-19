@@ -250,6 +250,10 @@ export default function ObjectInspectOverlay({
     }, [open, onClose])
 
     const puzzle = renderState?.puzzle?.type === 'text' ? renderState.puzzle : undefined
+    const puzzleMeta = (renderState as any)?.metadata ?? {}
+    const puzzleSolved = !!puzzleMeta?.solved
+    const puzzleSolvedAnswer = (puzzleMeta?.solvedAnswer ?? '') as string
+
     const [answer, setAnswer] = React.useState('')
     const [status, setStatus] = React.useState<'idle' | 'correct' | 'incorrect'>('idle')
     const inputRef = React.useRef<HTMLInputElement | null>(null)
@@ -292,7 +296,7 @@ export default function ObjectInspectOverlay({
 
         const onEnd = (e: TransitionEvent) => {
             if (e.propertyName === 'transform') {
-                if (puzzle) inputRef.current?.focus()
+                if (puzzle && !puzzleSolved) inputRef.current?.focus()
                 node.removeEventListener('transitionend', onEnd)
             }
         }
@@ -324,7 +328,7 @@ export default function ObjectInspectOverlay({
         setStatus(ok ? 'correct' : 'incorrect')
 
         if (ok && renderState) {
-            onSolved?.({ state: renderState })
+            onSolved?.({ state: renderState, answer: raw })
         }
     }, [answer, puzzle, normalize, renderState, onSolved])
 
@@ -528,12 +532,11 @@ export default function ObjectInspectOverlay({
                             right: 0,
                             bottom: 0,
                             padding: '12px 14px',
-                            background:
-                                status === 'correct'
-                                    ? 'rgba(0,128,0,0.25)'
-                                    : status === 'incorrect'
-                                        ? 'rgba(128,0,0,0.25)'
-                                        : 'rgba(0,0,0,0.55)',
+                            background: (puzzleSolved || status === 'correct')
+                                ? 'rgba(0,128,0,0.22)'
+                                : status === 'incorrect'
+                                    ? 'rgba(128,0,0,0.25)'
+                                    : 'rgba(0,0,0,0.55)',
                             borderTop: '1px solid rgba(255,255,255,0.1)',
                             display: 'flex',
                             gap: 10,
@@ -541,48 +544,69 @@ export default function ObjectInspectOverlay({
                             backdropFilter: 'blur(2px)',
                         }}
                     >
-                        <div style={{color: '#ddd', fontSize: 14, whiteSpace: 'nowrap'}}>
+                        <div style={{ color: '#ddd', fontSize: 14, whiteSpace: 'nowrap' }}>
                             {puzzle.prompt ?? 'Type your answer:'}
                         </div>
-                        <input
-                            ref={inputRef}
-                            value={answer}
-                            onChange={(e) => {
-                                setAnswer(e.target.value);
-                                setStatus('idle')
-                            }}
-                            onKeyDown={onKeyDown}
-                            placeholder="Your answer…"
-                            style={{
-                                flex: 1,
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.12)',
-                                color: '#fff',
-                                padding: '8px 10px',
-                                borderRadius: 8,
-                                outline: 'none',
-                                fontSize: 14,
-                            }}
-                        />
-                        <button
-                            onClick={submitAnswer}
-                            disabled={!answer.trim()}
-                            style={{
-                                background: !answer.trim() ? 'rgba(255,255,255,0.12)' : '#fff',
-                                color: !answer.trim() ? 'rgba(255,255,255,0.55)' : '#111',
-                                border: 'none',
-                                borderRadius: 8,
-                                padding: '8px 12px',
-                                cursor: !answer.trim() ? 'not-allowed' : 'pointer',
-                                fontWeight: 600,
-                            }}
-                        >
-                            Confirm
-                        </button>
-                        <div style={{minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 13}}>
-                            {status === 'correct' && (puzzle.feedback?.correct ?? 'Correct!')}
-                            {status === 'incorrect' && (puzzle.feedback?.incorrect ?? 'Try again')}
-                        </div>
+
+                        {puzzleSolved ? (
+                            <>
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        color: '#fff',
+                                        fontSize: 14,
+                                        padding: '8px 10px',
+                                        background: 'rgba(255,255,255,0.06)',
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        borderRadius: 8,
+                                    }}
+                                >
+                                    <strong>Solved answer:</strong> {puzzleSolvedAnswer || '(empty)'}
+                                </div>
+                                <div style={{ minWidth: 90, textAlign: 'right', color: '#00d323', fontSize: 13 }}>
+                                    {puzzle.feedback?.correct ?? 'Correct!'}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <input
+                                    ref={inputRef}
+                                    value={answer}
+                                    onChange={(e) => { setAnswer(e.target.value); setStatus('idle') }}
+                                    onKeyDown={onKeyDown}
+                                    placeholder="Your answer..."
+                                    style={{
+                                        flex: 1,
+                                        background: 'rgba(255,255,255,0.06)',
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        color: '#fff',
+                                        padding: '8px 10px',
+                                        borderRadius: 8,
+                                        outline: 'none',
+                                        fontSize: 14,
+                                    }}
+                                />
+                                <button
+                                    onClick={submitAnswer}
+                                    disabled={!answer.trim()}
+                                    style={{
+                                        background: !answer.trim() ? 'rgba(255,255,255,0.12)' : '#fff',
+                                        color: !answer.trim() ? 'rgba(255,255,255,0.55)' : '#111',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        padding: '8px 12px',
+                                        cursor: !answer.trim() ? 'not-allowed' : 'pointer',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Confirm
+                                </button>
+                                <div style={{ minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 13 }}>
+                                    {status === 'correct' && (puzzle.feedback?.correct ?? 'Correct!')}
+                                    {status === 'incorrect' && (puzzle.feedback?.incorrect ?? 'Try again')}
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
 

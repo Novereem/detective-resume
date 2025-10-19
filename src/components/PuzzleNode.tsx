@@ -33,6 +33,8 @@ type Props = {
     openInspect: (s: InspectState) => void
     rcFocus: (opts: FocusOpts) => (e: any) => void
     rotationOffsetWhenPinned?: Vec3
+    solved?: boolean
+    solvedAnswer?: string
 }
 
 export function PuzzleNode({
@@ -43,27 +45,25 @@ export function PuzzleNode({
                                openInspect,
                                rcFocus,
                                rotationOffsetWhenPinned = [0, 0, 0] as Vec3,
+                               solved,
+                               solvedAnswer,
                            }: Props) {
     if (!available && !pinned) return null
 
     const activeAnchor = ANCHOR[pinned ? def.wallAnchorKey : def.deskAnchorKey]
     const baseRot = (activeAnchor.rotation ?? [0, 0, 0]) as Vec3
 
-    // Option A: use rotateY180 flag from view
     const yFlip = view.rotateY180WhenPinned ? Math.PI : 0
-    // Option B: accept extra rotation offset from caller (DetectiveRoom)
     const rot: Vec3 = pinned
         ? ([baseRot[0] + rotationOffsetWhenPinned[0],
             baseRot[1] + rotationOffsetWhenPinned[1] + yFlip,
             baseRot[2] + rotationOffsetWhenPinned[2]] as Vec3)
         : baseRot
 
-    // Pin position: top-center of the frame
     const pinPos: Vec3 | null = pinned && view.kind === "framed"
         ? ([0, view.frame.height / 2 + (view.frame.border ?? 0.01) * 0.5, 0.015] as Vec3)
         : null
 
-    // Build InspectState on the fly (no more view.state merging)
     const inspectStateBase: InspectState = {
         kind: "framed",
         width: view.frame.width,
@@ -74,6 +74,13 @@ export function PuzzleNode({
         pixelSize: view.pixelSize ?? 1,
         inspectDistance: view.inspectDistance ?? 0.4,
         puzzle: view.inspect,
+
+        metadata: {
+            type: "puzzle",
+            puzzleId: def.puzzleId,
+            solved: !!solved,
+            solvedAnswer: solvedAnswer ?? undefined,
+        },
     }
 
     const handleInspect = (p: InspectState) =>

@@ -2,6 +2,11 @@ import type { InspectState} from "@/components/Types/inspectModels";
 
 export type InspectAction = 'secret-open' | 'secret-close'
 
+export type InspectSolvedCtx = {
+    state: InspectState
+    answer?: string
+}
+
 export type InspectOverlayProps = {
     open: boolean
     state: InspectState | null
@@ -9,6 +14,6 @@ export type InspectOverlayProps = {
     durationMs?: number
     pixelSize?: number
     camDistance?: number
-    onSolved?: (ctx: { state: InspectState }) => void
+    onSolved?: (ctx: InspectSolvedCtx) => void
     onAction?: (action: InspectAction, state: InspectState) => void
 }

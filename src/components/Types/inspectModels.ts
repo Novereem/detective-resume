@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Vec3 } from '@/components/Types/room'
+import {PuzzleId} from "@/components/Types/game";
 
 export type TextPuzzle = {
     type: 'text'
@@ -60,10 +61,16 @@ export type OutlinedGroupInspect = {
         roughness?: number
     }>
 }
+export type PuzzleOverlayMeta = {
+    type: 'puzzle'
+    puzzleId: PuzzleId
+    solved?: boolean
+    solvedAnswer?: string
+}
 
-/** Any inspect state can optionally carry a puzzle definition */
 export type InspectState =
     | (OutlinedInspect | FramedInspect | OutlinedGroupInspect) & {
     puzzle?: TextPuzzle
     inspectDisableOutline?: boolean
+    metadata?: PuzzleOverlayMeta
 }
