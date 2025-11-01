@@ -34,6 +34,7 @@ import {PuzzleNode} from "@/components/PuzzleNode";
 import {DrawerFileSpawn, PositionedSecretFile} from "@/components/Game/state.data";
 import RedStringsEffect from "@/components/RedStringsEffect";
 import { requestZoomPeek } from '@/components/PlayerControls'
+import {useSettings} from "@/components/UI/SettingsProvider";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -418,7 +419,23 @@ function Scene({
 export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
-    const [roomPixelSize] = React.useState(2.7)
+
+    const { initializePixelBase, pixelateSize } = useSettings()
+    React.useEffect(() => {
+        const RUNTIME_DEFAULT_PIXEL = 2.7
+        initializePixelBase(RUNTIME_DEFAULT_PIXEL)
+    }, [initializePixelBase])
+
+    const { initializeMouseSensitivity, mouseSensitivity } = useSettings()
+    React.useEffect(() => {
+        initializeMouseSensitivity(0.0022)
+    }, [initializeMouseSensitivity])
+
+    const { orientDamping, initializeOrientDamping } = useSettings()
+    React.useEffect(() => {
+        initializeOrientDamping(15) // Higher is snappier
+    }, [initializeOrientDamping])
+
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
     const {notify} = useNotifications()
@@ -467,8 +484,14 @@ export default function DetectiveRoom() {
                     />
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
-                    <FreeLookControls enabled={moveReq === null} qGoalRef={qGoalRef} />
-                    <PixelateNearestFX size={roomPixelSize} />
+
+                    <FreeLookControls
+                        qGoalRef={qGoalRef}
+                        enabled
+                        lookSensitivity={mouseSensitivity}
+                        orientDamping={orientDamping}
+                    />
+                    <PixelateNearestFX size={pixelateSize} />
                     <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
                 </Canvas>
             </div>

@@ -10,6 +10,7 @@ import { PixelateNearestFX } from '@/components/Effects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
 import {secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 import {InspectOverlayProps} from "@/components/Types/inspect";
+import {useSettings} from "@/components/UI/SettingsProvider";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)
@@ -204,6 +205,13 @@ export default function ObjectInspectOverlay({
     const effectivePixelSize = state?.pixelSize ?? defaultPixelSize
     // camera distance
     const effectiveCamDist   = state?.inspectDistance ?? camDistance
+
+    const { setIsInspecting } = useSettings()
+
+    React.useEffect(() => {
+        setIsInspecting(open)
+        return () => setIsInspecting(false)
+    }, [open, setIsInspecting])
 
     React.useEffect(() => {
         if (open && state) {

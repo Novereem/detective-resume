@@ -3,6 +3,9 @@ import dynamic from 'next/dynamic'
 import React from 'react'
 import { useTextureLoading } from '@/components/Textures/useTextureLoading'
 import { NotificationsProvider, NotificationsViewport } from '@/components/Notifications'
+import { ControlsHint } from '@/components/UI/ControlsHint'
+import EscapeMenu from '@/components/UI/EscapeMenu'
+import { SettingsProvider, useSettings } from '@/components/UI/SettingsProvider'
 
 function StaticLoader({ message }: { message: string }) {
     return (
@@ -19,6 +22,18 @@ const DetectiveRoom = dynamic(() => import('@/components/DetectiveRoom'), {
     ssr: false,
     loading: () => <StaticLoader message="Loading detective room…" />,
 })
+
+function OverlayedRoom() {
+    const { controlsHintVisible, controlsHintPosition } = useSettings()
+    return (
+        <>
+            <DetectiveRoom />
+            <NotificationsViewport position="top-left" />
+            <ControlsHint position={controlsHintPosition} scale={1.3} />
+            <EscapeMenu />
+        </>
+    )
+}
 
 const HIDE_DELAY_MS = 400
 const FADE_MS = 200
@@ -57,27 +72,28 @@ export default function DetectiveRoomPage() {
 
     return (
         <NotificationsProvider>
-            {overlayVisible && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        display: 'grid',
-                        placeItems: 'center',
-                        background: 'black',
-                        color: 'white',
-                        zIndex: 60,
-                        pointerEvents: 'none',
-                        opacity,
-                        transition: `opacity ${FADE_MS}ms ease`,
-                    }}
-                >
-                    <p>Loading detective room. . . {!booted && isLoading && pending > 0 ? ` (${pending})` : ''}</p>
-                </div>
-            )}
+            <SettingsProvider>
+                {overlayVisible && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            inset: 0,
+                            display: 'grid',
+                            placeItems: 'center',
+                            background: 'black',
+                            color: 'white',
+                            zIndex: 60,
+                            pointerEvents: 'none',
+                            opacity,
+                            transition: `opacity ${FADE_MS}ms ease`,
+                        }}
+                    >
+                        <p>Loading detective room. . . {!booted && isLoading && pending > 0 ? ` (${pending})` : ''}</p>
+                    </div>
+                )}
 
-            <DetectiveRoom/>
-            <NotificationsViewport position="top-left" />
+                <OverlayedRoom />
+            </SettingsProvider>
         </NotificationsProvider>
     )
 }
