@@ -38,3 +38,17 @@ export const secretFileMaterials: Record<string, PartMaterialOverride> = {
     paper1: { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.95, metalness: 0.0 },
     paper2: { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.95, metalness: 0.0 },
 }
+
+export const coatRackMaterials: Record<string, PartMaterialOverride> = {
+    pole:   { textureUrl: '/textures/clear_metal.jpg', roughness: 0.35, metalness: 0.85 },
+    ring:   { textureUrl: '/textures/clear_metal.jpg', roughness: 0.30, metalness: 0.85 },
+    leg:    { textureUrl: '/textures/clear_metal.jpg', roughness: 0.35, metalness: 0.85 },
+    hook:   { textureUrl: '/textures/clear_metal.jpg', roughness: 0.30, metalness: 0.85 },
+    foot:   { textureUrl: '/textures/clear_metal.jpg', roughness: 0.35, metalness: 0.85 },
+    cap:    { textureUrl: '/textures/clear_metal.jpg', roughness: 0.25, metalness: 0.85 },
+}
+
+export const detectiveHatMaterials: Record<string, PartMaterialOverride> = {
+    felt:   { textureUrl: '/textures/felt_beige.jpg', roughness: 1.0, metalness: 0.0 },
+    ribbon: { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9, metalness: 0.0 },
+}

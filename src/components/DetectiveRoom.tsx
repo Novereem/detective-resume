@@ -7,9 +7,12 @@ import ObjectInspectOverlay from "@/components/ObjectInspectOverlay"
 import { PixelateNearestFX } from "@/components/Effects/PixelateNearestFX"
 import { Desk } from '@/components/Models/Desk'
 import { Mug } from "@/components/Models/Mug"
+
+
 import {
+    coatRackMaterials,
     corkBoardMaterials,
-    deskMaterials,
+    deskMaterials, detectiveHatMaterials,
     metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
     mugMaterials, secretFileMaterials
 } from "@/components/Materials/detectiveRoomMats"
@@ -24,7 +27,7 @@ import {
     PlayerMover,
     MouseZoom,
     useRightClickFocus,
-    CameraPoseBridge
+    CameraPoseBridge, DevFlyMove
 } from '@/components/PlayerControls'
 import type {Vec3, MoveRequest, DrawerFileLike} from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
@@ -35,6 +38,8 @@ import {DrawerFileSpawn, PositionedSecretFile} from "@/components/Game/state.dat
 import RedStringsEffect from "@/components/RedStringsEffect";
 import { requestZoomPeek } from '@/components/PlayerControls'
 import {useSettings} from "@/components/UI/SettingsProvider";
+import {CoatRack} from "@/components/Models/CoatRack";
+import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -316,6 +321,32 @@ function Scene({
                 />
             </group>
 
+            <group onContextMenu={rcFocus(ANCHOR.coatRack)}>
+                <CoatRack
+                    position={ANCHOR.coatRack.position}
+                    rotation={[0, 0, 0]}
+                    materialsById={coatRackMaterials}
+                    color="#fff"
+                    outlineScale={1.04}
+                    inspectPixelSize={3}
+                    disableOutline
+                    inspectDisableOutline
+                    legAngleDeg={60}
+                    groundY={0}
+                    baseSpread={0.30}
+                    footPadRadius={0.012}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.hat)}>
+                <DetectiveHatSimple
+                    position={ANCHOR.hat.position}
+                    rotation={ANCHOR.hat.rotation}
+                    materialsById={detectiveHatMaterials}
+                    crownTopRadius={0.065}
+                />
+            </group>
+
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
             {/*    <Mug*/}
             {/*        position={ANCHOR.mug.position}*/}
@@ -420,7 +451,7 @@ export default function DetectiveRoom() {
     const [inspect, setInspect] = React.useState<InspectState | null>(null)
     const defaultInspectPixelSize = 3
 
-    const { initializePixelBase, pixelateSize } = useSettings()
+    const {initializePixelBase, pixelateSize} = useSettings()
     React.useEffect(() => {
         const RUNTIME_DEFAULT_PIXEL = 2.7
         initializePixelBase(RUNTIME_DEFAULT_PIXEL)
@@ -433,7 +464,7 @@ export default function DetectiveRoom() {
 
     const { orientDamping, initializeOrientDamping } = useSettings()
     React.useEffect(() => {
-        initializeOrientDamping(15) // Higher is snappier
+        initializeOrientDamping(20) // Higher is snappier
     }, [initializeOrientDamping])
 
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
@@ -458,6 +489,11 @@ export default function DetectiveRoom() {
 
     const prevCamPosRef = React.useRef<Vec3>([0, 1, 3])
     const prevLookAtRef = React.useRef<Vec3>([0, 1, 4])
+
+    const params = new URLSearchParams(location.search)
+    const isDev =
+        typeof window !== 'undefined' &&
+        (params.has('fly') || params.get('fly') === '1' || params.get('fly') === 'true')
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
@@ -491,6 +527,8 @@ export default function DetectiveRoom() {
                         lookSensitivity={mouseSensitivity}
                         orientDamping={orientDamping}
                     />
+                    <DevFlyMove enabled={isDev} speed={3} verticalSpeed={3} smoothing={0} />
+
                     <PixelateNearestFX size={pixelateSize} />
                     <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
                 </Canvas>

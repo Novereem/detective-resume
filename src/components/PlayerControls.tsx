@@ -285,3 +285,84 @@ export function requestZoomPeek(
     setMoveReq(to)
     setTimeout(() => setMoveReq(back), ms)
 }
+
+export function DevFlyMove({
+                               enabled = true,
+                               speed = 2.2,
+                               verticalSpeed = 2.2,
+                               smoothing = 0,
+                           }: {
+    enabled?: boolean
+    speed?: number
+    verticalSpeed?: number
+    smoothing?: number
+}) {
+    const { camera } = useThree()
+    const keys = React.useRef({
+        w:false,a:false,s:false,d:false, space:false, shift:false
+    })
+    const vel = React.useRef(new THREE.Vector3())
+
+    React.useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (!enabled) return
+            switch (e.code) {
+                case 'KeyW': keys.current.w = true; break
+                case 'KeyA': keys.current.a = true; break
+                case 'KeyS': keys.current.s = true; break
+                case 'KeyD': keys.current.d = true; break
+                case 'Space': keys.current.space = true; e.preventDefault(); break
+                case 'ShiftLeft':
+                case 'ShiftRight': keys.current.shift = true; e.preventDefault(); break
+            }
+        }
+        const up = (e: KeyboardEvent) => {
+            switch (e.code) {
+                case 'KeyW': keys.current.w = false; break
+                case 'KeyA': keys.current.a = false; break
+                case 'KeyS': keys.current.s = false; break
+                case 'KeyD': keys.current.d = false; break
+                case 'Space': keys.current.space = false; break
+                case 'ShiftLeft':
+                case 'ShiftRight': keys.current.shift = false; break
+            }
+        }
+        window.addEventListener('keydown', down, { passive: false })
+        window.addEventListener('keyup', up)
+        return () => {
+            window.removeEventListener('keydown', down as any)
+            window.removeEventListener('keyup', up as any)
+        }
+    }, [enabled])
+
+    useFrame((_, dt) => {
+        if (!enabled) return
+
+        const fwd = new THREE.Vector3()
+        camera.getWorldDirection(fwd)
+        fwd.y = 0; fwd.normalize()
+
+        const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0,1,0)).negate().normalize()
+        const up = new THREE.Vector3(0,1,0)
+
+        const v = new THREE.Vector3()
+        if (keys.current.w) v.add(fwd)
+        if (keys.current.s) v.sub(fwd)
+        if (keys.current.a) v.add(right)
+        if (keys.current.d) v.sub(right)
+        v.normalize().multiplyScalar(speed)
+
+        if (keys.current.space) v.addScaledVector(up, verticalSpeed)
+        if (keys.current.shift) v.addScaledVector(up, -verticalSpeed)
+
+        if (smoothing > 0) {
+            const t = 1 - Math.exp(-smoothing * dt)
+            vel.current.lerp(v, t)
+            camera.position.addScaledVector(vel.current, dt)
+        } else {
+            camera.position.addScaledVector(v, dt)
+        }
+    })
+
+    return null
+}
