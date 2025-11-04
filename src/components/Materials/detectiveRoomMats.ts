@@ -77,3 +77,24 @@ export const clockMaterials: Record<string, PartMaterialOverride> = {
     handHour:   { color: '#101010', roughness: 0.6, metalness: 0.0 },
     centerCap:  { color: '#d2b886', roughness: 0.4, metalness: 0.2 },
 }
+
+export const plantPotMaterials: Record<string, PartMaterialOverride> = {
+    potBody:    { textureUrl: '/textures/ceramic.jpg', color: '#d7d3ce', roughness: 0.9, metalness: 0.02 },
+    potLipOuter:{ textureUrl: '/textures/ceramic.jpg', color: '#9f9f9f', roughness: 0.9, metalness: 0.02 },
+    potBase:    { textureUrl: '/textures/ceramic.jpg', color: '#acacac', roughness: 0.9, metalness: 0.02 },
+    soil:       { textureUrl: '/textures/dirt.jpg', roughness: 1.0, metalness: 0.0 },
+
+    culm: {
+        textureUrl:   '/textures/bamboo.jpg',
+        color: '#e6e6e6',
+        roughness: 0.65,
+        metalness: 0.0,
+    },
+
+    leaf: {
+        textureUrl: '/textures/leaf_bamboo.jpg',
+        color: '#3f6d32',
+        roughness: 0.7,
+        metalness: 0.0,
+    },
+}

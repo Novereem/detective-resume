@@ -15,7 +15,7 @@ import {
     corkBoardMaterials,
     deskMaterials, detectiveHatMaterials,
     metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
-    mugMaterials, secretFileMaterials
+    mugMaterials, plantPotMaterials, secretFileMaterials
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {LightBulb} from "@/components/Models/LightBulb";
@@ -43,6 +43,7 @@ import {CoatRack} from "@/components/Models/CoatRack";
 import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
 import {Book} from "@/components/Models/Book";
 import {Clock} from "@/components/Models/Clock";
+import {PlantBamboo} from "@/components/Models/PlantPot";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -352,41 +353,51 @@ function Scene({
 
             <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn2)}>
                 <Book
-                    position={ANCHOR.deskTopSpawn2.position}
-                    rotation={ANCHOR.deskTopSpawn2.rotation}
+                    position={[1.2, 0.695, 4.25]}
+                    rotation={[Math.PI,-0.6,0]}
                     materialsById={{
                         ...bookMaterials,
-                        coverFront: {color: '#331961', roughness: 0.9},
-                        coverBack: {color: '#451b5e', roughness: 0.9},
-                        spine: {color: '#45143a', roughness: 0.88},
+                        coverFront: {color: '#611919', roughness: 0.9},
+                        coverBack: {color: '#5e1b2d', roughness: 0.9},
+                        spine: {color: '#451414', roughness: 0.88},
                     }}
                     disableOutline
                     inspectDisableOutline
                     inspectPixelSize={3}
-                    size={[0.15, 0.026, 0.12]}
+                    size={[0.13, 0.03, 0.20]}
                     spineThickness={0.012}
                 />
             </group>
 
             <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn)}>
                 <Book
-                    position={ANCHOR.deskTopSpawn.position}
-                    rotation={ANCHOR.deskTopSpawn.rotation}
+                    position={[1.2, 0.665, 4.25]}
+                    rotation={[Math.PI,-0.5,0]}
                     materialsById={bookMaterials}
                     disableOutline
                     inspectDisableOutline
                     inspectPixelSize={3}
+                    sizeMultiplier={1.1}
                 />
             </group>
 
             <Clock
-                position={[0.0, 1.65, 1.15]}
-                rotation={[0, 0, 0]}
+                position={[2.46, 2, 4.6]}
+                rotation={[Math.PI, -Math.PI/2, Math.PI]}
                 radius={0.22}
                 depth={0.065}
                 materialsById={clockMaterials}
                 disableOutline
                 inspectDisableOutline
+            />
+
+            <PlantBamboo
+                position={[1.1, 0.72, 4.45]}
+                rotation={[0, 0.2, 0]}
+                materialsById={plantPotMaterials}
+                disableOutline
+                inspectDisableOutline
+                leavesPerBranch={[3,5]}
             />
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}

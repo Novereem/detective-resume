@@ -96,7 +96,7 @@ export const Clock = memo(function Clock({
         p.push({
             id: 'face',
             geometry: <cylinderGeometry args={[faceR, faceR, faceT, 96, 1, false]} />,
-            rotation: [Math.PI / 2, 0, 0],
+            rotation: [Math.PI / 2, Math.PI / 2, 0],
             position: [0, 0, zCursor + faceT / 2],
             color: '#f4f2ea',
             outlineColor, roughness: 0.95, metalness: 0.0,
