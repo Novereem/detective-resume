@@ -48,7 +48,7 @@ export function Outlined({
     texturePixelated,
     metalness,
     roughness,
-    disableOutline = false,
+    disableOutline = false
 }: OutlinedProps) {
 
     const [localHover, setLocalHover] = React.useState(false)
@@ -91,24 +91,8 @@ export function Outlined({
 
     return (
         <group position={position} rotation={rotation} scale={scale} {...bind}>
-            {!disableOutline && (
-                <group scale={outlineScale}>
-                    <mesh raycast={() => null}>
-                        {React.cloneElement(geometry)}
-                        <meshBasicMaterial
-                            color={currentOutline}
-                            side={THREE.BackSide}
-                            polygonOffset
-                            polygonOffsetFactor={-1}
-                            polygonOffsetUnits={1}
-                            depthWrite
-                            depthTest
-                        />
-                    </mesh>
-                </group>
-            )}
-
-            <mesh>
+            {/* FILL PASS */}
+            <mesh renderOrder={0}>
                 {React.cloneElement(geometry)}
                 <meshStandardMaterial
                     key={tex ? 'std-with-map' : 'std-no-map'}
@@ -118,6 +102,26 @@ export function Outlined({
                     roughness={roughness ?? 1}
                 />
             </mesh>
+
+            {/* OUTLINE PASS */}
+            {!disableOutline && (
+                <group scale={outlineScale} renderOrder={10}>
+                    <mesh raycast={() => null}>
+                        {React.cloneElement(geometry)}
+                        <meshBasicMaterial
+                            color={currentOutline}
+                            side={THREE.BackSide}
+                            polygonOffset
+                            polygonOffsetFactor={1}
+                            polygonOffsetUnits={1}
+                            depthTest={true}
+                            depthWrite={false}
+                        />
+                    </mesh>
+                </group>
+            )}
+
+
         </group>
     )
 }

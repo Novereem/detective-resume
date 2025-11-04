@@ -132,9 +132,10 @@ export function ModelGroup({
     const resolveScale = React.useCallback(
         (p: PartSpec) => {
             if (p.outlineScale != null) return p.outlineScale
+            if (outlineScale != null) return outlineScale
             const t = p.outlineThickness ?? p.worldThickness ?? groupThickness
             if (t != null && p.boundingRadius != null) return 1 + t / p.boundingRadius
-            return outlineScale
+            return 1.035
         },
         [groupThickness, outlineScale]
     )

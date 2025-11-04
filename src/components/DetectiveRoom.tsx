@@ -283,7 +283,7 @@ function Scene({
                     materialsById={deskMaterials}
                     disableOutline={false}
                     inspectDisableOutline={true}
-                    visualizeHitbox={true}
+                    visualizeHitbox={false}
                 />
             </group>
 
@@ -473,7 +473,7 @@ export default function DetectiveRoom() {
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
-    const PUZZLE_SOLVE_ZOOM_MS = 900;
+    const PUZZLE_SOLVE_ZOOM_MS = 1500;
 
     const viewTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const deleteTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)

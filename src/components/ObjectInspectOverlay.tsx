@@ -503,6 +503,7 @@ export default function ObjectInspectOverlay({
                                                 textureFit={(renderState as any).textureFit}
                                                 texturePixelated={(renderState as any).texturePixelated}
                                                 textureZ={(renderState as any).textureZ}
+                                                frameDepthBias={false}
                                             />
                                         )}
                                 </>
