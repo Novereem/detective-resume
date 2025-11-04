@@ -27,6 +27,10 @@ type OutlinedProps = CommonTransform & {
     metalness?: number
     roughness?: number
     disableOutline?: boolean
+    transparent?: boolean
+    opacity?: number
+    depthWrite?: boolean
+    side?: THREE.Side
 }
 
 export function Outlined({
@@ -48,7 +52,11 @@ export function Outlined({
     texturePixelated,
     metalness,
     roughness,
-    disableOutline = false
+    disableOutline = false,
+    transparent = false,
+    opacity = 1,
+    depthWrite = true,
+    side,
 }: OutlinedProps) {
 
     const [localHover, setLocalHover] = React.useState(false)
@@ -91,7 +99,7 @@ export function Outlined({
 
     return (
         <group position={position} rotation={rotation} scale={scale} {...bind}>
-            {/* FILL PASS */}
+            {/* Fill Pass */}
             <mesh renderOrder={0}>
                 {React.cloneElement(geometry)}
                 <meshStandardMaterial
@@ -100,10 +108,14 @@ export function Outlined({
                     map={tex ?? null}
                     metalness={metalness ?? 0}
                     roughness={roughness ?? 1}
+                    transparent={!!transparent}
+                    opacity={opacity ?? 1}
+                    depthWrite={depthWrite ?? (!transparent)}
+                    side={side ?? THREE.FrontSide}
                 />
             </mesh>
 
-            {/* OUTLINE PASS */}
+            {/* Outline Pass */}
             {!disableOutline && (
                 <group scale={outlineScale} renderOrder={10}>
                     <mesh raycast={() => null}>

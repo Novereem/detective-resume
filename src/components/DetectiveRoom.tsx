@@ -10,6 +10,7 @@ import { Mug } from "@/components/Models/Mug"
 
 
 import {
+    bookMaterials, clockMaterials,
     coatRackMaterials,
     corkBoardMaterials,
     deskMaterials, detectiveHatMaterials,
@@ -40,6 +41,8 @@ import { requestZoomPeek } from '@/components/PlayerControls'
 import {useSettings} from "@/components/UI/SettingsProvider";
 import {CoatRack} from "@/components/Models/CoatRack";
 import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
+import {Book} from "@/components/Models/Book";
+import {Clock} from "@/components/Models/Clock";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -347,6 +350,45 @@ function Scene({
                 />
             </group>
 
+            <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn2)}>
+                <Book
+                    position={ANCHOR.deskTopSpawn2.position}
+                    rotation={ANCHOR.deskTopSpawn2.rotation}
+                    materialsById={{
+                        ...bookMaterials,
+                        coverFront: {color: '#331961', roughness: 0.9},
+                        coverBack: {color: '#451b5e', roughness: 0.9},
+                        spine: {color: '#45143a', roughness: 0.88},
+                    }}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                    size={[0.15, 0.026, 0.12]}
+                    spineThickness={0.012}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn)}>
+                <Book
+                    position={ANCHOR.deskTopSpawn.position}
+                    rotation={ANCHOR.deskTopSpawn.rotation}
+                    materialsById={bookMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <Clock
+                position={[0.0, 1.65, 1.15]}
+                rotation={[0, 0, 0]}
+                radius={0.22}
+                depth={0.065}
+                materialsById={clockMaterials}
+                disableOutline
+                inspectDisableOutline
+            />
+
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
             {/*    <Mug*/}
             {/*        position={ANCHOR.mug.position}*/}
@@ -457,7 +499,7 @@ export default function DetectiveRoom() {
         initializePixelBase(RUNTIME_DEFAULT_PIXEL)
     }, [initializePixelBase])
 
-    const { initializeMouseSensitivity, mouseSensitivity } = useSettings()
+    const {initializeMouseSensitivity, mouseSensitivity} = useSettings()
     React.useEffect(() => {
         initializeMouseSensitivity(0.0022)
     }, [initializeMouseSensitivity])

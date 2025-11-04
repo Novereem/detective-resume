@@ -23,6 +23,10 @@ export type PartSpec = {
     texturePixelated?: boolean
     metalness?: number
     roughness?: number
+    transparent?: boolean
+    opacity?: number
+    depthWrite?: boolean
+    side?: THREE.Side
 }
 
 export type PartMaterialOverride = {
@@ -32,6 +36,10 @@ export type PartMaterialOverride = {
     texturePixelated?: boolean
     metalness?: number
     roughness?: number
+    transparent?: boolean
+    opacity?: number
+    depthWrite?: boolean
+    side?: THREE.Side
 }
 
 type ModelGroupProps = ThreeElements['group'] & {
@@ -260,6 +268,10 @@ export function ModelGroup({
                             const effPix = ov?.texturePixelated ?? p.texturePixelated
                             const effMetal = ov?.metalness ?? p.metalness
                             const effRough = ov?.roughness ?? p.roughness
+                            const effTransparent = ov?.transparent ?? p.transparent
+                            const effOpacity     = ov?.opacity ?? p.opacity
+                            const effDepthWrite  = ov?.depthWrite ?? p.depthWrite
+                            const effSide        = ov?.side ?? p.side
                             return (
                                 <Outlined
                                     key={i}
@@ -278,6 +290,10 @@ export function ModelGroup({
                                     metalness={effMetal}
                                     roughness={effRough}
                                     disableOutline={disableOutline}
+                                    transparent={effTransparent}
+                                    opacity={effOpacity}
+                                    depthWrite={effDepthWrite}
+                                    side={effSide}
                                 />
                             )
                         })}

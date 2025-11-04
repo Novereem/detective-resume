@@ -52,3 +52,28 @@ export const detectiveHatMaterials: Record<string, PartMaterialOverride> = {
     felt:   { textureUrl: '/textures/felt_beige.jpg', roughness: 1.0, metalness: 0.0 },
     ribbon: { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9, metalness: 0.0 },
 }
+
+export const bookMaterials: Record<string, PartMaterialOverride> = {
+    coverFront: { textureUrl: '/textures/leather_white.jpg', color: '#ffffff', roughness: 0.9, metalness: 0.0,},
+    coverBack:  { textureUrl: '/textures/leather_white.jpg', color: '#ffffff', roughness: 0.9, metalness: 0.0 },
+    spine:      { textureUrl: '/textures/fabric_leather_brown.jpg', color: '#ffffff', roughness: 0.88, metalness: 0.0 },
+    pages:      { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.95, metalness: 0.0 },
+}
+
+export const clockMaterials: Record<string, PartMaterialOverride> = {
+    frame_0: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    frame_fill_0: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    frame_1: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    frame_fill_1: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    frame_2: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    frame_fill_2: { color: '#0d0f12', roughness: 0.6, metalness: 0.0 },
+    backPlate: { color: '#0d0f12', roughness: 0.65, metalness: 0.0 },
+
+    face: { textureUrl: '/textures/clock.jpg', color: '#f4f2ea', roughness: 0.95, metalness: 0.0, },
+
+    glass: { color: '#ffffff', roughness: 0.0, metalness: 0.0, },
+
+    handMinute: { color: '#101010', roughness: 0.6, metalness: 0.0 },
+    handHour:   { color: '#101010', roughness: 0.6, metalness: 0.0 },
+    centerCap:  { color: '#d2b886', roughness: 0.4, metalness: 0.2 },
+}
