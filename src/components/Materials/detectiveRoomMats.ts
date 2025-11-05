@@ -95,3 +95,11 @@ export const cardboardMaterials: Record<string, PartMaterialOverride> = {
     lidTop:  { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
     lidSide: { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
 }
+
+export const trashBinMaterials = {
+    rimTop:    { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.3, metalness: 1 },
+    rimBottom: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
+    ring:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 0.85 },
+    wire:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 0.85 },
+    base:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.45, metalness: 1  },
+}

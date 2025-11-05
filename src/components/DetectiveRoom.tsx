@@ -15,7 +15,7 @@ import {
     corkBoardMaterials,
     deskMaterials, detectiveHatMaterials,
     metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
-    mugMaterials, plantPotMaterials, secretFileMaterials
+    mugMaterials, plantPotMaterials, secretFileMaterials, trashBinMaterials
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {LightBulb} from "@/components/Models/LightBulb";
@@ -47,6 +47,7 @@ import {PlantBamboo} from "@/components/Models/PlantPot";
 import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
 import {CardboardBox} from "@/components/Models/CardboardBox/CardboardBox";
 import {CardboardBoxInteractive} from "@/components/Models/CardboardBox/CardboardBoxInteractive";
+import TrashBin from "@/components/Models/TrashBin";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -442,6 +443,18 @@ function Scene({
                 wallT={0.003}
                 sideH={0.028}
                 clearance={0.002}
+                disableOutline
+                inspectDisableOutline
+            />
+
+            <TrashBin
+                position={[-1.1, 0.19 , 4.1]}
+                rotation={[0, 0.35, 0]}
+                materialsById={trashBinMaterials}
+                size={[0.20, 0.16, 0.35]}
+                rimT={0.0075}
+                baseT={0.004}
+                baseInset={0.01}
                 disableOutline
                 inspectDisableOutline
             />
