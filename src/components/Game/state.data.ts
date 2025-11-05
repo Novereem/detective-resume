@@ -71,7 +71,15 @@ export type GameSnapshot = {
     drawers: Partial<Record<DrawerKey, { fileAlive?: boolean }>>
     puzzlesConfig: Record<PuzzleId, PuzzleConfig>
     puzzleStatus: Record<PuzzleId, PuzzleStatus>
+    cardboardBoxes: CardboardBoxesState
 }
+
+export type CardboardBoxEntry = {
+    status: 'closed' | 'opening' | 'opened'
+    openNonce: number
+}
+
+export type CardboardBoxesState = Record<string, CardboardBoxEntry>
 
 export const initialSnapshot: GameSnapshot = {
     files: [
@@ -163,4 +171,6 @@ export const initialSnapshot: GameSnapshot = {
 
         [PZ.FrameBlue]: { available: true, pinned: false },
     },
+
+    cardboardBoxes: {},
 }

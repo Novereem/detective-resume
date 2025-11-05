@@ -107,4 +107,29 @@ export class GameState {
             this.setDrawer(dfile.drawerKey, { fileAlive: false })
         }
     }
+
+    requestOpenCardboardBox = (id: string) => {
+        const prev = this._snapshot.cardboardBoxes[id] ?? { status: 'closed', openNonce: 0 }
+        this._snapshot = {
+            ...this._snapshot,
+            cardboardBoxes: {
+                ...this._snapshot.cardboardBoxes,
+                [id]: { ...prev, status: 'opening', openNonce: prev.openNonce + 1 },
+            },
+        }
+        this.emit()
+    }
+
+    finishOpenCardboardBox = (id: string) => {
+        const prev = this._snapshot.cardboardBoxes[id]
+        if (!prev) return
+        this._snapshot = {
+            ...this._snapshot,
+            cardboardBoxes: {
+                ...this._snapshot.cardboardBoxes,
+                [id]: { ...prev, status: 'opened' },
+            },
+        }
+        this.emit()
+    }
 }

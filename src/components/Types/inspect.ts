@@ -1,6 +1,6 @@
 import type { InspectState} from "@/components/Types/inspectModels";
 
-export type InspectAction = 'secret-open' | 'secret-close'
+export type InspectAction = 'secret-open' | 'secret-close' | 'box-open'
 
 export type InspectSolvedCtx = {
     state: InspectState

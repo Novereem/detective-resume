@@ -33,7 +33,11 @@ type FramedPlaneProps = CommonTransform & {
     frameRoughness?: number
     receiveShadow?: boolean
     frameZ?: number
-    frameDepthBias?: boolean;
+    frameDepthBias?: boolean
+    textureRepeat?: [number, number]
+    textureOffset?: [number, number]
+    textureRotation?: number
+    textureCenter?: [number, number]
 }
 
 export function FramedPlane({
@@ -63,13 +67,17 @@ export function FramedPlane({
                                 receiveShadow = true,
                                 frameZ = 0,
                                 frameDepthBias = true,
+                                textureRepeat,
+                                textureOffset,
+                                textureRotation,
+                                textureCenter,
                             }: FramedPlaneProps) {
     const [hovered, setHovered] = React.useState(false)
     useCursor(canInteract && hovered)
 
     const framePolyProps = frameDepthBias
         ? ({ polygonOffset: true as const, polygonOffsetFactor: 1, polygonOffsetUnits: 1 } as const)
-        : {};
+        : {}
 
     const side = doubleSide ? THREE.DoubleSide : THREE.FrontSide
     const frameColor = canInteract && hovered ? hoverColor : borderColor
@@ -80,7 +88,24 @@ export function FramedPlane({
         generateMipmaps: !texturePixelated,
     })
 
-    const artSize = React.useMemo<[number, number]>(() => {
+    React.useEffect(() => {
+        if (!tex) return
+        if (textureRepeat) {
+            tex.wrapS = THREE.RepeatWrapping
+            tex.wrapT = THREE.RepeatWrapping
+            tex.repeat.set(textureRepeat[0], textureRepeat[1])
+        } else {
+            tex.wrapS = THREE.ClampToEdgeWrapping
+            tex.wrapT = THREE.ClampToEdgeWrapping
+            tex.repeat.set(1, 1)
+        }
+        if (textureOffset) tex.offset.set(textureOffset[0], textureOffset[1])
+        if (typeof textureRotation === 'number') tex.rotation = textureRotation
+        if (textureCenter) tex.center.set(textureCenter[0], textureCenter[1])
+        tex.needsUpdate = true
+    }, [tex, textureRepeat, textureOffset, textureRotation, textureCenter])
+
+    const fittedSize = React.useMemo<[number, number]>(() => {
         if (!tex || !('image' in tex) || !tex.image || textureFit === 'stretch') return [width, height]
         const tw = (tex.image as any).width || 1
         const th = (tex.image as any).height || 1
@@ -93,6 +118,11 @@ export function FramedPlane({
         }
     }, [tex, width, height, textureFit])
 
+    const finalArtSize = React.useMemo<[number, number]>(() => {
+        if (textureRepeat) return [width, height]
+        return fittedSize
+    }, [textureRepeat, fittedSize, width, height])
+
     const payload = React.useMemo<FramedInspect>(() => ({
         kind: 'framed',
         width, height, color, borderColor, border, doubleSide,
@@ -100,13 +130,12 @@ export function FramedPlane({
         ...inspectOverrides,
     }), [width, height, color, borderColor, border, doubleSide, textureUrl, textureFit, texturePixelated, textureZ, inspectOverrides, inspectDistance])
 
-    const handleOver  = (e: any) => { e.stopPropagation(); setHovered(true) }
-    const handleOut   = (e: any) => { e.stopPropagation(); setHovered(false) }
+    const handleOver = (e: any) => { e.stopPropagation(); setHovered(true) }
+    const handleOut  = (e: any) => { e.stopPropagation(); setHovered(false) }
     const handleClick = (e: any) => { e.stopPropagation(); onInspect?.(payload) }
 
     return (
         <group position={position} rotation={rotation} scale={scale}>
-            {/* base panel */}
             <mesh raycast={() => null} receiveShadow={lit && receiveShadow}>
                 <planeGeometry args={[width, height]} />
                 {lit ? (
@@ -116,10 +145,9 @@ export function FramedPlane({
                 )}
             </mesh>
 
-            {/* texture layer */}
             {tex && (
                 <mesh position={[0, 0, textureZ]} raycast={() => null} receiveShadow={lit && receiveShadow}>
-                    <planeGeometry args={artSize} />
+                    <planeGeometry args={finalArtSize} />
                     {lit ? (
                         <meshStandardMaterial map={tex} side={side} metalness={0} roughness={1} />
                     ) : (
@@ -128,82 +156,37 @@ export function FramedPlane({
                 </mesh>
             )}
 
-            {/* frame strips */}
-            {/* Top strip */}
-            <mesh
-                raycast={() => null}
-                position={[0, height / 2 + border / 2, frameZ]}
-                receiveShadow={lit && receiveShadow}
-            >
+            <mesh raycast={() => null} position={[0, height / 2 + border / 2, frameZ]} receiveShadow={lit && receiveShadow}>
                 <planeGeometry args={[width + 2 * border, border]}/>
                 {lit ? (
-                    <meshStandardMaterial
-                        color={frameColor}
-                        side={side}
-                        metalness={frameMetalness}
-                        roughness={frameRoughness}
-                        {...framePolyProps}
-                    />
+                    <meshStandardMaterial color={frameColor} side={side} metalness={frameMetalness} roughness={frameRoughness} {...framePolyProps} />
                 ) : (
                     <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
                 )}
             </mesh>
 
-            {/* Bottom strip */}
-            <mesh
-                raycast={() => null}
-                position={[0, -height / 2 - border / 2, frameZ]}
-                receiveShadow={lit && receiveShadow}
-            >
+            <mesh raycast={() => null} position={[0, -height / 2 - border / 2, frameZ]} receiveShadow={lit && receiveShadow}>
                 <planeGeometry args={[width + 2 * border, border]}/>
                 {lit ? (
-                    <meshStandardMaterial
-                        color={frameColor}
-                        side={side}
-                        metalness={frameMetalness}
-                        roughness={frameRoughness}
-                        {...framePolyProps}
-                    />
+                    <meshStandardMaterial color={frameColor} side={side} metalness={frameMetalness} roughness={frameRoughness} {...framePolyProps} />
                 ) : (
                     <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
                 )}
             </mesh>
 
-            {/* Right strip */}
-            <mesh
-                raycast={() => null}
-                position={[-width / 2 - border / 2, 0, frameZ]}
-                receiveShadow={lit && receiveShadow}
-            >
+            <mesh raycast={() => null} position={[-width / 2 - border / 2, 0, frameZ]} receiveShadow={lit && receiveShadow}>
                 <planeGeometry args={[border, height]}/>
                 {lit ? (
-                    <meshStandardMaterial
-                        color={frameColor}
-                        side={side}
-                        metalness={frameMetalness}
-                        roughness={frameRoughness}
-                        {...framePolyProps}
-                    />
+                    <meshStandardMaterial color={frameColor} side={side} metalness={frameMetalness} roughness={frameRoughness} {...framePolyProps} />
                 ) : (
                     <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
                 )}
             </mesh>
 
-            {/* Left strip */}
-            <mesh
-                raycast={() => null}
-                position={[width / 2 + border / 2, 0, frameZ]}
-                receiveShadow={lit && receiveShadow}
-            >
+            <mesh raycast={() => null} position={[width / 2 + border / 2, 0, frameZ]} receiveShadow={lit && receiveShadow}>
                 <planeGeometry args={[border, height]}/>
                 {lit ? (
-                    <meshStandardMaterial
-                        color={frameColor}
-                        side={side}
-                        metalness={frameMetalness}
-                        roughness={frameRoughness}
-                        {...framePolyProps}
-                    />
+                    <meshStandardMaterial color={frameColor} side={side} metalness={frameMetalness} roughness={frameRoughness} {...framePolyProps} />
                 ) : (
                     <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
                 )}

@@ -84,17 +84,14 @@ export const plantPotMaterials: Record<string, PartMaterialOverride> = {
     potBase:    { textureUrl: '/textures/ceramic.jpg', color: '#acacac', roughness: 0.9, metalness: 0.02 },
     soil:       { textureUrl: '/textures/dirt.jpg', roughness: 1.0, metalness: 0.0 },
 
-    culm: {
-        textureUrl:   '/textures/bamboo.jpg',
-        color: '#e6e6e6',
-        roughness: 0.65,
-        metalness: 0.0,
-    },
+    culm: { textureUrl:   '/textures/bamboo.jpg', color: '#e6e6e6', roughness: 0.65, metalness: 0.0, },
 
-    leaf: {
-        textureUrl: '/textures/leaf_bamboo.jpg',
-        color: '#3f6d32',
-        roughness: 0.7,
-        metalness: 0.0,
-    },
+    leaf: { textureUrl: '/textures/leaf_bamboo.jpg', color: '#3f6d32', roughness: 0.7, metalness: 0.0, },
+}
+
+export const cardboardMaterials: Record<string, PartMaterialOverride> = {
+    bottom:  { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
+    wall:    { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
+    lidTop:  { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
+    lidSide: { textureUrl: '/textures/cardboard.jpg', roughness: 0.95, metalness: 0.0 },
 }

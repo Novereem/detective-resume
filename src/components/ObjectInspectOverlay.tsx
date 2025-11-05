@@ -8,9 +8,11 @@ import { FramedPlane } from '@/components/Primitives/FramedPlane'
 import type { InspectState } from '@/components/Types/inspectModels'
 import { PixelateNearestFX } from '@/components/Effects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
-import {secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
+import {cardboardMaterials, secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 import {InspectOverlayProps} from "@/components/Types/inspect";
 import {useSettings} from "@/components/UI/SettingsProvider";
+import {CardboardBox} from "@/components/Models/CardboardBox/CardboardBox";
+import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)
@@ -37,6 +39,60 @@ function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
                 disableOutline
                 materialsById={secretFileMaterials}
             />
+        </group>
+    )
+}
+
+function CardboardBoxPreview({
+                                 targetLift = 0,
+                                 size = [0.28, 0.14, 0.28] as [number, number, number],
+                                 lidLip = 0.028,
+                                 lidWallT = 0.003,
+                                 lidClearance = 0.002,
+                             }: {
+    targetLift?: number
+    size?: [number, number, number]
+    lidLip?: number
+    lidWallT?: number
+    lidClearance?: number
+}) {
+    const invalidate = useThree((s) => s.invalidate)
+    const [lift, setLift] = React.useState(0)
+
+    React.useEffect(() => { invalidate() }, [targetLift, invalidate])
+
+    useFrame((_, dt) => {
+        const dtClamped = Math.min(dt, 1 / 60)
+        const next = THREE.MathUtils.damp(lift, targetLift, 6, dtClamped)
+        if (Math.abs(next - lift) > 1e-4) {
+            setLift(next)
+            invalidate()
+        }
+    })
+
+    const [W, H, D] = size
+    const lidY = H / 2 + THREE.MathUtils.lerp(0, 0.12, lift)
+
+    return (
+        <group rotation={[0, Math.PI, 0]}>
+            <CardboardBox
+                size={size}
+                lidEnabled={false}
+                materialsById={cardboardMaterials}
+                disableOutline
+                inspectDisableOutline
+            />
+            <group position={[0, lidY, 0]}>
+                <CardboardLid
+                    size={[W, D]}
+                    sideH={lidLip}
+                    wallT={lidWallT}
+                    clearance={lidClearance}
+                    materialsById={cardboardMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                />
+            </group>
         </group>
     )
 }
@@ -352,9 +408,10 @@ export default function ObjectInspectOverlay({
         if (renderState) setSecretTarget(0)
     }, [renderState])
 
+    const metaType = (renderState as any)?.metadata?.type
+
     const isInspectingSecretFile = React.useMemo(() => {
         // 1) Prefer explicit metadata from DetectiveRoom
-        const metaType = (renderState as any)?.metadata?.type
         if (metaType === 'secretfile') return true
 
         // 2) Fallback: detect by parts ids (works with your ModelGroup output)
@@ -372,6 +429,10 @@ export default function ObjectInspectOverlay({
 
         return hasCovers && hasPaper
     }, [renderState])
+
+    const isInspectingCardboardBox = metaType === 'cardboard-box'
+    const [boxOpenAmt, setBoxOpenAmt] = React.useState(0)
+    React.useEffect(() => { if (renderState) setBoxOpenAmt(0) }, [renderState])
 
     return (
         <div
@@ -449,7 +510,15 @@ export default function ObjectInspectOverlay({
 
                     <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
                         <group ref={contentRef} position={offset}>
-                            {isInspectingSecretFile ? (
+                            {isInspectingCardboardBox ? (
+                                <CardboardBoxPreview
+                                    targetLift={boxOpenAmt}
+                                    size={[0.28, 0.14, 0.28]}
+                                    lidLip={0.028}
+                                    lidWallT={0.003}
+                                    lidClearance={0.002}
+                                />
+                            ) : isInspectingSecretFile ? (
                                 <SecretFilePreview targetAngle={secretTarget}/>
                             ) : (
                                 <>
@@ -630,6 +699,18 @@ export default function ObjectInspectOverlay({
                                 }
                             }}
                             opening={secretTarget === 0}
+                        />
+                    </div>
+                )}
+
+                {isInspectingCardboardBox && (
+                    <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                        <HoverButton
+                            onClick={() => {
+                                setBoxOpenAmt(1)
+                                onAction?.('box-open', renderState!)
+                            }}
+                            opening={boxOpenAmt === 0}
                         />
                     </div>
                 )}

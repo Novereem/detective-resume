@@ -10,7 +10,7 @@ import { Mug } from "@/components/Models/Mug"
 
 
 import {
-    bookMaterials, clockMaterials,
+    bookMaterials, cardboardMaterials, clockMaterials,
     coatRackMaterials,
     corkBoardMaterials,
     deskMaterials, detectiveHatMaterials,
@@ -19,7 +19,7 @@ import {
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {LightBulb} from "@/components/Models/LightBulb";
-import {MetalDesk} from "@/components/Models/MetalDesk";
+import {MetalDesk} from "@/components/Models/MetalDesk/MetalDesk";
 import {SecretFile} from "@/components/Models/SecretFile";
 import { useNotifications } from '@/components/Notifications'
 import {PoofEffect} from "@/components/PoofEffect";
@@ -44,6 +44,9 @@ import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
 import {Book} from "@/components/Models/Book";
 import {Clock} from "@/components/Models/Clock";
 import {PlantBamboo} from "@/components/Models/PlantPot";
+import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
+import {CardboardBox} from "@/components/Models/CardboardBox/CardboardBox";
+import {CardboardBoxInteractive} from "@/components/Models/CardboardBox/CardboardBoxInteractive";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -177,7 +180,7 @@ function Scene({
                     <FramedPlane
                         width={5}
                         height={5}
-                        textureUrl="/textures/rainbow_metal.jpg"
+                        textureUrl="/textures/light_concrete.jpg"
                         textureFit="stretch"
                         border={0}
                         color="#777"
@@ -196,7 +199,7 @@ function Scene({
                     <FramedPlane
                         width={5}
                         height={5}
-                        textureUrl="/textures/light_concrete.jpg"
+                        textureUrl="/textures/felt_beige.jpg"
                         textureFit="stretch"
                         border={0}
                         color="#777"
@@ -213,8 +216,8 @@ function Scene({
                     <FramedPlane
                         width={5}
                         height={5}
-                        textureUrl="/textures/light_concrete.jpg"
-                        textureFit="stretch"
+                        textureUrl="/textures/wallpaper_red.jpg"
+                        textureRepeat={[4,3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -230,8 +233,8 @@ function Scene({
                     <FramedPlane
                         width={5}
                         height={5}
-                        textureUrl="/textures/light_concrete.jpg"
-                        textureFit="stretch"
+                        textureUrl="/textures/wallpaper_red.jpg"
+                        textureRepeat={[4,3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -247,8 +250,8 @@ function Scene({
                     <FramedPlane
                         width={5}
                         height={5}
-                        textureUrl="/textures/light_concrete.jpg"
-                        textureFit="stretch"
+                        textureUrl="/textures/wallpaper_red.jpg"
+                        textureRepeat={[4,3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -271,6 +274,8 @@ function Scene({
                     materialsById={deskMaterials}
                     disableOutline={true}
                     inspectDisableOutline={true}
+                    visualizeHitbox={false}
+                    disablePointer={true}
                 />
             </group>
 
@@ -287,7 +292,6 @@ function Scene({
                     materialsById={deskMaterials}
                     disableOutline={false}
                     inspectDisableOutline={true}
-                    visualizeHitbox={false}
                 />
             </group>
 
@@ -295,7 +299,6 @@ function Scene({
                 <CorkBoard
                     position={ANCHOR.corkBoard.position}
                     rotation={[0, 0, 0]}
-                    onInspect={openInspect}
                     color="#fff"
                     materialsById={corkBoardMaterials}
                     inspectDistance={1}
@@ -398,6 +401,49 @@ function Scene({
                 disableOutline
                 inspectDisableOutline
                 leavesPerBranch={[3,5]}
+            />
+
+            <CardboardBox
+                position={[1.9, 0.725, 4.2]}
+                rotation={[0, 0.4, 0]}
+                materialsById={cardboardMaterials}
+                size={[0.28, 0.14, 0.28]}
+                wallT={0.004}
+                lidEnabled={false}
+                lidLip={0.028}
+                lidWallT={0.003}
+                lidClearance={0.002}
+                disableOutline
+                inspectDisableOutline
+            />
+
+            <CardboardBoxInteractive
+                id="cardbox-01"
+                position={[1.9, 0.1, 4.2]}
+                rotation={[0, 0.4, 0]}
+                materialsById={cardboardMaterials}
+                size={[0.28, 0.14, 0.28]}
+                wallT={0.004}
+                lidLip={0.028}
+                lidWallT={0.003}
+                lidClearance={0.002}
+                disableOutline={false}
+                inspectDisableOutline
+                onInspect={openInspect}
+                inspectDistance={0.6}
+            />
+
+
+            <CardboardLid
+                position={[1.8, 0.75, 4.4]}
+                rotation={[0.4, 0.1, 0.4]}
+                materialsById={cardboardMaterials}
+                size={[0.28, 0.28]}
+                wallT={0.003}
+                sideH={0.028}
+                clearance={0.002}
+                disableOutline
+                inspectDisableOutline
             />
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
@@ -538,7 +584,7 @@ export default function DetectiveRoom() {
     }, [])
 
     const {files, drawer_files, poofs, drawers, puzzlesConfig } = useGameState()
-    const {removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle} = useGameActions()
+    const { removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle, requestOpenCardboardBox } = useGameActions()
 
     const prevCamPosRef = React.useRef<Vec3>([0, 1, 3])
     const prevLookAtRef = React.useRef<Vec3>([0, 1, 4])
@@ -628,22 +674,36 @@ export default function DetectiveRoom() {
                 }}
 
                 onAction={(action, state) => {
-                    if (action !== 'secret-open') return
-                    const meta = (state as any)?.metadata ?? {}
-                    const { id, notif, persistAfterOpen, worldPos } = meta
+                    if (action === 'secret-open') {
+                        const meta = (state as any)?.metadata ?? {}
+                        const { id, notif, persistAfterOpen, worldPos } = meta
+                        notify(notif ?? 'Secret file opened — new puzzle available.', { ttlMs: 10000 })
+                        if (!persistAfterOpen && id) {
+                            if (viewTimerRef.current)   clearTimeout(viewTimerRef.current)
+                            if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+                            viewTimerRef.current = setTimeout(() => {
+                                setInspect(null)
+                                deleteTimerRef.current = setTimeout(() => {
+                                    handleSecretOpen({ id, worldPos })
+                                }, typeof OVERLAY_CLOSE_ANIM_MS === 'number' ? OVERLAY_CLOSE_ANIM_MS : 300)
+                            }, typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)
+                        }
+                        return
+                    }
 
-                    notify(notif ?? 'Secret file opened — new puzzle available.', { ttlMs: 10000 })
+                    if (action === 'box-open') {
+                        const id = (state as any)?.metadata?.id as string | undefined
+                        if (id) requestOpenCardboardBox(id)
 
-                    if (!persistAfterOpen && id) {
+                        const BOX_VIEW_BEFORE_CLOSE_MS = 900
                         if (viewTimerRef.current)   clearTimeout(viewTimerRef.current)
                         if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
 
                         viewTimerRef.current = setTimeout(() => {
                             setInspect(null)
-                            deleteTimerRef.current = setTimeout(() => {
-                                handleSecretOpen({ id, worldPos })
-                            }, typeof OVERLAY_CLOSE_ANIM_MS === 'number' ? OVERLAY_CLOSE_ANIM_MS : 300)
-                        }, typeof SECRETFILE_VIEW_BEFORE_CLOSE_MS === 'number' ? SECRETFILE_VIEW_BEFORE_CLOSE_MS : 1000)
+                        }, BOX_VIEW_BEFORE_CLOSE_MS)
+
+                        return
                     }
                 }}
             />
