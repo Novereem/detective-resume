@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { Outlined } from '@/components/Primitives/Outlined'
 import { FramedPlane } from '@/components/Primitives/FramedPlane'
 import type { InspectState } from '@/components/Types/inspectModels'
-import { PixelateNearestFX } from '@/components/Effects/PixelateNearestFX'
+import { PixelateNearestFX } from '@/components/CameraEffects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
 import {cardboardMaterials, secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 import {InspectOverlayProps} from "@/components/Types/inspect";

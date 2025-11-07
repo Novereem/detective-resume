@@ -103,3 +103,20 @@ export const trashBinMaterials = {
     wire:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 0.85 },
     base:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.45, metalness: 1  },
 }
+
+export const cigarMaterials = {
+    body:    { textureUrl: '/textures/cigar_wrapper.jpg', roughness: 0.9,  metalness: 0.02 },
+    headCap: { textureUrl: '/textures/cigar_wrapper.jpg', roughness: 0.88, metalness: 0.02 },
+    footCap: { textureUrl: '/textures/cigar_wrapper.jpg', roughness: 0.9,  metalness: 0.02 },
+    footFlat:{ textureUrl: '/textures/burning_ash.jpg', roughness: 0, metalness: 0.0 },
+    band:    { textureUrl: '/textures/gold_foil.jpg',    roughness: 0.6,  metalness: 0.15 },
+}
+
+export const ashTrayWoodMaterials = {
+    baseBlock: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    topPlate:  { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    bowl:      { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    bowlFloor: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    restLip_0: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    restLip_1: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+}

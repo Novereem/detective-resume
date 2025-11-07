@@ -1,16 +1,17 @@
 'use client'
 import { Canvas, useThree } from '@react-three/fiber'
-import React from 'react'
+import React, {Suspense} from 'react'
 import * as THREE from 'three'
 import { FramedPlane } from "@/components/Primitives/FramedPlane"
 import ObjectInspectOverlay from "@/components/ObjectInspectOverlay"
-import { PixelateNearestFX } from "@/components/Effects/PixelateNearestFX"
+import { PixelateNearestFX } from "@/components/CameraEffects/PixelateNearestFX"
 import { Desk } from '@/components/Models/Desk'
 import { Mug } from "@/components/Models/Mug"
 
 
 import {
-    bookMaterials, cardboardMaterials, clockMaterials,
+    ashTrayWoodMaterials,
+    bookMaterials, cardboardMaterials, cigarMaterials, clockMaterials,
     coatRackMaterials,
     corkBoardMaterials,
     deskMaterials, detectiveHatMaterials,
@@ -22,7 +23,7 @@ import {LightBulb} from "@/components/Models/LightBulb";
 import {MetalDesk} from "@/components/Models/MetalDesk/MetalDesk";
 import {SecretFile} from "@/components/Models/SecretFile";
 import { useNotifications } from '@/components/Notifications'
-import {PoofEffect} from "@/components/PoofEffect";
+import {PoofEffect} from "@/components/Effects/PoofEffect";
 import {
     FreeLookControls,
     PlayerMover,
@@ -48,6 +49,10 @@ import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
 import {CardboardBox} from "@/components/Models/CardboardBox/CardboardBox";
 import {CardboardBoxInteractive} from "@/components/Models/CardboardBox/CardboardBoxInteractive";
 import TrashBin from "@/components/Models/TrashBin";
+import Cigar from "@/components/Models/Cigar";
+import AshTray, {AshTrayWood} from "@/components/Models/AshTray";
+import CigarSmokeFlat from "@/components/Effects/CigarSmoke";
+import CigarWithSmoke from "@/components/Models/CigarWithSmoke";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -457,6 +462,31 @@ function Scene({
                 baseInset={0.01}
                 disableOutline
                 inspectDisableOutline
+            />
+
+            <group position={[-0.8, 0.795, 4.06]} rotation={[1, -0.35, Math.PI / 2]}>
+                <CigarWithSmoke
+                    materialsById={cigarMaterials}
+                    lit
+                    smokeProps={{
+                        // fades out nicely
+                        opacity: 0.2,
+                        alphaPow: 1.2,
+                        // shape
+                        baseHalfWidth: 0.006,
+                        topWidthMult: 3.4,
+                        widthPow: 0.55,
+                        // foot pinch right at the tip
+                        footPinchFactor: 0.25,
+                        footPinchV: 0.80,
+                    }}
+                />
+            </group>
+
+            <AshTrayWood
+                position={[-0.76, 0.778, 4.06]}
+                rotation={[0, -0.28, 0]}
+                materialsById={ashTrayWoodMaterials}
             />
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
