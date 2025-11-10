@@ -223,7 +223,7 @@ function Scene({
                         width={5}
                         height={5}
                         textureUrl="/textures/wallpaper_red.jpg"
-                        textureRepeat={[4,3]}
+                        textureRepeat={[4, 3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -240,7 +240,7 @@ function Scene({
                         width={5}
                         height={5}
                         textureUrl="/textures/wallpaper_red.jpg"
-                        textureRepeat={[4,3]}
+                        textureRepeat={[4, 3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -257,7 +257,7 @@ function Scene({
                         width={5}
                         height={5}
                         textureUrl="/textures/wallpaper_red.jpg"
-                        textureRepeat={[4,3]}
+                        textureRepeat={[4, 3]}
                         border={0}
                         color="#777"
                         canInteract={false}
@@ -363,7 +363,7 @@ function Scene({
             <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn2)}>
                 <Book
                     position={[1.2, 0.695, 4.25]}
-                    rotation={[Math.PI,-0.6,0]}
+                    rotation={[Math.PI, -0.6, 0]}
                     materialsById={{
                         ...bookMaterials,
                         coverFront: {color: '#611919', roughness: 0.9},
@@ -381,7 +381,7 @@ function Scene({
             <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn)}>
                 <Book
                     position={[1.2, 0.665, 4.25]}
-                    rotation={[Math.PI,-0.5,0]}
+                    rotation={[Math.PI, -0.5, 0]}
                     materialsById={bookMaterials}
                     disableOutline
                     inspectDisableOutline
@@ -392,7 +392,7 @@ function Scene({
 
             <Clock
                 position={[2.46, 2, 4.6]}
-                rotation={[Math.PI, -Math.PI/2, Math.PI]}
+                rotation={[Math.PI, -Math.PI / 2, Math.PI]}
                 radius={0.22}
                 depth={0.065}
                 materialsById={clockMaterials}
@@ -406,7 +406,7 @@ function Scene({
                 materialsById={plantPotMaterials}
                 disableOutline
                 inspectDisableOutline
-                leavesPerBranch={[3,5]}
+                leavesPerBranch={[3, 5]}
             />
 
             <CardboardBox
@@ -453,7 +453,7 @@ function Scene({
             />
 
             <TrashBin
-                position={[-1.1, 0.19 , 4.1]}
+                position={[-1.1, 0.19, 4.1]}
                 rotation={[0, 0.35, 0]}
                 materialsById={trashBinMaterials}
                 size={[0.20, 0.16, 0.35]}
@@ -488,6 +488,22 @@ function Scene({
                 rotation={[0, -0.28, 0]}
                 materialsById={ashTrayWoodMaterials}
             />
+
+            <mesh position={[0.35, 1.5, 4.685]} rotation={[Math.PI, 0, Math.PI+0.05]} raycast={() => null}>
+                <FramedPlane
+                    width={0.4}
+                    height={0.2}
+                    textureUrl="/textures/scherpenzeel.jpg"
+                    textureFit={"stretch"}
+                    border={0}
+                    color="#ffffff"
+                    canInteract={false}
+                    lit
+                    roughness={10}
+                    metalness={0}
+                    receiveShadow
+                />
+            </mesh>
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
             {/*    <Mug*/}
@@ -604,7 +620,7 @@ export default function DetectiveRoom() {
         initializeMouseSensitivity(0.0022)
     }, [initializeMouseSensitivity])
 
-    const { orientDamping, initializeOrientDamping } = useSettings()
+    const {orientDamping, initializeOrientDamping } = useSettings()
     React.useEffect(() => {
         initializeOrientDamping(20) // Higher is snappier
     }, [initializeOrientDamping])
