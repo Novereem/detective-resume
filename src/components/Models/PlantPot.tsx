@@ -253,7 +253,7 @@ export const PlantBamboo = memo(function PlantBamboo({
 
         culms.forEach((c, idx) => {
             items.push(
-                <mesh key={`culm_${idx}`} position={[c.base.x, c.base.y + c.H / 2, c.base.z]} material={culmMat}>
+                <mesh key={`culm_${idx}`} position={[c.base.x, c.base.y + c.H / 2, c.base.z]} material={culmMat} castShadow receiveShadow={false}>
                     <cylinderGeometry args={[c.Rt, c.Rb, c.H, 12]}/>
                 </mesh>
             )
@@ -261,7 +261,7 @@ export const PlantBamboo = memo(function PlantBamboo({
                 const col = ringColors[Math.floor(rand() * ringColors.length)]
                 const rMul = THREE.MathUtils.lerp(1.0, 1.08, rand())
                 items.push(
-                    <mesh key={`node_${idx}_${i}`} position={[c.base.x, ny, c.base.z]}>
+                    <mesh key={`node_${idx}_${i}`} position={[c.base.x, ny, c.base.z]} castShadow receiveShadow={false}>
                         <cylinderGeometry args={[c.Rb * rMul, c.Rb * rMul, nodeThick, 12]} />
                         <meshStandardMaterial color={col} roughness={0.6} metalness={0.05} />
                     </mesh>
@@ -318,7 +318,7 @@ export const PlantBamboo = memo(function PlantBamboo({
                     const dir = new THREE.Vector3(0, 1, 0).applyQuaternion(b.quat)
                     const pos = b.pos.clone().addScaledVector(dir, b.len / 2)
                     return (
-                        <mesh key={`branch_${i}`} position={pos.toArray()} quaternion={b.quat}>
+                        <mesh key={`branch_${i}`} position={pos.toArray()} quaternion={b.quat} castShadow receiveShadow={false}>
                             <cylinderGeometry args={[b.rad, b.rad, b.len, 8]} />
                             <meshStandardMaterial color="#d0b85a" roughness={0.6} metalness={0.05} />
                         </mesh>
@@ -499,7 +499,7 @@ export const PlantBamboo = memo(function PlantBamboo({
 
             {/* Reversed leaves at twig tips */}
             <instancedMesh key={`leaves-${leafAnchors.length}`} ref={leafRef}
-                           args={[leafGeom, leafMat, leafAnchors.length]}/>
+                           args={[leafGeom, leafMat, leafAnchors.length]} castShadow/>
 
         </group>
     )

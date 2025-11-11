@@ -330,6 +330,11 @@ function Scene({
                     disableOutline
                     inspectDisableOutline
                     enableLight
+                    castShadow
+                    shadowMapSize={512}
+                    shadowBias={-0.0008}
+                    shadowRadius={2}
+                    shadowNormalBias={0}
                     inspectPixelSize={3}
                 />
             </group>
@@ -469,14 +474,11 @@ function Scene({
                     materialsById={cigarMaterials}
                     lit
                     smokeProps={{
-                        // fades out nicely
                         opacity: 0.2,
                         alphaPow: 1.2,
-                        // shape
                         baseHalfWidth: 0.006,
                         topWidthMult: 3.4,
                         widthPow: 0.55,
-                        // foot pinch right at the tip
                         footPinchFactor: 0.25,
                         footPinchV: 0.80,
                     }}
@@ -489,19 +491,36 @@ function Scene({
                 materialsById={ashTrayWoodMaterials}
             />
 
-            <mesh position={[0.35, 1.5, 4.685]} rotation={[Math.PI, 0, Math.PI+0.05]} raycast={() => null}>
+            <mesh position={[0.4, 1.6, 4.965]} rotation={[Math.PI, 0, Math.PI+0.05]} raycast={() => null}>
                 <FramedPlane
                     width={0.4}
                     height={0.2}
                     textureUrl="/textures/scherpenzeel.jpg"
                     textureFit={"stretch"}
                     border={0}
-                    color="#ffffff"
+                    color="#bbbbbb"
                     canInteract={false}
                     lit
                     roughness={10}
                     metalness={0}
                     receiveShadow
+                />
+            </mesh>
+
+            <mesh position={[1, 1.5, 4.685]} rotation={[Math.PI, 0, Math.PI]} raycast={() => null}>
+                <FramedPlane
+                    width={0.4}
+                    height={0.3}
+                    textureUrl="/textures/calender2025.jpg"
+                    textureFit={"stretch"}
+                    border={0}
+                    color="#ggg"
+                    canInteract={false}
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                    doubleSide={false}
                 />
             </mesh>
 
@@ -657,6 +676,7 @@ export default function DetectiveRoom() {
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
             <div style={{position: 'absolute', inset: 0}}>
                 <Canvas
+                    shadows
                     dpr={[1, 1.25]}
                     camera={{position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0]}}
                     gl={{

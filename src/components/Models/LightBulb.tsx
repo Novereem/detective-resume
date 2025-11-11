@@ -28,6 +28,10 @@ type LightBulbProps = Inherited & {
     lightDecay?: number
     lightOffset?: Vec3
     castShadow?: boolean
+    shadowMapSize?: number | [number, number]
+    shadowBias?: number
+    shadowNormalBias?: number
+    shadowRadius?: number
 }
 
 export const LightBulb = memo(function LightBulb({
@@ -52,6 +56,10 @@ export const LightBulb = memo(function LightBulb({
                                                      lightDecay = 1.5,
                                                      lightOffset = [0, 0.0, 0],
                                                      castShadow = false,
+                                                     shadowMapSize = 1024,
+                                                     shadowBias = -0.0008,
+                                                     shadowNormalBias = 0.0,
+                                                     shadowRadius = 20,
                                                      color = '#c9c9c9',
                                                      outlineColor = '#ffffff',
                                                      hoverColor = '#ff3b30',
@@ -167,6 +175,11 @@ export const LightBulb = memo(function LightBulb({
                     decay={lightDecay}
                     position={[lightOffset[0], lightOffset[1] + bulbRadius * 0.08, lightOffset[2]]}
                     castShadow={castShadow}
+                    shadow-mapSize-width={Array.isArray(shadowMapSize) ? shadowMapSize[0] : shadowMapSize}
+                    shadow-mapSize-height={Array.isArray(shadowMapSize) ? shadowMapSize[1] : shadowMapSize}
+                    shadow-bias={shadowBias}
+                    shadow-normalBias={shadowNormalBias}
+                    shadow-radius={shadowRadius}
                 />
             )}
         </group>

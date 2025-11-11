@@ -27,6 +27,8 @@ export type PartSpec = {
     opacity?: number
     depthWrite?: boolean
     side?: THREE.Side
+    castShadow?: boolean
+    receiveShadow?: boolean
 }
 
 export type PartMaterialOverride = {
@@ -61,6 +63,8 @@ type ModelGroupProps = ThreeElements['group'] & {
     inspectDisableOutline?: boolean
     visualizeHitbox?: boolean
     visualizeColor?: string
+    castShadowDefault?: boolean
+    receiveShadowDefault?: boolean
 }
 
 type BoxSpec = { size: Vec3; center: Vec3 }
@@ -128,6 +132,8 @@ export function ModelGroup({
                                inspectDisableOutline = false,
                                visualizeHitbox = false,
                                visualizeColor = '#00ffff',
+                               castShadowDefault = true,
+                               receiveShadowDefault = true,
                                ...groupProps
                            }: ModelGroupProps) {
     const [hovered, setHovered] = React.useState(false)
@@ -272,6 +278,8 @@ export function ModelGroup({
                             const effOpacity     = ov?.opacity ?? p.opacity
                             const effDepthWrite  = ov?.depthWrite ?? p.depthWrite
                             const effSide        = ov?.side ?? p.side
+                            const effCast = p.castShadow ?? castShadowDefault
+                            const effReceive = p.receiveShadow ?? receiveShadowDefault
                             return (
                                 <Outlined
                                     key={i}
@@ -294,6 +302,8 @@ export function ModelGroup({
                                     opacity={effOpacity}
                                     depthWrite={effDepthWrite}
                                     side={effSide}
+                                    castShadow={effCast}
+                                    receiveShadow={effReceive}
                                 />
                             )
                         })}

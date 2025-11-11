@@ -31,6 +31,8 @@ type OutlinedProps = CommonTransform & {
     opacity?: number
     depthWrite?: boolean
     side?: THREE.Side
+    castShadow?: boolean
+    receiveShadow?: boolean
 }
 
 export function Outlined({
@@ -57,6 +59,8 @@ export function Outlined({
     opacity = 1,
     depthWrite = true,
     side,
+    castShadow = true,
+    receiveShadow = true,
 }: OutlinedProps) {
 
     const [localHover, setLocalHover] = React.useState(false)
@@ -100,7 +104,7 @@ export function Outlined({
     return (
         <group position={position} rotation={rotation} scale={scale} {...bind}>
             {/* Fill Pass */}
-            <mesh renderOrder={0}>
+            <mesh renderOrder={0} castShadow={castShadow} receiveShadow={receiveShadow}>
                 {React.cloneElement(geometry)}
                 <meshStandardMaterial
                     key={tex ? 'std-with-map' : 'std-no-map'}
