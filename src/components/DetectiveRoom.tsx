@@ -370,10 +370,10 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn2)}>
+            <group onContextMenu={rcFocus(ANCHOR.bookA)}>
                 <Book
-                    position={[1.2, 0.695, 4.25]}
-                    rotation={[Math.PI, -0.6, 0]}
+                    position={ANCHOR.bookA.position}
+                    rotation={ANCHOR.bookA.rotation}
                     materialsById={{
                         ...bookMaterials,
                         coverFront: {color: '#611919', roughness: 0.9},
@@ -388,10 +388,10 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.deskTopSpawn)}>
+            <group onContextMenu={rcFocus(ANCHOR.bookB)}>
                 <Book
-                    position={[1.2, 0.665, 4.25]}
-                    rotation={[Math.PI, -0.5, 0]}
+                    position={ANCHOR.bookB.position}
+                    rotation={ANCHOR.bookB.rotation}
                     materialsById={bookMaterials}
                     disableOutline
                     inspectDisableOutline
@@ -400,81 +400,92 @@ function Scene({
                 />
             </group>
 
-            <Clock
-                position={[2.46, 2, 4.6]}
-                rotation={[Math.PI, -Math.PI / 2, Math.PI]}
-                radius={0.22}
-                depth={0.065}
-                materialsById={clockMaterials}
-                disableOutline
-                inspectDisableOutline
-            />
+            <group onContextMenu={rcFocus(ANCHOR.clock)}>
+                <Clock
+                    position={ANCHOR.clock.position}
+                    rotation={ANCHOR.clock.rotation}
+                    radius={0.22}
+                    depth={0.065}
+                    materialsById={clockMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                />
+            </group>
 
-            <PlantBamboo
-                position={[1.1, 0.72, 4.45]}
-                rotation={[0, 0.2, 0]}
-                materialsById={plantPotMaterials}
-                disableOutline
-                inspectDisableOutline
-                leavesPerBranch={[3, 5]}
-            />
+            <group onContextMenu={rcFocus(ANCHOR.plant)}>
+                <PlantBamboo
+                    position={ANCHOR.plant.position}
+                    rotation={ANCHOR.clock.rotation}
+                    materialsById={plantPotMaterials}
+                    disableOutline
+                    inspectDisableOutline
+                    leavesPerBranch={[3, 5]}
+                />
+            </group>
 
-            <CardboardBox
-                position={[1.9, 0.725, 4.2]}
-                rotation={[0, 0.4, 0]}
-                materialsById={cardboardMaterials}
-                size={[0.28, 0.14, 0.28]}
-                wallT={0.004}
-                lidEnabled={false}
-                lidLip={0.028}
-                lidWallT={0.003}
-                lidClearance={0.002}
-                disableOutline
-                inspectDisableOutline
-            />
+            <group onContextMenu={rcFocus(ANCHOR.cardboard1)}>
+                <CardboardBox
+                    position={ANCHOR.cardboard1.position}
+                    rotation={ANCHOR.cardboard1.rotation}
+                    materialsById={cardboardMaterials}
+                    size={[0.28, 0.14, 0.28]}
+                    wallT={0.004}
+                    lidEnabled={false}
+                    lidLip={0.028}
+                    lidWallT={0.003}
+                    lidClearance={0.002}
+                    disableOutline
+                    inspectDisableOutline
+                />
+            </group>
 
-            <CardboardBoxInteractive
-                id="cardbox-01"
-                position={[1.9, 0.1, 4.2]}
-                rotation={[0, 0.4, 0]}
-                materialsById={cardboardMaterials}
-                size={[0.28, 0.14, 0.28]}
-                wallT={0.004}
-                lidLip={0.028}
-                lidWallT={0.003}
-                lidClearance={0.002}
-                disableOutline={false}
-                inspectDisableOutline
-                onInspect={openInspect}
-                inspectDistance={0.6}
-            />
+            <group onContextMenu={rcFocus(ANCHOR.cardbox01)}>
+                <CardboardBoxInteractive
+                    id="cardbox-01"
+                    position={ANCHOR.cardbox01.position}
+                    rotation={ANCHOR.cardbox01.rotation}
+                    materialsById={cardboardMaterials}
+                    size={[0.28, 0.14, 0.28]}
+                    wallT={0.004}
+                    lidLip={0.028}
+                    lidWallT={0.003}
+                    lidClearance={0.002}
+                    disableOutline={false}
+                    inspectDisableOutline
+                    onInspect={openInspect}
+                    inspectDistance={0.6}
+                />
+            </group>
 
+            <group onContextMenu={rcFocus(ANCHOR.cardboardLid1)}>
+                <CardboardLid
+                    position={ANCHOR.cardboardLid1.position}
+                    rotation={ANCHOR.cardboardLid1.rotation}
+                    materialsById={cardboardMaterials}
+                    size={[0.28, 0.28]}
+                    wallT={0.003}
+                    sideH={0.028}
+                    clearance={0.002}
+                    disableOutline
+                    inspectDisableOutline
+                />
+            </group>
 
-            <CardboardLid
-                position={[1.8, 0.75, 4.4]}
-                rotation={[0.4, 0.1, 0.4]}
-                materialsById={cardboardMaterials}
-                size={[0.28, 0.28]}
-                wallT={0.003}
-                sideH={0.028}
-                clearance={0.002}
-                disableOutline
-                inspectDisableOutline
-            />
+            <group onContextMenu={rcFocus(ANCHOR.trashBin)}>
+                <TrashBin
+                    position={ANCHOR.trashBin.position}
+                    rotation={ANCHOR.trashBin.rotation}
+                    materialsById={trashBinMaterials}
+                    size={[0.20, 0.16, 0.35]}
+                    rimT={0.0075}
+                    baseT={0.004}
+                    baseInset={0.01}
+                    disableOutline
+                    inspectDisableOutline
+                />
+            </group>
 
-            <TrashBin
-                position={[-1.1, 0.19, 4.1]}
-                rotation={[0, 0.35, 0]}
-                materialsById={trashBinMaterials}
-                size={[0.20, 0.16, 0.35]}
-                rimT={0.0075}
-                baseT={0.004}
-                baseInset={0.01}
-                disableOutline
-                inspectDisableOutline
-            />
-
-            <group position={[-0.8, 0.795, 4.06]} rotation={[1, -0.35, Math.PI / 2]}>
+            <group onContextMenu={rcFocus(ANCHOR.cigar1)} position={ANCHOR.cigar1.position} rotation={ANCHOR.cigar1.rotation}>
                 <CigarWithSmoke
                     materialsById={cigarMaterials}
                     lit
@@ -490,13 +501,15 @@ function Scene({
                 />
             </group>
 
-            <AshTrayWood
-                position={[-0.76, 0.778, 4.06]}
-                rotation={[0, -0.28, 0]}
-                materialsById={ashTrayWoodMaterials}
-            />
+            <group onContextMenu={rcFocus(ANCHOR.ashTray1)}>
+                <AshTrayWood
+                    position={ANCHOR.ashTray1.position}
+                    rotation={ANCHOR.ashTray1.rotation}
+                    materialsById={ashTrayWoodMaterials}
+                />
+            </group>
 
-            <mesh position={[0.4, 1.6, 4.965]} rotation={[Math.PI, 0, Math.PI+0.05]} raycast={() => null}>
+            <mesh onContextMenu={rcFocus(ANCHOR.mapFrame)} position={ANCHOR.mapFrame.position} rotation={ANCHOR.mapFrame.rotation} raycast={() => null}>
                 <FramedPlane
                     width={0.4}
                     height={0.2}
@@ -512,7 +525,7 @@ function Scene({
                 />
             </mesh>
 
-            <mesh position={[1, 1.5, 4.685]} rotation={[Math.PI, 0, Math.PI]} raycast={() => null}>
+            <mesh onContextMenu={rcFocus(ANCHOR.calendar2025)} position={ANCHOR.calendar2025.position} rotation={ANCHOR.calendar2025.rotation} raycast={() => null}>
                 <FramedPlane
                     width={0.4}
                     height={0.3}

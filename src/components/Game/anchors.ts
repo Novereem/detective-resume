@@ -5,6 +5,14 @@ export type AnchorKey =
     | "corkBoard" | "mug" | "coatRack" | "hat" | "houseFrame"
     | "deskTopSpawn" | "drawerLeftTopContent"
     | "photoClueFrame"| "photoBlueFrame"| "deskTopSpawn2" | "testPuzzle3"
+    | "bookA" | "bookB"
+    | "clock"
+    | "plant"
+    | "cardboard1" | "cardbox01" | "cardboardLid1"
+    | "trashBin"
+    | "cigar1" | "ashTray1"
+    | "calendar2025"
+    | "mapFrame"
 
 export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: Vec3 }> = {
     bulb:       { eye: [ 0.6, 1.6, 3.3], position: [0, 2, 4.3] },
@@ -24,4 +32,23 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     deskTopSpawn: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
     deskTopSpawn2: { eye: [0.2, 1.3, 3.6], position: [0.62, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
     drawerLeftTopContent: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 3.2] },
+
+    bookA:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
+    bookB:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
+
+    clock:   { eye: [2.0, 1.6, 3.6], position: [2.46, 2.00, 4.60], rotation: [Math.PI, -Math.PI/2, Math.PI] },
+
+    plant:   { eye: [1.0, 1.2, 3.5], position: [1.10, 0.72, 4.45], rotation: [0, 0.2, 0] },
+
+    cardboard1:   { eye: [1.7, 1.2, 3.4], position: [1.90, 0.725, 4.20], rotation: [0, 0.4, 0] },
+    cardbox01:    { eye: [1.90, 1.1, 3.2], position: [1.90, 0.10, 4.20], rotation: [0, 0.4, 0] },
+    cardboardLid1:{ eye: [1.7, 1.2, 3.4], position: [1.80, 0.75, 4.40], rotation: [0.4, 0.1, 0.4] },
+
+    trashBin: { eye: [-1.10, 1.05, 3.2], position: [-1.10, 0.19, 4.10], rotation: [0, 0.35, 0] },
+
+    cigar1:   { eye: [-0.80, 1.05, 3.2], position: [-0.80, 0.795, 4.06], rotation: [1, -0.35, Math.PI/2] },
+    ashTray1: { eye: [-0.76, 1.05, 3.2], position: [-0.76, 0.778, 4.06], rotation: [0, -0.28, 0] },
+
+    mapFrame: { eye: [0.2, 1.3, 3.6], position: [0.40, 1.60, 4.965], rotation: [Math.PI, 0, Math.PI + 0.05] },
+    calendar2025: { eye: [0.9, 1.3, 3.6], position: [1.00, 1.50, 4.685], rotation: [Math.PI, 0, Math.PI] },
 }
