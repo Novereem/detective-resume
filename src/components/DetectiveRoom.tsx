@@ -71,6 +71,9 @@ function Scene({
 
     scene.background = new THREE.Color('#3c3c3c')
 
+    const { shadowsEnabled, shadowPreset } = useSettings()
+
+
     const makeOpenInspectSecret = React.useCallback(
         (file: PositionedSecretFile) =>
             (p: InspectState) =>
@@ -330,11 +333,13 @@ function Scene({
                     disableOutline
                     inspectDisableOutline
                     enableLight
-                    castShadow
-                    shadowMapSize={512}
-                    shadowBias={-0.0008}
-                    shadowRadius={2}
-                    shadowNormalBias={0}
+                    castShadow={shadowsEnabled}
+                    shadowMapSize={shadowPreset.mapSize}
+                    shadowRadius={shadowPreset.radius}
+                    shadowBias={shadowPreset.bias}
+                    shadowNormalBias={shadowPreset.normalBias}
+                    shadowCameraNear={0.1}
+                    shadowCameraFar={4.8}
                     inspectPixelSize={3}
                 />
             </group>
@@ -644,6 +649,8 @@ export default function DetectiveRoom() {
         initializeOrientDamping(20) // Higher is snappier
     }, [initializeOrientDamping])
 
+    const { shadowsEnabled, shadowPreset} = useSettings()
+
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
     const {notify} = useNotifications()
@@ -672,11 +679,16 @@ export default function DetectiveRoom() {
         typeof window !== 'undefined' &&
         (params.has('fly') || params.get('fly') === '1' || params.get('fly') === 'true')
 
+    const shadowType =
+        shadowPreset.type === 'basic'   ? THREE.BasicShadowMap :
+            shadowPreset.type === 'pcf'     ? THREE.PCFShadowMap :
+                THREE.PCFSoftShadowMap
+
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
             <div style={{position: 'absolute', inset: 0}}>
                 <Canvas
-                    shadows
+                    shadows={shadowsEnabled ? { type: shadowType } : false}
                     dpr={[1, 1.25]}
                     camera={{position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0]}}
                     gl={{

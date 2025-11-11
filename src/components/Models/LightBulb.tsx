@@ -1,8 +1,9 @@
 'use client'
-import React, { memo, useMemo } from 'react'
+import React, {memo, useEffect, useMemo, useRef} from 'react'
 import * as THREE from 'three'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import {Vec3} from "@/components/Types/room";
+import {PointLight} from "three";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts'>
 
@@ -32,6 +33,8 @@ type LightBulbProps = Inherited & {
     shadowBias?: number
     shadowNormalBias?: number
     shadowRadius?: number
+    shadowCameraNear?: number
+    shadowCameraFar?: number
 }
 
 export const LightBulb = memo(function LightBulb({
@@ -58,8 +61,10 @@ export const LightBulb = memo(function LightBulb({
                                                      castShadow = false,
                                                      shadowMapSize = 1024,
                                                      shadowBias = -0.0008,
-                                                     shadowNormalBias = 0.0,
+                                                     shadowNormalBias = 0.01,
                                                      shadowRadius = 20,
+                                                     shadowCameraNear = 0.1,
+                                                     shadowCameraFar  = 6,
                                                      color = '#c9c9c9',
                                                      outlineColor = '#ffffff',
                                                      hoverColor = '#ff3b30',
@@ -108,6 +113,22 @@ export const LightBulb = memo(function LightBulb({
     const hitboxCenter: Vec3 = [0, baseY + baseHeight / 2 + totalH / 2 - baseHeight, 0]
 
     const emitterRadius = bulbRadius * emitterRadiusFactor
+
+    const lightRef = useRef<PointLight>(null!)
+    useEffect(() => {
+        const L = lightRef.current
+        if (!L) return
+        const size = Array.isArray(shadowMapSize) ? shadowMapSize : [shadowMapSize, shadowMapSize]
+        L.castShadow = !!castShadow
+        L.shadow.bias = shadowBias
+        L.shadow.normalBias = shadowNormalBias
+        L.shadow.radius = shadowRadius
+        L.shadow.mapSize.set(size[0], size[1])
+        L.shadow.camera.near = shadowCameraNear
+        L.shadow.camera.far = shadowCameraFar
+        if (L.shadow.map) { L.shadow.map.dispose(); (L.shadow as any).map = null }
+        L.shadow.needsUpdate = true
+    }, [castShadow, shadowMapSize, shadowBias, shadowNormalBias, shadowRadius, shadowCameraNear, shadowCameraFar])
 
     return (
         <group position={rest.position as any} rotation={rest.rotation as any} scale={rest.scale as any}>
@@ -169,6 +190,7 @@ export const LightBulb = memo(function LightBulb({
 
             {enableLight && (
                 <pointLight
+                    ref={lightRef}
                     color={new THREE.Color(lightColor)}
                     intensity={lightIntensity}
                     distance={lightDistance}
@@ -180,6 +202,8 @@ export const LightBulb = memo(function LightBulb({
                     shadow-bias={shadowBias}
                     shadow-normalBias={shadowNormalBias}
                     shadow-radius={shadowRadius}
+                    shadow-camera-near={shadowCameraNear}
+                    shadow-camera-far={shadowCameraFar}
                 />
             )}
         </group>
