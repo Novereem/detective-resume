@@ -29,7 +29,7 @@ import {
     PlayerMover,
     MouseZoom,
     useRightClickFocus,
-    CameraPoseBridge, DevFlyMove
+    CameraPoseBridge, DevFlyMove, DevObjectMove
 } from '@/components/PlayerControls'
 import type {Vec3, MoveRequest, DrawerFileLike} from '@/components/Types/room'
 import {InspectState} from "@/components/Types/inspectModels";
@@ -272,7 +272,7 @@ function Scene({
                 </mesh>
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.desk1)}>
+            <group onContextMenu={rcFocus(ANCHOR.desk1)} userData={{ movable: true, anchorKey: 'desk1' }}>
                 <Desk
                     position={ANCHOR.desk1.position}
                     rotation={[0, 0, 0]}
@@ -288,7 +288,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.desk2)}>
+            <group onContextMenu={rcFocus(ANCHOR.desk2)} userData={{ movable: true, anchorKey: 'desk2' }}>
                 <Desk
                     position={ANCHOR.desk2.position}
                     rotation={[0, Math.PI / 2, 0]}
@@ -304,7 +304,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.corkBoard)}>
+            <group onContextMenu={rcFocus(ANCHOR.corkBoard)} userData={{ movable: true, anchorKey: 'corkBoard' }}>
                 <CorkBoard
                     position={ANCHOR.corkBoard.position}
                     rotation={[0, 0, 0]}
@@ -317,7 +317,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bulb)}>
+            <group onContextMenu={rcFocus(ANCHOR.bulb)} userData={{ movable: true, anchorKey: 'bulb' }}>
                 <LightBulb
                     position={ANCHOR.bulb.position}
                     rotation={[0, 0, Math.PI]}
@@ -344,7 +344,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.coatRack)}>
+            <group onContextMenu={rcFocus(ANCHOR.coatRack)} userData={{ movable: true, anchorKey: 'coatRack' }}>
                 <CoatRack
                     position={ANCHOR.coatRack.position}
                     rotation={[0, 0, 0]}
@@ -361,7 +361,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.hat)}>
+            <group onContextMenu={rcFocus(ANCHOR.hat)} userData={{ movable: true, anchorKey: 'hat' }}>
                 <DetectiveHatSimple
                     position={ANCHOR.hat.position}
                     rotation={ANCHOR.hat.rotation}
@@ -370,7 +370,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookA)}>
+            <group onContextMenu={rcFocus(ANCHOR.bookA)} userData={{ movable: true, anchorKey: 'bookA' }}>
                 <Book
                     position={ANCHOR.bookA.position}
                     rotation={ANCHOR.bookA.rotation}
@@ -388,7 +388,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookB)}>
+            <group onContextMenu={rcFocus(ANCHOR.bookB)} userData={{ movable: true, anchorKey: 'bookB' }}>
                 <Book
                     position={ANCHOR.bookB.position}
                     rotation={ANCHOR.bookB.rotation}
@@ -400,7 +400,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.clock)}>
+            <group onContextMenu={rcFocus(ANCHOR.clock)} userData={{ movable: true, anchorKey: 'clock' }}>
                 <Clock
                     position={ANCHOR.clock.position}
                     rotation={ANCHOR.clock.rotation}
@@ -412,7 +412,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.plant)}>
+            <group onContextMenu={rcFocus(ANCHOR.plant)} userData={{ movable: true, anchorKey: 'plant' }}>
                 <PlantBamboo
                     position={ANCHOR.plant.position}
                     rotation={ANCHOR.clock.rotation}
@@ -423,7 +423,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardboard1)}>
+            <group onContextMenu={rcFocus(ANCHOR.cardboard1)} userData={{ movable: true, anchorKey: 'cardboard1' }}>
                 <CardboardBox
                     position={ANCHOR.cardboard1.position}
                     rotation={ANCHOR.cardboard1.rotation}
@@ -439,7 +439,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardbox01)}>
+            <group onContextMenu={rcFocus(ANCHOR.cardbox01)} userData={{ movable: true, anchorKey: 'cardbox01' }}>
                 <CardboardBoxInteractive
                     id="cardbox-01"
                     position={ANCHOR.cardbox01.position}
@@ -457,7 +457,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardboardLid1)}>
+            <group onContextMenu={rcFocus(ANCHOR.cardboardLid1)} userData={{ movable: true, anchorKey: 'cardboardLid1' }}>
                 <CardboardLid
                     position={ANCHOR.cardboardLid1.position}
                     rotation={ANCHOR.cardboardLid1.rotation}
@@ -471,7 +471,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.trashBin)}>
+            <group onContextMenu={rcFocus(ANCHOR.trashBin)} userData={{ movable: true, anchorKey: 'trashBin' }}>
                 <TrashBin
                     position={ANCHOR.trashBin.position}
                     rotation={ANCHOR.trashBin.rotation}
@@ -485,7 +485,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cigar1)} position={ANCHOR.cigar1.position} rotation={ANCHOR.cigar1.rotation}>
+            <group onContextMenu={rcFocus(ANCHOR.cigar1)} position={ANCHOR.cigar1.position} rotation={ANCHOR.cigar1.rotation} userData={{ movable: true, anchorKey: 'cigar1' }}>
                 <CigarWithSmoke
                     materialsById={cigarMaterials}
                     lit
@@ -501,7 +501,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.ashTray1)}>
+            <group onContextMenu={rcFocus(ANCHOR.ashTray1)} userData={{ movable: true, anchorKey: 'ashTray1' }}>
                 <AshTrayWood
                     position={ANCHOR.ashTray1.position}
                     rotation={ANCHOR.ashTray1.rotation}
@@ -509,7 +509,7 @@ function Scene({
                 />
             </group>
 
-            <mesh onContextMenu={rcFocus(ANCHOR.mapFrame)} position={ANCHOR.mapFrame.position} rotation={ANCHOR.mapFrame.rotation} raycast={() => null}>
+            <mesh onContextMenu={rcFocus(ANCHOR.mapFrame)} position={ANCHOR.mapFrame.position} rotation={ANCHOR.mapFrame.rotation} raycast={() => null} userData={{ movable: true, anchorKey: 'mapFrame' }}>
                 <FramedPlane
                     width={0.4}
                     height={0.2}
@@ -525,22 +525,25 @@ function Scene({
                 />
             </mesh>
 
-            <mesh onContextMenu={rcFocus(ANCHOR.calendar2025)} position={ANCHOR.calendar2025.position} rotation={ANCHOR.calendar2025.rotation} raycast={() => null}>
-                <FramedPlane
-                    width={0.4}
-                    height={0.3}
-                    textureUrl="/textures/calender2025.jpg"
-                    textureFit={"stretch"}
-                    border={0}
-                    color="#ggg"
-                    canInteract={false}
-                    lit
-                    roughness={1}
-                    metalness={0}
-                    receiveShadow
-                    doubleSide={false}
-                />
-            </mesh>
+            <group userData={{movable: true, anchorKey: 'calendar2025'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.calendar2025)} position={ANCHOR.calendar2025.position}
+                      rotation={ANCHOR.calendar2025.rotation}>
+                    <FramedPlane
+                        width={0.4}
+                        height={0.3}
+                        textureUrl="/textures/calender2025.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
             {/*    <Mug*/}
@@ -692,6 +695,9 @@ export default function DetectiveRoom() {
         typeof window !== 'undefined' &&
         (params.has('fly') || params.get('fly') === '1' || params.get('fly') === 'true')
 
+    const isMove = (params.has('move-objects') || params.get('move-objects') === '1' || params.get('move-objects') === 'true')
+    const [moverBusy, setMoverBusy] = React.useState(false)
+
     const shadowType =
         shadowPreset.type === 'basic'   ? THREE.BasicShadowMap :
             shadowPreset.type === 'pcf'     ? THREE.PCFShadowMap :
@@ -726,11 +732,12 @@ export default function DetectiveRoom() {
 
                     <FreeLookControls
                         qGoalRef={qGoalRef}
-                        enabled
+                        enabled={!isMove || !moverBusy}
                         lookSensitivity={mouseSensitivity}
                         orientDamping={orientDamping}
                     />
                     <DevFlyMove enabled={isDev} speed={3} verticalSpeed={3} smoothing={0} />
+                    <DevObjectMove enabled={isMove} onBusyChange={setMoverBusy} />
 
                     <PixelateNearestFX size={pixelateSize} />
                     <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />

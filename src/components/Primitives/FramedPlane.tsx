@@ -41,6 +41,7 @@ type FramedPlaneProps = CommonTransform & {
     shading?: 'basic' | 'lambert' | 'standard'
     envMapIntensity?: number
     castShadow?: boolean
+    devPickable?: boolean
 }
 
 export function FramedPlane({
@@ -77,6 +78,7 @@ export function FramedPlane({
                                 shading = 'standard',
                                 envMapIntensity = 1,
                                 castShadow = false,
+                                devPickable=true,
                             }: FramedPlaneProps) {
     const [hovered, setHovered] = React.useState(false)
     useCursor(canInteract && hovered)
@@ -196,7 +198,7 @@ export function FramedPlane({
                 {matKind === 'standard' && <meshStandardMaterial color={frameColor} side={side} metalness={frameMetalness} roughness={frameRoughness} envMapIntensity={envMapIntensity} {...framePolyProps} />}
             </mesh>
 
-            {canInteract && (
+            {(canInteract || devPickable) && (
                 <mesh position={[0, 0, Math.max(textureZ, 0) + 0.002]} onPointerOver={handleOver} onPointerOut={handleOut} onClick={handleClick}>
                     <planeGeometry args={[width + 2 * border, height + 2 * border]}/>
                     <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
