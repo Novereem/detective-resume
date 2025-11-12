@@ -120,3 +120,20 @@ export const ashTrayWoodMaterials = {
     restLip_0: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
     restLip_1: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
 }
+
+export const woodBlindsMaterials: Record<string, PartMaterialOverride> = {
+    head:   { textureUrl: '/textures/dark_planks.jpg', roughness: 0.95, metalness: 0.02 },
+    bottom: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    slat:   { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    tape:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 1.0, metalness: 0.0, color: '#d8d2c6' },
+}
+
+export const rectWindowMaterials: Record<string, PartMaterialOverride> = {
+    surround: { textureUrl: '/textures/dark_planks.jpg', roughness: 1.0, metalness: 0.0 },
+    frame:    { textureUrl: '/textures/ceramic.jpg',  color: '#858585', roughness: 0.85, metalness: 0.05 },
+    glass:    { color: '#777777', roughness: 0.0, metalness: 0.0 }
+}
+
+export const wallCutoutMaterials: Record<string, PartMaterialOverride> = {
+    panel: { textureUrl: '/textures/wallpaper_red.jpg', color: '#ffffff', roughness: 1, metalness: 0 },
+}

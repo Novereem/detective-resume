@@ -11,12 +11,24 @@ import { Mug } from "@/components/Models/Mug"
 
 import {
     ashTrayWoodMaterials,
-    bookMaterials, cardboardMaterials, cigarMaterials, clockMaterials,
+    bookMaterials,
+    cardboardMaterials,
+    cigarMaterials,
+    clockMaterials,
     coatRackMaterials,
     corkBoardMaterials,
-    deskMaterials, detectiveHatMaterials,
-    metalCabinetMaterials, metalDeskTopMaterials, metalDrawerMaterials,
-    mugMaterials, plantPotMaterials, secretFileMaterials, trashBinMaterials
+    deskMaterials,
+    detectiveHatMaterials,
+    metalCabinetMaterials,
+    metalDeskTopMaterials,
+    metalDrawerMaterials,
+    mugMaterials,
+    plantPotMaterials,
+    rectWindowMaterials,
+    secretFileMaterials,
+    trashBinMaterials,
+    wallCutoutMaterials,
+    woodBlindsMaterials
 } from "@/components/Materials/detectiveRoomMats"
 import {CorkBoard} from "@/components/Models/CorkBoard";
 import {LightBulb} from "@/components/Models/LightBulb";
@@ -53,6 +65,9 @@ import Cigar from "@/components/Models/Cigar";
 import AshTray, {AshTrayWood} from "@/components/Models/AshTray";
 import CigarSmokeFlat from "@/components/Effects/CigarSmoke";
 import CigarWithSmoke from "@/components/Models/CigarWithSmoke";
+import WoodBlinds from "@/components/Models/WoodBlinds";
+import RectWindow from "@/components/Models/RectWindow";
+import WallWithCutouts, {apertureFromWindow} from "@/components/Models/WallWithCutouts";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -158,8 +173,6 @@ function Scene({
         ))
     }, [puzzlesConfig, puzzleStatus, openInspect, rcFocus])
 
-
-
     return (
         <>
             {/* lights */}
@@ -239,20 +252,20 @@ function Scene({
                     />
                 </mesh>
 
-                {/* left wall */}
-                <mesh position={[-2.5, 2.5, 2.5]} rotation={[-Math.PI, (Math.PI / 2), 0]} raycast={() => null}>
+                {/* city scape */}
+                <mesh position={[-2.7, 1.5, 2.5]} rotation={[0, (Math.PI / 2), 0]} raycast={() => null}>
                     <FramedPlane
-                        width={5}
-                        height={5}
-                        textureUrl="/textures/wallpaper_red.jpg"
-                        textureRepeat={[4, 3]}
+                        width={3}
+                        height={2.5}
+                        textureUrl="/textures/cityscape.jpg"
+                        textureFit={"stretch"}
                         border={0}
-                        color="#777"
+                        color="#000000"
                         canInteract={false}
-                        lit
+                        lit={false}
                         roughness={1}
                         metalness={0}
-                        receiveShadow
+                        receiveShadow={false}
                     />
                 </mesh>
 
@@ -274,7 +287,7 @@ function Scene({
                 </mesh>
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.desk1)} userData={{ movable: true, anchorKey: 'desk1' }}>
+            <group onContextMenu={rcFocus(ANCHOR.desk1)} userData={{movable: true, anchorKey: 'desk1'}}>
                 <Desk
                     position={ANCHOR.desk1.position}
                     rotation={[0, 0, 0]}
@@ -290,7 +303,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.corkBoard)} userData={{ movable: true, anchorKey: 'corkBoard' }}>
+            <group onContextMenu={rcFocus(ANCHOR.corkBoard)} userData={{movable: true, anchorKey: 'corkBoard'}}>
                 <CorkBoard
                     position={ANCHOR.corkBoard.position}
                     rotation={[0, 0, 0]}
@@ -303,7 +316,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bulb)} userData={{ movable: true, anchorKey: 'bulb' }}>
+            <group onContextMenu={rcFocus(ANCHOR.bulb)} userData={{movable: true, anchorKey: 'bulb'}}>
                 <LightBulb
                     position={ANCHOR.bulb.position}
                     rotation={[0, 0, Math.PI]}
@@ -330,7 +343,36 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.coatRack)} userData={{ movable: true, anchorKey: 'coatRack' }}>
+            <group onContextMenu={rcFocus(ANCHOR.outsideLight1)} userData={{movable: true, anchorKey: 'outsideLight1'}}>
+                <LightBulb
+                    position={ANCHOR.outsideLight1.position}
+                    rotation={ANCHOR.outsideLight1.rotation}
+                    materialsById={{
+                        base: {color: '#b8bcc2', metalness: 0.85, roughness: 0.3},
+                        tip: {color: '#c5c9cf', metalness: 0.9, roughness: 0.2},
+                        collar: {color: '#ededed', metalness: 0.05, roughness: 0.65},
+                        neck: {color: '#dcdcdc', metalness: 0.0, roughness: 0.9},
+                        postL: {color: '#b9bcc0'},
+                        postR: {color: '#b9bcc0'},
+                        filament: {color: '#ffcc55'},
+                    }}
+                    disableOutline
+                    inspectDisableOutline
+                    enableLight
+                    castShadow={shadowsEnabled}
+                    shadowMapSize={shadowPreset.mapSize}
+                    shadowRadius={shadowPreset.radius}
+                    shadowBias={shadowPreset.bias}
+                    shadowNormalBias={shadowPreset.normalBias}
+                    shadowCameraNear={0.1}
+                    shadowCameraFar={4.8}
+                    lightColor={"#d0f5ff"}
+                    lightIntensity={0.5}
+
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.coatRack)} userData={{movable: true, anchorKey: 'coatRack'}}>
                 <CoatRack
                     position={ANCHOR.coatRack.position}
                     rotation={[0, 0, 0]}
@@ -347,7 +389,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.hat)} userData={{ movable: true, anchorKey: 'hat' }}>
+            <group onContextMenu={rcFocus(ANCHOR.hat)} userData={{movable: true, anchorKey: 'hat'}}>
                 <DetectiveHatSimple
                     position={ANCHOR.hat.position}
                     rotation={ANCHOR.hat.rotation}
@@ -356,7 +398,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookA)} userData={{ movable: true, anchorKey: 'bookA' }}>
+            <group onContextMenu={rcFocus(ANCHOR.bookA)} userData={{movable: true, anchorKey: 'bookA'}}>
                 <Book
                     position={ANCHOR.bookA.position}
                     rotation={ANCHOR.bookA.rotation}
@@ -374,7 +416,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookB)} userData={{ movable: true, anchorKey: 'bookB' }}>
+            <group onContextMenu={rcFocus(ANCHOR.bookB)} userData={{movable: true, anchorKey: 'bookB'}}>
                 <Book
                     position={ANCHOR.bookB.position}
                     rotation={ANCHOR.bookB.rotation}
@@ -386,7 +428,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.clock)} userData={{ movable: true, anchorKey: 'clock' }}>
+            <group onContextMenu={rcFocus(ANCHOR.clock)} userData={{movable: true, anchorKey: 'clock'}}>
                 <Clock
                     position={ANCHOR.clock.position}
                     rotation={ANCHOR.clock.rotation}
@@ -398,7 +440,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.plant)} userData={{ movable: true, anchorKey: 'plant' }}>
+            <group onContextMenu={rcFocus(ANCHOR.plant)} userData={{movable: true, anchorKey: 'plant'}}>
                 <PlantBamboo
                     position={ANCHOR.plant.position}
                     rotation={ANCHOR.clock.rotation}
@@ -409,7 +451,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardboard1)} userData={{ movable: true, anchorKey: 'cardboard1' }}>
+            <group onContextMenu={rcFocus(ANCHOR.cardboard1)} userData={{movable: true, anchorKey: 'cardboard1'}}>
                 <CardboardBox
                     position={ANCHOR.cardboard1.position}
                     rotation={ANCHOR.cardboard1.rotation}
@@ -425,7 +467,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardbox01)} userData={{ movable: true, anchorKey: 'cardbox01' }}>
+            <group onContextMenu={rcFocus(ANCHOR.cardbox01)} userData={{movable: true, anchorKey: 'cardbox01'}}>
                 <CardboardBoxInteractive
                     id="cardbox-01"
                     position={ANCHOR.cardbox01.position}
@@ -443,7 +485,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cardboardLid1)} userData={{ movable: true, anchorKey: 'cardboardLid1' }}>
+            <group onContextMenu={rcFocus(ANCHOR.cardboardLid1)} userData={{movable: true, anchorKey: 'cardboardLid1'}}>
                 <CardboardLid
                     position={ANCHOR.cardboardLid1.position}
                     rotation={ANCHOR.cardboardLid1.rotation}
@@ -457,7 +499,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.trashBin)} userData={{ movable: true, anchorKey: 'trashBin' }}>
+            <group onContextMenu={rcFocus(ANCHOR.trashBin)} userData={{movable: true, anchorKey: 'trashBin'}}>
                 <TrashBin
                     position={ANCHOR.trashBin.position}
                     rotation={ANCHOR.trashBin.rotation}
@@ -471,7 +513,8 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.cigar1)} position={ANCHOR.cigar1.position} rotation={ANCHOR.cigar1.rotation} userData={{ movable: true, anchorKey: 'cigar1' }}>
+            <group onContextMenu={rcFocus(ANCHOR.cigar1)} position={ANCHOR.cigar1.position}
+                   rotation={ANCHOR.cigar1.rotation} userData={{movable: true, anchorKey: 'cigar1'}}>
                 <CigarWithSmoke
                     materialsById={cigarMaterials}
                     lit
@@ -487,7 +530,7 @@ function Scene({
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.ashTray1)} userData={{ movable: true, anchorKey: 'ashTray1' }}>
+            <group onContextMenu={rcFocus(ANCHOR.ashTray1)} userData={{movable: true, anchorKey: 'ashTray1'}}>
                 <AshTrayWood
                     position={ANCHOR.ashTray1.position}
                     rotation={ANCHOR.ashTray1.rotation}
@@ -495,7 +538,9 @@ function Scene({
                 />
             </group>
 
-            <mesh onContextMenu={rcFocus(ANCHOR.mapFrame)} position={ANCHOR.mapFrame.position} rotation={ANCHOR.mapFrame.rotation} raycast={() => null} userData={{ movable: true, anchorKey: 'mapFrame' }}>
+            <mesh onContextMenu={rcFocus(ANCHOR.mapFrame)} position={ANCHOR.mapFrame.position}
+                  rotation={ANCHOR.mapFrame.rotation} raycast={() => null}
+                  userData={{movable: true, anchorKey: 'mapFrame'}}>
                 <FramedPlane
                     width={0.4}
                     height={0.2}
@@ -630,6 +675,62 @@ function Scene({
                     />
                 </mesh>
             </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.blinds1)} userData={{movable: true, anchorKey: 'blinds1'}}>
+                <WoodBlinds
+                    position={ANCHOR.blinds1.position}
+                    rotation={ANCHOR.blinds1.rotation}
+                    size={[0.62, 1.2, 0.05]}
+                    materialsById={woodBlindsMaterials}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.blinds2)} userData={{movable: true, anchorKey: 'blinds2'}}>
+                <WoodBlinds
+                    position={ANCHOR.blinds2.position}
+                    rotation={ANCHOR.blinds2.rotation}
+                    size={[0.62, 1, 0.05]}
+                    materialsById={woodBlindsMaterials}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.window1)} userData={{movable: true, anchorKey: 'window1'}}>
+                <RectWindow
+                    position={ANCHOR.window1.position}
+                    rotation={ANCHOR.window1.rotation}
+                    size={[0.75, 1.4, 0.05]}
+                    surroundBorder={0.04}
+                    frameW={0.04}
+                    frameDepth={0.02}
+                    windowOffset={-0.02}
+                    materialsById={rectWindowMaterials}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.window2)} userData={{movable: true, anchorKey: 'window2'}}>
+                <RectWindow
+                    position={ANCHOR.window2.position}
+                    rotation={ANCHOR.window2.rotation}
+                    size={[0.75, 1.4, 0.05]}
+                    surroundBorder={0.04}
+                    frameW={0.04}
+                    frameDepth={0.02}
+                    windowOffset={-0.02}
+                    materialsById={rectWindowMaterials}
+                />
+            </group>
+
+            <WallWithCutouts
+                position={[-2.5, 2.5, 2.5]}
+                rotation={[-Math.PI, Math.PI / 2, 0]}
+                size={[5, 5]}
+                textureRepeat={[1, 1]}
+                materialsById={wallCutoutMaterials}
+                holes={[
+                    { ...apertureFromWindow({ size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006 }), center: [ -0.2, 1.2] },
+                    { ...apertureFromWindow({ size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006 }), center: [ 0.8, 1.2] },
+                ]}
+            />
 
             {/*<group onContextMenu={rcFocus(ANCHOR.mug)}>*/}
             {/*    <Mug*/}
