@@ -23,6 +23,9 @@ type SettingsState = {
     controlsHintPosition: Corner
     setControlsHintPosition: (c: Corner) => void
 
+    moveBackToDeskEnabled: boolean
+    setMoveBackToDeskEnabled: (v: boolean) => void
+
     pixelateBase: number
     setPixelateBase: (n: number) => void
     pixelateSize: number
@@ -67,12 +70,15 @@ const ORIENT_BASE_KEY = 'cam.smooth.base.v1'
 const ORIENT_VAL_KEY  = 'cam.smooth.v1'
 const SHADOWS_ENABLED_KEY = 'gfx.shadows.enabled.v1'
 const SHADOW_QUALITY_KEY  = 'gfx.shadows.quality.v1'
+const BACK_TO_DESK_BTN_KEY = 'ui.backToDesk.enabled.v1'
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [menuOpen, setMenuOpen] = React.useState(false)
 
     const [controlsHintVisible, setControlsHintVisible] = React.useState(true)
     const [controlsHintPosition, setControlsHintPosition] = React.useState<Corner>('bottom-left')
+
+    const [moveBackToDeskEnabled, setMoveBackToDeskEnabled] = React.useState(true)
 
     const [pixelateBase, setPixelateBase] = React.useState<number>(2.7)
     const [pixelateSize, setPixelateSize] = React.useState<number>(2.7)
@@ -95,14 +101,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     const [shadowsEnabled, setShadowsEnabled] = React.useState(true)
     const [shadowQuality, setShadowQuality] = React.useState<ShadowQuality>('medium')
-    const hadShadowsEnabledRef = React.useRef(false)
-    const hadShadowQualityRef  = React.useRef(false)
 
     React.useEffect(() => {
         const v = localStorage.getItem(VISIBLE_KEY)
         if (v !== null) setControlsHintVisible(v === '1')
         const p = localStorage.getItem(POSITION_KEY) as Corner | null
         if (p) setControlsHintPosition(p)
+
+        const mb = localStorage.getItem(BACK_TO_DESK_BTN_KEY)
+        if (mb !== null) setMoveBackToDeskEnabled(mb === '1')
 
         const pb = localStorage.getItem(PX_BASE_KEY)
         const ps = localStorage.getItem(PX_SIZE_KEY)
@@ -124,6 +131,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(VISIBLE_KEY, controlsHintVisible ? '1' : '0') }, [controlsHintVisible])
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(POSITION_KEY, controlsHintPosition) }, [controlsHintPosition])
+    React.useEffect(() => { if (loadedRef.current) localStorage.setItem(BACK_TO_DESK_BTN_KEY, moveBackToDeskEnabled ? '1' : '0') }, [moveBackToDeskEnabled])
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(PX_BASE_KEY, String(pixelateBase)) }, [pixelateBase])
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(PX_SIZE_KEY, String(pixelateSize)) }, [pixelateSize])
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(SENS_BASE_KEY, String(mouseSensBase)) }, [mouseSensBase])
@@ -194,6 +202,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         menuOpen, setMenuOpen,
         controlsHintVisible, setControlsHintVisible,
         controlsHintPosition, setControlsHintPosition,
+        moveBackToDeskEnabled, setMoveBackToDeskEnabled,
         pixelateBase, setPixelateBase,
         pixelateSize, setPixelateSize,
         initializePixelBase,

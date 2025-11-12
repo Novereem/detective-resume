@@ -6,6 +6,7 @@ import { NotificationsProvider, NotificationsViewport } from '@/components/Notif
 import { ControlsHint } from '@/components/UI/ControlsHint'
 import EscapeMenu from '@/components/UI/EscapeMenu'
 import { SettingsProvider, useSettings } from '@/components/UI/SettingsProvider'
+import BackToDeskButton from "@/components/UI/BackToDeskButton";
 
 function StaticLoader({ message }: { message: string }) {
     return (
@@ -30,6 +31,7 @@ function OverlayedRoom() {
             <DetectiveRoom />
             <NotificationsViewport position="top-left" />
             <ControlsHint position={controlsHintPosition} scale={1.3} />
+            <BackToDeskButton />
             <EscapeMenu />
         </>
     )

@@ -9,6 +9,7 @@ export default function EscapeMenu() {
         menuOpen, setMenuOpen,
         controlsHintVisible, setControlsHintVisible,
         controlsHintPosition, setControlsHintPosition,
+        moveBackToDeskEnabled, setMoveBackToDeskEnabled,
         pixelateBase, pixelateSize, setPixelateSize, resetVisuals,
         mouseSensBase, mouseSensitivity, setMouseSensitivity,
         isInspecting,
@@ -123,8 +124,13 @@ export default function EscapeMenu() {
 
                             <div style={row}>
                                 <div style={{fontWeight: 600, marginBottom: 6}}>Controls Hint</div>
-                                <div style={{ display:'grid', gridTemplateColumns:'repeat(2, minmax(0,1fr))', gap:8, marginBottom:10 }}>
-                                    {(['top-left','top-right','bottom-left','bottom-right'] as const).map(c => (
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(2, minmax(0,1fr))',
+                                    gap: 8,
+                                    marginBottom: 10
+                                }}>
+                                    {(['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const).map(c => (
                                         <button key={c}
                                                 onClick={() => setControlsHintPosition(c)}
                                                 aria-pressed={controlsHintPosition === c}
@@ -137,46 +143,97 @@ export default function EscapeMenu() {
                                         </button>
                                     ))}
                                 </div>
-                                <label style={{display:'flex', alignItems:'center', gap:10}}>
-                                    <input type="checkbox" checked={controlsHintVisible} onChange={(e)=>setControlsHintVisible(e.target.checked)} />
-                                    <span style={{fontWeight:600}}>Show Controls Hint</span>
+                                <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                                    <input type="checkbox" checked={controlsHintVisible}
+                                           onChange={(e) => setControlsHintVisible(e.target.checked)}/>
+                                    <span style={{fontWeight: 600}}>Show Controls Hint</span>
                                 </label>
                             </div>
 
                             <div style={row}>
-                                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:10}}>
+                                <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                                    <input
+                                        type="checkbox"
+                                        checked={moveBackToDeskEnabled}
+                                        onChange={(e) => setMoveBackToDeskEnabled(e.target.checked)}
+                                    />
+                                    <span style={{fontWeight: 600}}>Show “Move back to desk” button</span>
+                                </label>
+                                <div style={{opacity: 0.7, fontSize: 12, marginTop: 6}}>
+                                    Quick action button at the bottom center of the screen.
+                                </div>
+                            </div>
+
+                            <div style={row}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10
+                                }}>
                                     <div>
-                                        <div style={{fontWeight:600}}>Mouse Sensitivity</div>
-                                        <div style={{opacity:0.65, fontSize:12, marginTop:2}}>Higher = faster camera movement</div>
+                                        <div style={{fontWeight: 600}}>Mouse Sensitivity</div>
+                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = faster camera
+                                            movement
+                                        </div>
                                     </div>
-                                    <div style={{display:'flex', alignItems:'center', gap:8}}>
-                                        <div style={{opacity:0.85, fontVariantNumeric:'tabular-nums'}}>{toUIReal(mouseSensitivity, minSens, maxSens).toFixed(1)}</div>
-                                        <button style={miniBtn} onClick={resetMouseSensitivityToBase} title="Reset to default">Reset</button>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                        <div style={{
+                                            opacity: 0.85,
+                                            fontVariantNumeric: 'tabular-nums'
+                                        }}>{toUIReal(mouseSensitivity, minSens, maxSens).toFixed(1)}</div>
+                                        <button style={miniBtn} onClick={resetMouseSensitivityToBase}
+                                                title="Reset to default">Reset
+                                        </button>
                                     </div>
                                 </div>
-                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1} value={toUIReal(mouseSensitivity, minSens, maxSens)}
-                                       onChange={(e)=>setMouseSensitivity(fromUI(parseFloat(e.target.value), minSens, maxSens))}
-                                       style={{ width:'100%', marginTop:10 }} />
-                                <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, opacity:0.7, marginTop:6 }}>
+                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
+                                       value={toUIReal(mouseSensitivity, minSens, maxSens)}
+                                       onChange={(e) => setMouseSensitivity(fromUI(parseFloat(e.target.value), minSens, maxSens))}
+                                       style={{width: '100%', marginTop: 10}}/>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontSize: 12,
+                                    opacity: 0.7,
+                                    marginTop: 6
+                                }}>
                                     <span>{UI_MIN}</span><span>{UI_MAX}</span>
                                 </div>
                             </div>
 
                             <div style={row}>
-                                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:10}}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10
+                                }}>
                                     <div>
-                                        <div style={{fontWeight:600}}>Camera Smoothing</div>
-                                        <div style={{opacity:0.65, fontSize:12, marginTop:2}}>Higher = snappier</div>
+                                        <div style={{fontWeight: 600}}>Camera Smoothing</div>
+                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = snappier</div>
                                     </div>
-                                    <div style={{display:'flex', alignItems:'center', gap:8}}>
-                                        <div style={{opacity:0.85, fontVariantNumeric:'tabular-nums'}}>{toUIReal(orientDamping, minDamp, maxDamp).toFixed(1)}</div>
-                                        <button style={miniBtn} onClick={resetSmoothingToBase} title="Reset to default">Reset</button>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                        <div style={{
+                                            opacity: 0.85,
+                                            fontVariantNumeric: 'tabular-nums'
+                                        }}>{toUIReal(orientDamping, minDamp, maxDamp).toFixed(1)}</div>
+                                        <button style={miniBtn} onClick={resetSmoothingToBase}
+                                                title="Reset to default">Reset
+                                        </button>
                                     </div>
                                 </div>
-                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1} value={toUIReal(orientDamping, minDamp, maxDamp)}
-                                       onChange={(e)=>setOrientDamping(fromUI(parseFloat(e.target.value), minDamp, maxDamp))}
-                                       style={{ width:'100%', marginTop:10 }} />
-                                <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, opacity:0.7, marginTop:6 }}>
+                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
+                                       value={toUIReal(orientDamping, minDamp, maxDamp)}
+                                       onChange={(e) => setOrientDamping(fromUI(parseFloat(e.target.value), minDamp, maxDamp))}
+                                       style={{width: '100%', marginTop: 10}}/>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontSize: 12,
+                                    opacity: 0.7,
+                                    marginTop: 6
+                                }}>
                                     <span>{UI_MIN}</span><span>{UI_MAX}</span>
                                 </div>
                             </div>
@@ -186,13 +243,23 @@ export default function EscapeMenu() {
                             <div style={groupTitle}>Video Settings</div>
 
                             <div style={row}>
-                                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:10}}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10
+                                }}>
                                     <div>
-                                        <div style={{fontWeight:600}}>Pixelization</div>
-                                        <div style={{opacity:0.65, fontSize:12, marginTop:2}}>Higher = more pixelized</div>
+                                        <div style={{fontWeight: 600}}>Pixelization</div>
+                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = more
+                                            pixelized
+                                        </div>
                                     </div>
-                                    <div style={{display:'flex', alignItems:'center', gap:8}}>
-                                        <div style={{opacity:0.85, fontVariantNumeric:'tabular-nums'}}>{toUIReal(pixelateSize, minPx, maxPx).toFixed(1)}</div>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                        <div style={{
+                                            opacity: 0.85,
+                                            fontVariantNumeric: 'tabular-nums'
+                                        }}>{toUIReal(pixelateSize, minPx, maxPx).toFixed(1)}</div>
                                         <button style={miniBtn} onClick={resetPixelizationToBase} title="Reset to default">Reset</button>
                                     </div>
                                 </div>

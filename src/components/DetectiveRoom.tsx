@@ -73,7 +73,6 @@ function Scene({
 
     const { shadowsEnabled, shadowPreset } = useSettings()
 
-
     const makeOpenInspectSecret = React.useCallback(
         (file: PositionedSecretFile) =>
             (p: InspectState) =>
@@ -158,6 +157,9 @@ function Scene({
             />
         ))
     }, [puzzlesConfig, puzzleStatus, openInspect, rcFocus])
+
+
+
     return (
         <>
             {/* lights */}
@@ -285,22 +287,6 @@ function Scene({
                     inspectDisableOutline={true}
                     visualizeHitbox={false}
                     disablePointer={true}
-                />
-            </group>
-
-            <group onContextMenu={rcFocus(ANCHOR.desk2)} userData={{ movable: true, anchorKey: 'desk2' }}>
-                <Desk
-                    position={ANCHOR.desk2.position}
-                    rotation={[0, Math.PI / 2, 0]}
-                    topSize={[1.7, 0.05, 0.6]}
-                    legHeight={0.65}
-                    color="#fff"
-                    outlineScale={6.56}
-                    outlinePerPart={{topScale: 1.04, legScale: 1.1}}
-                    inspectPixelSize={3}
-                    materialsById={deskMaterials}
-                    disableOutline={false}
-                    inspectDisableOutline={true}
                 />
             </group>
 
@@ -529,9 +515,109 @@ function Scene({
                 <mesh onContextMenu={rcFocus(ANCHOR.calendar2025)} position={ANCHOR.calendar2025.position}
                       rotation={ANCHOR.calendar2025.rotation}>
                     <FramedPlane
-                        width={0.4}
-                        height={0.3}
+                        width={0.6}
+                        height={0.45}
                         textureUrl="/textures/calender2025.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'newspaper1'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.newspaper1)} position={ANCHOR.newspaper1.position}
+                      rotation={ANCHOR.newspaper1.rotation}>
+                    <FramedPlane
+                        width={0.6}
+                        height={0.45}
+                        textureUrl="/textures/newspapers.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'newspaper2'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.newspaper2)} position={ANCHOR.newspaper2.position}
+                      rotation={ANCHOR.newspaper2.rotation}>
+                    <FramedPlane
+                        width={0.6}
+                        height={0.45}
+                        textureUrl="/textures/newspapers.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'newspaper3'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.newspaper3)} position={ANCHOR.newspaper3.position}
+                      rotation={ANCHOR.newspaper3.rotation}>
+                    <FramedPlane
+                        width={0.6}
+                        height={0.45}
+                        textureUrl="/textures/newspapers.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'writtenLetter1'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.writtenLetter1)} position={ANCHOR.writtenLetter1.position}
+                      rotation={ANCHOR.writtenLetter1.rotation}>
+                    <FramedPlane
+                        width={0.25}
+                        height={0.35}
+                        textureUrl="/textures/written_letter.jpg"
+                        textureFit={"stretch"}
+                        border={0}
+                        color="#ffffff"
+                        canInteract={false}
+                        lit
+                        roughness={1}
+                        metalness={0}
+                        receiveShadow
+                        doubleSide={false}
+                    />
+                </mesh>
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'writtenLetter2'}}>
+                <mesh onContextMenu={rcFocus(ANCHOR.writtenLetter2)} position={ANCHOR.writtenLetter2.position}
+                      rotation={ANCHOR.writtenLetter2.rotation}>
+                    <FramedPlane
+                        width={0.25}
+                        height={0.35}
+                        textureUrl="/textures/written_letter.jpg"
                         textureFit={"stretch"}
                         border={0}
                         color="#ffffff"
@@ -702,6 +788,12 @@ export default function DetectiveRoom() {
         shadowPreset.type === 'basic'   ? THREE.BasicShadowMap :
             shadowPreset.type === 'pcf'     ? THREE.PCFShadowMap :
                 THREE.PCFSoftShadowMap
+
+    React.useEffect(() => {
+        const handler = () => setMoveReq({ camera: [0, 1, 3], lookAt: [0, 1, 4] })
+        window.addEventListener('tt:moveBackToDesk' as any, handler)
+        return () => window.removeEventListener('tt:moveBackToDesk' as any, handler)
+    }, [])
 
     return (
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
