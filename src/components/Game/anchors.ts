@@ -36,7 +36,7 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     bookA:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
     bookB:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
 
-    clock:   { eye: [2.0, 1.6, 3.6], position: [2.46, 2.00, 4.60], rotation: [Math.PI, -Math.PI/2, Math.PI] },
+    clock: { eye: [2.000, 1.600, 3.600], position: [-1.110, 1.730, 4.968], rotation: [-Math.PI, 0, -Math.PI] },
 
     plant: { eye: [1.000, 1.200, 3.500], position: [1.047, 0.734, 4.397], rotation: [0, 0.200, 0] },
 
@@ -46,8 +46,8 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
 
     trashBin: { eye: [-1.100, 1.050, 3.200], position: [-1.138, 0.191, 4.172], rotation: [0, 0.350, 0] },
 
-    cigar1:   { eye: [-0.80, 1.05, 3.2], position: [-0.80, 0.795, 4.06], rotation: [1, -0.35, Math.PI/2] },
-    ashTray1: { eye: [-0.76, 1.05, 3.2], position: [-0.76, 0.778, 4.06], rotation: [0, -0.28, 0] },
+    cigar1: { eye: [-0.800, 1.050, 3.200], position: [-0.769, 0.795, 4.408], rotation: [1.000, -0.350, Math.PI/2] },
+    ashTray1: { eye: [-0.760, 1.050, 3.200], position: [-0.741, 0.778, 4.421], rotation: [0, -0.280, 0] },
 
     mapFrame: { eye: [0.2, 1.3, 3.6], position: [0.40, 1.60, 4.965], rotation: [Math.PI, 0, Math.PI + 0.05] },
     calendar2025: { eye: [0.900, 1.300, 3.600], position: [1.05, 1.677, 4.988], rotation: [Math.PI, 0, Math.PI] },

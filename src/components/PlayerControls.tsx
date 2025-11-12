@@ -414,9 +414,12 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
     const pivotWorld = React.useRef(new THREE.Vector3())
     const dragStartVec = React.useRef(new THREE.Vector3())
 
-    // Axis-line state (pivot at gizmo center)
     const axisOriginW = React.useRef(new THREE.Vector3())
     const uStart = React.useRef(0)
+
+    const rotSnapHeld = React.useRef(false)
+
+    const selectionStartById = React.useRef<Map<string, THREE.Matrix4>>(new Map())
 
     const setBusy = React.useCallback((v: boolean) => onBusyChange?.(v), [onBusyChange])
     const EPS = 1e-3
@@ -541,7 +544,6 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
     const axisUnit = (axis: 'x'|'y'|'z') =>
         axis === 'x' ? new THREE.Vector3(1,0,0) : axis === 'y' ? new THREE.Vector3(0,1,0) : new THREE.Vector3(0,0,1)
 
-    // ray ↔ line (through axisOriginW in direction a, both world-space) : get scalar u along a
     const closestUToRay = (ray: THREE.Ray, p0: THREE.Vector3, a: THREE.Vector3) => {
         const ro = ray.origin, rd = ray.direction.clone().normalize()
         const A = a.clone().normalize()
@@ -549,7 +551,6 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         const c = A.dot(rd)
         const denom = 1 - c*c
         if (Math.abs(denom) < 1e-6) {
-            // fallback: plane through p0, normal as viewDir×A×A (keeps axis in-plane)
             const view = new THREE.Vector3(); camera.getWorldDirection(view)
             const n = new THREE.Vector3().crossVectors(A, view).cross(A).normalize()
             if (n.lengthSq() < 1e-6) n.set(0,1,0).cross(A).normalize()
@@ -568,7 +569,6 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         parentWorldInv.current.copy(selected.current!.parent?.matrixWorld ?? tmpM2.current.identity()).invert()
         tmpAxisW.current.copy(axisUnit(axis))
 
-        // pivot at the gizmo center (matches the visible handles)
         const pivot = gizmo.current?.position ?? selected.current!.getWorldPosition(new THREE.Vector3())
         axisOriginW.current.copy(pivot)
 
@@ -635,8 +635,13 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
                 const sin = THREE.MathUtils.clamp(cross.dot(axis), -1, 1)
                 const cos = THREE.MathUtils.clamp(dragStartVec.current.dot(vNow), -1, 1)
                 let ang = Math.atan2(sin, cos)
-                if (ev.shiftKey) {
-                    const snapRad = THREE.MathUtils.degToRad(15)
+                let snapRad: number | null = null
+                if (rotSnapHeld.current) {
+                    snapRad = THREE.MathUtils.degToRad(22.5)
+                } else if (ev.shiftKey) {
+                    snapRad = THREE.MathUtils.degToRad(15)
+                }
+                if (snapRad) {
                     ang = Math.round(ang / snapRad) * snapRad
                 }
                 const dq = tmpQ.current.setFromAxisAngle(axis, ang)
@@ -676,26 +681,39 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         const isTrans = !!(hit && (hit.object as any).userData?.kind === 'translate' && selected.current)
         const isRot   = !!(hit && (hit.object as any).userData?.kind === 'rotate'    && selected.current)
         const root    = hit ? toTopMovable(hit.object) : null
+
         if (isTrans || isRot || root) { ev.stopImmediatePropagation?.(); ev.preventDefault?.() }
         if (isTrans) { startTranslate((hit!.object as any).userData.axis); return }
         if (isRot)   { startRotate((hit!.object as any).userData.axis);    return }
 
-        selected.current = root
-        const key = root ? ((root as any).userData?.anchorKey as AnchorKey) ?? null : null
-        selectedAnchorKey.current = key
+        const changed = root && root !== selected.current
+
+        if (changed) {
+            selected.current = root
+            const key = ((root as any).userData?.anchorKey ?? null) as AnchorKey | null
+            selectedAnchorKey.current = key
+            if (key) {
+                const base = ANCHOR[key]
+                const basePos = new THREE.Vector3().fromArray(base.position as any)
+                const br = base.rotation ?? [0, 0, 0]
+                const baseQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(br[0], br[1], br[2], 'XYZ'))
+                baseAnchorMat.current.compose(basePos, baseQuat, new THREE.Vector3(1,1,1))
+
+                selected.current.updateMatrixWorld(true)
+                const id = selected.current.uuid
+                const firstSeen = selectionStartById.current.get(id)
+                if (firstSeen) {
+                    selectionStartWorldMat.current.copy(firstSeen)
+                } else {
+                    const m0 = selected.current.matrixWorld.clone()
+                    selectionStartById.current.set(id, m0.clone())
+                    selectionStartWorldMat.current.copy(m0)
+                }
+            }
+        }
+
         showGizmoAt(root)
         updateBoxFor(root)
-
-        if (selected.current && key) {
-            const base = ANCHOR[key]
-            const basePos = new THREE.Vector3().fromArray(base.position as any)
-            const br = base.rotation ?? [0, 0, 0]
-            const baseQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(br[0], br[1], br[2], 'XYZ'))
-            baseAnchorMat.current.compose(basePos, baseQuat, new THREE.Vector3(1,1,1))
-
-            selected.current.updateMatrixWorld(true)
-            selectionStartWorldMat.current.copy(selected.current.matrixWorld)
-        }
     }
 
     const onUp = () => {
@@ -739,7 +757,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
                     `position: [${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)}], ` +
                     `rotation: [${fmtRad(e.x)}, ${fmtRad(e.y)}, ${fmtRad(e.z)}] },`
 
-                console.log('// Paste into anchors.ts:\n' + line)
+                console.log('New coordinates: ' + line)
                 navigator.clipboard?.writeText(line).catch(() => {})
             }
         }
@@ -750,25 +768,54 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         if (!enabled) return
         ensureBoxHelper(); ensureGizmo(); updateGizmoVisibility()
         const el = gl.domElement
-        const key = (e: KeyboardEvent) => {
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (!enabled) return
             if (e.code === 'KeyQ') { mode.current = 'translate'; updateGizmoVisibility() }
             if (e.code === 'KeyE') { mode.current = 'rotate'; if (selected.current) showGizmoAt(selected.current); updateGizmoVisibility() }
+            if (e.code === 'KeyR') { rotSnapHeld.current = true }
+
+            if (e.code === 'KeyC') {
+                const obj = selected.current
+                if (obj) {
+                    obj.updateMatrixWorld(true)
+                    const id = obj.uuid
+                    const m = obj.matrixWorld.clone()
+                    selectionStartById.current.set(id, m.clone())
+                    selectionStartWorldMat.current.copy(m)
+                    console.log('[DevMove] reset sinceSelect for', id)
+                }
+            }
+
+            if (e.code === 'KeyX' && e.shiftKey) {
+                selectionStartById.current.clear()
+                console.log('[DevMove] cleared all sinceSelect starts')
+            }
         }
+        const onKeyUp = (e: KeyboardEvent) => {
+            if (!enabled) return
+            if (e.code === 'KeyR') { rotSnapHeld.current = false }
+        }
+
         el.addEventListener('pointermove', onMove)
         el.addEventListener('pointerdown', onDown)
         window.addEventListener('pointerup', onUp)
-        window.addEventListener('keydown', key)
+        window.addEventListener('keydown', onKeyDown)
+        window.addEventListener('keyup', onKeyUp)
+
         return () => {
             el.removeEventListener('pointermove', onMove)
             el.removeEventListener('pointerdown', onDown)
             window.removeEventListener('pointerup', onUp)
-            window.removeEventListener('keydown', key)
+            window.removeEventListener('keydown', onKeyDown)
+            window.removeEventListener('keyup', onKeyUp)
             if (boxHelper.current) boxHelper.current.visible = false
             if (gizmo.current) gizmo.current.visible = false
             selected.current = null
             picking.current = false
             dragAxis.current = null
             setBusy(false)
+            selectionStartById.current.clear()
         }
     }, [enabled, gl, camera, scene, setBusy])
 
