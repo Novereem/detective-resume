@@ -69,11 +69,11 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     writtenLetter1: { eye: [0.900, 1.300, 3.600], position: [1.136, 1.550, 4.995], rotation: [Math.PI, 0, -2.848] },
     writtenLetter2: { eye: [0.900, 1.300, 3.600], position: [1.015, 1.750, 4.997], rotation: [Math.PI, 0, 2.904] },
 
-    blinds1: { eye: [0.900, 1.300, 3.600], position: [-2.528, 1.5, 3.299], rotation: [0, Math.PI/2, 0] },
-    blinds2: { eye: [0.900, 1.300, 3.600], position: [-2.528, 1.5, 2.299], rotation: [0, Math.PI/2, 0] },
+    blinds1: { eye: [0.900, 1.300, 3.600], position: [-1.528, 1.5, 3.299], rotation: [0, Math.PI/2, 0] },
+    blinds2: { eye: [0.900, 1.300, 3.600], position: [-1.528, 1.5, 2.299], rotation: [0, Math.PI/2, 0] },
 
-    window1: { eye: [0.900, 1.300, 3.600], position: [-2.517, 1.314, 3.293], rotation: [0, Math.PI/2, 0] },
-    window2: { eye: [0.900, 1.300, 3.600], position: [-2.517, 1.314, 2.293], rotation: [0, Math.PI/2, 0] },
+    window1: { eye: [0.900, 1.300, 3.600], position: [-1.517, 1.314, 3.293], rotation: [0, Math.PI/2, 0] },
+    window2: { eye: [0.900, 1.300, 3.600], position: [-1.517, 1.314, 2.293], rotation: [0, Math.PI/2, 0] },
 
-    outsideLight1: { eye: [0.900, 1.300, 3.600], position: [-3.079, 1.740, 2.293], rotation: [0, Math.PI/2, 0] },
+    outsideLight1: { eye: [0.900, 1.300, 3.600], position: [-2.079, 1.740, 2.293], rotation: [0, Math.PI/2, 0] },
 }

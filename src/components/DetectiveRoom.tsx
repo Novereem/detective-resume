@@ -236,7 +236,7 @@ function Scene({
                 </mesh>
 
                 {/* front wall */}
-                <mesh position={[0, 2.5, 0]} rotation={[0, 0, Math.PI]} raycast={() => null}>
+                <mesh position={[0, 2.5, 1]} rotation={[0, 0, Math.PI]} raycast={() => null}>
                     <FramedPlane
                         width={5}
                         height={5}
@@ -253,7 +253,7 @@ function Scene({
                 </mesh>
 
                 {/* city scape */}
-                <mesh position={[-2.7, 1.5, 2.5]} rotation={[0, (Math.PI / 2), 0]} raycast={() => null}>
+                <mesh position={[-1.7, 1.5, 2.5]} rotation={[0, (Math.PI / 2), 0]} raycast={() => null}>
                     <FramedPlane
                         width={3}
                         height={2.5}
@@ -340,6 +340,7 @@ function Scene({
                     shadowCameraNear={0.1}
                     shadowCameraFar={4.8}
                     inspectPixelSize={3}
+                    lightIntensity={2}
                 />
             </group>
 
@@ -367,7 +368,7 @@ function Scene({
                     shadowCameraNear={0.1}
                     shadowCameraFar={4.8}
                     lightColor={"#d0f5ff"}
-                    lightIntensity={0.5}
+                    lightIntensity={1}
 
                 />
             </group>
@@ -721,7 +722,7 @@ function Scene({
             </group>
 
             <WallWithCutouts
-                position={[-2.5, 2.5, 2.5]}
+                position={[-1.5, 2.5, 2.5]}
                 rotation={[-Math.PI, Math.PI / 2, 0]}
                 size={[5, 5]}
                 textureRepeat={[1, 1]}
