@@ -10,7 +10,7 @@ import { Mug } from "@/components/Models/Mug"
 
 
 import {
-    ashTrayWoodMaterials,
+    ashTrayWoodMaterials, binderMaterials,
     bookMaterials,
     cardboardMaterials,
     cigarMaterials,
@@ -68,6 +68,7 @@ import CigarWithSmoke from "@/components/Models/CigarWithSmoke";
 import WoodBlinds from "@/components/Models/WoodBlinds";
 import RectWindow from "@/components/Models/RectWindow";
 import WallWithCutouts, {apertureFromWindow} from "@/components/Models/WallWithCutouts";
+import {Binder} from "@/components/Models/Binder";
 
 function Scene({
                    openInspect, requestMove, files, drawerFiles, poofs, onPoofDone, drawers,
@@ -429,6 +430,78 @@ function Scene({
                 />
             </group>
 
+            <group onContextMenu={rcFocus(ANCHOR.binder1)} userData={{movable: true, anchorKey: 'binder1'}}>
+                <Binder
+                    position={ANCHOR.binder1.position}
+                    rotation={ANCHOR.binder1.rotation}
+                    materialsById={{
+                        ...binderMaterials,
+                        coverFront: {...binderMaterials.coverFront, color: '#304a7a'},
+                        coverBack: {...binderMaterials.coverBack, color: '#334e80'},
+                        spine: {...binderMaterials.spine, color: '#263a60'},
+                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
+                    }}
+                    paperFill={0.9}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.binder2)} userData={{movable: true, anchorKey: 'binder2'}}>
+                <Binder
+                    position={ANCHOR.binder2.position}
+                    rotation={ANCHOR.binder2.rotation}
+                    materialsById={{
+                        ...binderMaterials,
+                        coverFront: {...binderMaterials.coverFront, color: '#6d1f1f'},
+                        coverBack: {...binderMaterials.coverBack, color: '#6d1f1f'},
+                        spine: {...binderMaterials.spine, color: '#4f1616'},
+                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
+                    }}
+                    paperFill={0.7}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.binder3)} userData={{movable: true, anchorKey: 'binder3'}}>
+                <Binder
+                    position={ANCHOR.binder3.position}
+                    rotation={ANCHOR.binder3.rotation}
+                    materialsById={{
+                        ...binderMaterials,
+                        coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},
+                        coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},
+                        spine: {...binderMaterials.spine, color: '#104326'},
+                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
+                    }}
+                    paperFill={0.4}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.binder4)} userData={{movable: true, anchorKey: 'binder4'}}>
+                <Binder
+                    position={ANCHOR.binder4.position}
+                    rotation={ANCHOR.binder4.rotation}
+                    materialsById={{
+                        ...binderMaterials,
+                        coverFront: {...binderMaterials.coverFront, color: '#262626'},
+                        coverBack: {...binderMaterials.coverBack, color: '#262626'},
+                        spine: {...binderMaterials.spine, color: '#141414'},
+                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
+                    }}
+                    paperFill={0.15}
+                    disableOutline
+                    inspectDisableOutline
+                    inspectPixelSize={3}
+                />
+            </group>
+
             <group onContextMenu={rcFocus(ANCHOR.clock)} userData={{movable: true, anchorKey: 'clock'}}>
                 <Clock
                     position={ANCHOR.clock.position}
@@ -728,8 +801,14 @@ function Scene({
                 textureRepeat={[1, 1]}
                 materialsById={wallCutoutMaterials}
                 holes={[
-                    { ...apertureFromWindow({ size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006 }), center: [ -0.2, 1.2] },
-                    { ...apertureFromWindow({ size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006 }), center: [ 0.8, 1.2] },
+                    {
+                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
+                        center: [-0.2, 1.2]
+                    },
+                    {
+                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
+                        center: [0.8, 1.2]
+                    },
                 ]}
             />
 
@@ -848,12 +927,12 @@ export default function DetectiveRoom() {
         initializeMouseSensitivity(0.0022)
     }, [initializeMouseSensitivity])
 
-    const {orientDamping, initializeOrientDamping } = useSettings()
+    const {orientDamping, initializeOrientDamping} = useSettings()
     React.useEffect(() => {
         initializeOrientDamping(20) // Higher is snappier
     }, [initializeOrientDamping])
 
-    const { shadowsEnabled, shadowPreset} = useSettings()
+    const {shadowsEnabled, shadowPreset} = useSettings()
 
     const [moveReq, setMoveReq] = React.useState<MoveRequest | null>(null)
     const qGoalRef = React.useRef(new THREE.Quaternion())
@@ -872,8 +951,8 @@ export default function DetectiveRoom() {
         }
     }, [])
 
-    const {files, drawer_files, poofs, drawers, puzzlesConfig } = useGameState()
-    const { removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle, requestOpenCardboardBox } = useGameActions()
+    const {files, drawer_files, poofs, drawers, puzzlesConfig} = useGameState()
+    const {removePoof, handleSecretOpen, pinPuzzle, solveIdToPuzzle, requestOpenCardboardBox} = useGameActions()
 
     const prevCamPosRef = React.useRef<Vec3>([0, 1, 3])
     const prevLookAtRef = React.useRef<Vec3>([0, 1, 4])
@@ -887,12 +966,12 @@ export default function DetectiveRoom() {
     const [moverBusy, setMoverBusy] = React.useState(false)
 
     const shadowType =
-        shadowPreset.type === 'basic'   ? THREE.BasicShadowMap :
-            shadowPreset.type === 'pcf'     ? THREE.PCFShadowMap :
+        shadowPreset.type === 'basic' ? THREE.BasicShadowMap :
+            shadowPreset.type === 'pcf' ? THREE.PCFShadowMap :
                 THREE.PCFSoftShadowMap
 
     React.useEffect(() => {
-        const handler = () => setMoveReq({ camera: [0, 1, 3], lookAt: [0, 1, 4] })
+        const handler = () => setMoveReq({camera: [0, 1, 3], lookAt: [0, 1, 4]})
         window.addEventListener('tt:moveBackToDesk' as any, handler)
         return () => window.removeEventListener('tt:moveBackToDesk' as any, handler)
     }, [])
@@ -901,7 +980,7 @@ export default function DetectiveRoom() {
         <div style={{position: 'fixed', inset: 0}} onContextMenu={(e) => e.preventDefault()}>
             <div style={{position: 'absolute', inset: 0}}>
                 <Canvas
-                    shadows={shadowsEnabled ? { type: shadowType } : false}
+                    shadows={shadowsEnabled ? {type: shadowType} : false}
                     dpr={[1, 1.25]}
                     camera={{position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0]}}
                     gl={{
@@ -909,8 +988,9 @@ export default function DetectiveRoom() {
                         alpha: false,
                         depth: true,
                         stencil: false,
-                        powerPreference: 'high-performance', preserveDrawingBuffer: false }}
-                    style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
+                        powerPreference: 'high-performance', preserveDrawingBuffer: false
+                    }}
+                    style={{width: '100%', height: '100%', imageRendering: 'pixelated'}}
                 >
                     <Scene
                         openInspect={setInspect}

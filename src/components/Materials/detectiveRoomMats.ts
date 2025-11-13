@@ -137,3 +137,13 @@ export const rectWindowMaterials: Record<string, PartMaterialOverride> = {
 export const wallCutoutMaterials: Record<string, PartMaterialOverride> = {
     panel: { textureUrl: '/textures/wallpaper_red.jpg', color: '#ffffff', roughness: 1, metalness: 0 },
 }
+
+export const binderMaterials: Record<string, PartMaterialOverride> = {
+    coverFront: { textureUrl: '/textures/binder_cover.jpg', roughness: 0.9, metalness: 0.0 },
+    coverBack:  { textureUrl: '/textures/binder_cover.jpg', roughness: 0.9, metalness: 0.0 },
+    spine:      { textureUrl: '/textures/binder_spine.jpg', roughness: 0.9, metalness: 0.0 },
+    innerBoard: { textureUrl: '/textures/binder_inside.jpg', roughness: 0.95, metalness: 0.0 },
+    paper:      { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.97, metalness: 0.0 },
+    ringRail:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 0.9 },
+    ring:       { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.3,  metalness: 1.0 },
+}

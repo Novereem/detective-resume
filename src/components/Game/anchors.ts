@@ -6,6 +6,7 @@ export type AnchorKey =
     | "deskTopSpawn" | "drawerLeftTopContent"
     | "photoClueFrame"| "photoBlueFrame"| "deskTopSpawn2" | "testPuzzle3"
     | "bookA" | "bookB"
+    | "binder1" | "binder2" | "binder3" | "binder4"
     | "clock"
     | "plant"
     | "cardboard1" | "cardbox01" | "cardboardLid1"
@@ -45,6 +46,11 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
 
     bookA:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
     bookB:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
+
+    binder1: { eye: [0.2, 1.3, 3.6], position: [0.96, 0.705, 4.23], rotation: [Math.PI, -0.45, 0] },
+    binder2: { eye: [0.2, 1.3, 3.6], position: [1.06, 0.705, 4.22], rotation: [Math.PI, -0.25, 0.05] },
+    binder3: { eye: [0.2, 1.3, 3.6], position: [1.16, 0.705, 4.21], rotation: [Math.PI, -0.1, 0.12] },
+    binder4: { eye: [0.2, 1.3, 3.6], position: [1.26, 0.705, 4.20], rotation: [Math.PI, 0.05, 0.18] },
 
     clock: { eye: [2.000, 1.600, 3.600], position: [-1.110, 1.730, 4.968], rotation: [-Math.PI, 0, -Math.PI] },
 
