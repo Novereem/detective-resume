@@ -31,7 +31,7 @@ export type BinderProps = Inherited & {
 export const Binder = memo(function Binder({
                                                size = [0.24, 0.055, 0.32],
                                                sizeMultiplier = 1,
-                                               spineThickness = 0.032,
+                                               spineThickness = 0.012,
                                                coverThickness = 0.0035,
                                                pageInset = 0.003,
                                                paperFill = 0.7,
@@ -68,10 +68,12 @@ export const Binder = memo(function Binder({
 
         const boundR = Math.max(WScaled, HScaled) * 0.5
 
+        // Back cover
         p.push({
             id: 'coverBack',
             geometry: <boxGeometry args={[WScaled, clampedCover, HScaled]} />,
-            position: [0, -TScaled / 2 + clampedCover / 2, 0],
+            position: [0, -TScaled / 2 + clampedCover / 2 + (0.00007/paperT), 0],
+            rotation: [0,0,0.0005/paperT],
             color,
             outlineColor,
             boundingRadius: boundR,
@@ -79,10 +81,12 @@ export const Binder = memo(function Binder({
             metalness: 0.0,
         })
 
+        // Front cover
         p.push({
             id: 'coverFront',
             geometry: <boxGeometry args={[WScaled, clampedCover, HScaled]} />,
-            position: [0, TScaled / 2 - clampedCover / 2, 0],
+            position: [0, TScaled / 2 - clampedCover / 2 - (0.00007/paperT), 0],
+            rotation: [0,0,-0.0005/paperT],
             color,
             outlineColor,
             boundingRadius: boundR,
@@ -90,9 +94,10 @@ export const Binder = memo(function Binder({
             metalness: 0.0,
         })
 
+        // Spine block
         p.push({
             id: 'spine',
-            geometry: <boxGeometry args={[clampedSpine, TScaled, HScaled]} />,
+            geometry: <boxGeometry args={[clampedSpine, TScaled - 0.005, HScaled]} />,
             position: [-WScaled / 2 + clampedSpine / 2, 0, 0],
             color,
             outlineColor,
@@ -101,23 +106,13 @@ export const Binder = memo(function Binder({
             metalness: 0.0,
         })
 
-        p.push({
-            id: 'innerBoard',
-            geometry: <boxGeometry args={[innerW, innerT * 0.3, innerH]} />,
-            position: [-WScaled / 2 + clampedSpine + innerW / 2, 0, 0],
-            color,
-            outlineColor,
-            boundingRadius: boundR,
-            roughness: 0.95,
-            metalness: 0.0,
-        })
-
+        // Paper stack
         if (paperT > 0.0005) {
             p.push({
                 id: 'paper',
                 geometry: <boxGeometry args={[innerW * 0.94, paperT, innerH * 0.96]} />,
                 position: [
-                    -WScaled / 2 + clampedSpine + innerW / 2,
+                    -WScaled / 2 + clampedSpine + innerW / 2 - 0.01,
                     0,
                     0,
                 ],
@@ -129,24 +124,51 @@ export const Binder = memo(function Binder({
             })
         }
 
-        const railW = innerW * 0.6
-        const railT = Math.max(innerT * 0.18, ringTubeRadius * 4)
-        const railH = ringTubeRadius * 3
-
-        const railX = -WScaled / 2 + clampedSpine + innerW * ringOffsetRatio
-        const railY = 0
-        const railZ = 0
+        // Spine label
+        const labelThickness = clampedSpine * 0.06
+        const labelHeight = HScaled * 0.22
+        const labelWidth = Math.min(TScaled * 0.55, innerT * 0.9)
 
         p.push({
-            id: 'ringRail',
-            geometry: <boxGeometry args={[railW, railT, railH]} />,
-            position: [railX, railY, railZ],
+            id: 'spineLabel',
+            geometry: <boxGeometry args={[labelThickness, labelWidth, labelHeight]} />,
+            position: [
+                -WScaled / 2 + clampedSpine - labelThickness / 2 - 0.0121,
+                0,
+                0,
+            ],
             color,
             outlineColor,
-            boundingRadius: railW * 0.6,
+            boundingRadius: labelHeight * 0.6,
+            roughness: 0.96,
+            metalness: 0.0,
+        })
+
+        // Spine pull ring
+        const spineRingRadius = Math.min(clampedSpine, TScaled) * 0.8
+        const spineRingTubeRadius = spineRingRadius * 0.05
+
+        p.push({
+            id: 'spineRing',
+            geometry: <torusGeometry args={[spineRingRadius, spineRingTubeRadius, 12, 32]} />,
+            position: [
+                -WScaled / 2 + clampedSpine - spineRingTubeRadius * 0.4 - 0.015,
+                0,
+                -HScaled * 0.28,
+            ],
+            rotation: [0,Math.PI /2 ,0 ],
+            color,
+            outlineColor,
+            boundingRadius: spineRingRadius + spineRingTubeRadius,
             roughness: 0.35,
             metalness: 0.9,
         })
+
+        // Inner ring rail
+        const railT = Math.max(innerT * 0.18, ringTubeRadius * 4)
+
+        const railX = -WScaled / 2 + clampedSpine + innerW * ringOffsetRatio
+        const railY = 0
 
         const rings = Math.max(1, Math.floor(ringCount))
         const usableSpan = innerH * ringSpanRatio
@@ -158,21 +180,9 @@ export const Binder = memo(function Binder({
 
             p.push({
                 id: 'ring',
-                geometry: <cylinderGeometry args={[ringTubeRadius * 0.9, ringTubeRadius * 0.9, railT * 0.8, 10]} />,
-                position: [railX, railY, z],
-                rotation: [0, 0, Math.PI / 2],
-                color,
-                outlineColor,
-                boundingRadius: ringRadius,
-                roughness: 0.35,
-                metalness: 0.95,
-            })
-
-            p.push({
-                id: 'ring',
                 geometry: <torusGeometry args={[ringRadius, ringTubeRadius, 12, 24, Math.PI]} />,
-                position: [railX, railY + railT * 0.45, z],
-                rotation: [0, 0, Math.PI / 2],
+                position: [railX - 0.04, railY + railT * 0.45 -0.003, z],
+                rotation: [0, 0, Math.PI + Math.PI / 2],
                 color,
                 outlineColor,
                 boundingRadius: ringRadius + ringTubeRadius,
