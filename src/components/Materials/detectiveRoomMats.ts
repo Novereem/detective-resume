@@ -141,11 +141,19 @@ export const wallCutoutMaterials: Record<string, PartMaterialOverride> = {
 export const binderMaterials: Record<string, PartMaterialOverride> = {
     coverFront: { textureUrl: '/textures/clear_metal.jpg', roughness: 0.9,  metalness: 0.0 },
     coverBack:  { textureUrl: '/textures/clear_metal.jpg', roughness: 0.9,  metalness: 0.0 },
-    spine:      { textureUrl: '/textures/binder_spine.jpg', roughness: 0.9,  metalness: 0.0 },
+    spine:      { textureUrl: '/textures/clear_metal.jpg', roughness: 0.9,  metalness: 0.0 },
 
     paper:      { textureUrl: '/textures/written_letter.jpg', roughness: 0.97, metalness: 0.0 },
     spineLabel: { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.96, metalness: 0.0, color: '#ffffff' },
 
     ring:      { roughness: 0.1, metalness: 0.9, color: '#ffffff' },
     spineRing: { roughness: 0.35, metalness: 0.9, color: '#ffffff' },
+}
+
+export const bookshelfMaterials: Record<string, PartMaterialOverride> = {
+    side:   { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    top:    { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    bottom: { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    shelf:  { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
+    back:   { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.98, metalness: 0.01 },
 }
