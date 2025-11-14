@@ -19,7 +19,7 @@ function StaticLoader({ message }: { message: string }) {
     )
 }
 
-const DetectiveRoom = dynamic(() => import('@/components/DetectiveRoom'), {
+const DetectiveRoom = dynamic(() => import('@/components/DetectiveRoom/DetectiveRoom'), {
     ssr: false,
     loading: () => <StaticLoader message="Loading detective room…" />,
 })

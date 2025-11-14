@@ -16,6 +16,7 @@ export type AnchorKey =
     | "cigar1" | "ashTray1"
     | "calendar2025"
     | "mapFrame"
+    | "mapFramePin"
     | "newspaper1"
     | "newspaper2"
     | "newspaper3"
@@ -78,6 +79,8 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     ashTray1: { eye: [-0.760, 1.050, 3.200], position: [-0.741, 0.778, 4.421], rotation: [0, -0.280, 0] },
 
     mapFrame: { eye: [0.2, 1.3, 3.6], position: [0.40, 1.60, 4.965], rotation: [Math.PI, 0, Math.PI + 0.05] },
+    mapFramePin: { eye: [0.200, 1.300, 3.600], position: [0.400, 1.681, 4.957], rotation: [Math.PI/2, 0, -3.092] },
+
     calendar2025: { eye: [0.900, 1.300, 3.600], position: [1.107, 1.064, 4.988], rotation: [Math.PI, 0, Math.PI] },
 
     newspaper1: { eye: [0.900, 1.300, 3.600], position: [-1.138, 0.001, 3.652], rotation: [-Math.PI/2, 0, 2.917] },
