@@ -2,7 +2,7 @@
 import React from 'react'
 import { useSettings } from './SettingsProvider'
 
-type TabKey = 'controls' | 'video'
+type TabKey = 'controls' | 'video' | 'extras'
 
 export default function EscapeMenu() {
     const {
@@ -16,6 +16,7 @@ export default function EscapeMenu() {
         orientDampingBase, orientDamping, setOrientDamping,
         shadowsEnabled, setShadowsEnabled, shadowQuality, setShadowQuality,
         resetControlsToDefaults, resetVideoToDefaults,
+        flyEnabled, setFlyEnabled,
     } = useSettings()
 
     const [tab, setTab] = React.useState<TabKey>('controls')
@@ -42,11 +43,6 @@ export default function EscapeMenu() {
 
     const UI_MIN = 1, UI_MAX = 5
     const clamp = (n:number,a:number,b:number)=>Math.min(Math.max(n,a),b)
-    const toUI = (real:number,min:number,max:number)=>{
-        if (max<=min) return (UI_MIN+UI_MAX)/2
-        const t=(real-min)/(max-min)
-        return clamp(UI_MIN + t*(UI_MAX-UI_MAX?0:0), UI_MIN, UI_MAX) // keep structure; replaced below
-    }
 
     const toUIReal = (real:number,min:number,max:number)=>{
         if (max<=min) return (UI_MIN+UI_MAX)/2
@@ -59,10 +55,6 @@ export default function EscapeMenu() {
         return clamp(min + t*(max-min), min, max)
     }
 
-    const pixelUI = toUIReal(pixelateSize, minPx, maxPx)
-    const sensUI  = toUIReal(mouseSensitivity, minSens, maxSens)
-    const smoothingUI = toUIReal(orientDamping, minDamp, maxDamp)
-
     const resetPixelizationToBase = () => setPixelateSize(clamp(pixelateBase, minPx, maxPx))
     const resetMouseSensitivityToBase = () => setMouseSensitivity(clamp(mouseSensBase, minSens, maxSens))
     const resetSmoothingToBase = ()=> setOrientDamping(clamp(orientDampingBase, minDamp, maxDamp))
@@ -70,178 +62,222 @@ export default function EscapeMenu() {
     const PANEL_W = 'min(92vw, 560px)'
     const PANEL_H = 'min(90vh, 800px)'
 
+    const resetCurrentTab = () => {
+        if (tab === 'controls') {
+            resetControlsToDefaults()
+        } else if (tab === 'video') {
+            resetVideoToDefaults()
+        } else if (tab === 'extras') {
+            setFlyEnabled(false)
+        }
+    }
+
+    const resetLabel =
+        tab === 'controls'
+            ? 'Reset controls to default'
+            : tab === 'video'
+                ? 'Reset video to default'
+                : 'Reset extras to default'
+
     return (
         <div role="dialog" aria-modal="true" aria-label="Game menu"
              style={{ position:'fixed', inset:0, zIndex:80, display:'grid', placeItems:'center' }}>
             <div onClick={close} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.35)' }} />
             <div
                 style={{
-                    position:'relative',
+                    position: 'relative',
                     width: PANEL_W,
                     height: PANEL_H,
-                    background:'rgba(18,18,18,0.9)',
-                    border:'1px solid rgba(255,255,255,0.08)',
-                    boxShadow:'0 20px 60px rgba(0,0,0,0.5)',
-                    backdropFilter:'blur(6px)',
-                    color:'white',
-                    padding:20,
-                    display:'flex',
-                    flexDirection:'column'
+                    background: 'rgba(18,18,18,0.9)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(6px)',
+                    color: 'white',
+                    padding: 20,
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12 }}>
-                    <h2 style={{ margin:0, fontSize:20, fontWeight:700 }}>Game Menu</h2>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12}}>
+                    <h2 style={{margin: 0, fontSize: 20, fontWeight: 700}}>Game Menu</h2>
                     <button onClick={close} aria-label="Close menu" style={iconBtn}>×</button>
                 </div>
-                <div style={{ marginTop:10, fontSize:13, opacity:0.85 }}>
+                <div style={{marginTop: 10, fontSize: 13, opacity: 0.85}}>
                     Press <kbd style={kbd}>Esc</kbd> to close.
                 </div>
 
-                <div role="tablist" aria-label="Settings sections"
-                     style={{ display:'flex', gap:8, marginTop:14, borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:8 }}>
-                    {(['controls','video'] as TabKey[]).map(k => (
+                <div
+                    role="tablist"
+                    aria-label="Settings sections"
+                    style={{
+                        display: 'flex',
+                        gap: 8,
+                        marginTop: 14,
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        paddingBottom: 8,
+                    }}
+                >
+                    {(['controls', 'video', 'extras'] as TabKey[]).map((k) => (
                         <button
                             key={k}
                             role="tab"
-                            aria-selected={tab===k}
-                            onClick={()=>setTab(k)}
+                            aria-selected={tab === k}
+                            onClick={() => setTab(k)}
                             style={{
                                 ...tabBtn,
-                                background: tab===k ? 'rgba(255,255,255,0.10)' : 'transparent',
-                                borderColor: tab===k ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)'
+                                background: tab === k ? 'rgba(255,255,255,0.10)' : 'transparent',
+                                borderColor:
+                                    tab === k
+                                        ? 'rgba(255,255,255,0.35)'
+                                        : 'rgba(255,255,255,0.15)',
                             }}
                         >
-                            {k === 'controls' ? 'Controls' : 'Video Settings'}
+                            {k === 'controls'
+                                ? 'Controls'
+                                : k === 'video'
+                                    ? 'Video Settings'
+                                    : 'Extras'}
                         </button>
                     ))}
                 </div>
 
-                <div style={{ marginTop:14, flex:1, overflowY:'auto', paddingRight:4, display:'grid', gap:16, alignContent:'start', alignItems:'start' }}>
-                    {tab === 'controls' ? (
+                <div
+                    style={{
+                        marginTop: 14,
+                        flex: 1,
+                        overflowY: 'auto',
+                        paddingRight: 4,
+                        display: 'grid',
+                        gap: 16,
+                        alignContent: 'start',
+                        alignItems: 'start',
+                    }}
+                >
+                    {tab === 'controls' && (
                         <section style={group} role="tabpanel" aria-labelledby="controls">
                             <div style={groupTitle}>Game Controls</div>
-
-                            <div style={row}>
-                                <div style={{fontWeight: 600, marginBottom: 6}}>Controls Hint</div>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(2, minmax(0,1fr))',
-                                    gap: 8,
-                                    marginBottom: 10
-                                }}>
-                                    {(['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const).map(c => (
-                                        <button key={c}
-                                                onClick={() => setControlsHintPosition(c)}
-                                                aria-pressed={controlsHintPosition === c}
-                                                style={{
-                                                    ...btn,
-                                                    outline: controlsHintPosition === c ? '2px solid rgba(255,255,255,0.9)' : '1px solid rgba(255,255,255,0.15)',
-                                                    background: controlsHintPosition === c ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-                                                }}>
-                                            {labelForCorner(c)}
-                                        </button>
-                                    ))}
+                                <div style={row}>
+                                    <div style={{fontWeight: 600, marginBottom: 6}}>Controls Hint</div>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, minmax(0,1fr))',
+                                        gap: 8,
+                                        marginBottom: 10
+                                    }}>
+                                        {(['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const).map(c => (
+                                            <button key={c}
+                                                    onClick={() => setControlsHintPosition(c)}
+                                                    aria-pressed={controlsHintPosition === c}
+                                                    style={{
+                                                        ...btn,
+                                                        outline: controlsHintPosition === c ? '2px solid rgba(255,255,255,0.9)' : '1px solid rgba(255,255,255,0.15)',
+                                                        background: controlsHintPosition === c ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                                                    }}>
+                                                {labelForCorner(c)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                                        <input type="checkbox" checked={controlsHintVisible}
+                                               onChange={(e) => setControlsHintVisible(e.target.checked)}/>
+                                        <span style={{fontWeight: 600}}>Show Controls Hint</span>
+                                    </label>
                                 </div>
-                                <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                                    <input type="checkbox" checked={controlsHintVisible}
-                                           onChange={(e) => setControlsHintVisible(e.target.checked)}/>
-                                    <span style={{fontWeight: 600}}>Show Controls Hint</span>
-                                </label>
-                            </div>
 
-                            <div style={row}>
-                                <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                                    <input
-                                        type="checkbox"
-                                        checked={moveBackToDeskEnabled}
-                                        onChange={(e) => setMoveBackToDeskEnabled(e.target.checked)}
-                                    />
-                                    <span style={{fontWeight: 600}}>Show “Move back to desk” button</span>
-                                </label>
-                                <div style={{opacity: 0.7, fontSize: 12, marginTop: 6}}>
-                                    Quick action button at the bottom center of the screen.
+                                <div style={row}>
+                                    <label style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                                        <input
+                                            type="checkbox"
+                                            checked={moveBackToDeskEnabled}
+                                            onChange={(e) => setMoveBackToDeskEnabled(e.target.checked)}
+                                        />
+                                        <span style={{fontWeight: 600}}>Show “Move back to desk” button</span>
+                                    </label>
+                                    <div style={{opacity: 0.7, fontSize: 12, marginTop: 6}}>
+                                        Quick action button at the bottom center of the screen.
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div style={row}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: 10
-                                }}>
-                                    <div>
-                                        <div style={{fontWeight: 600}}>Mouse Sensitivity</div>
-                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = faster camera
-                                            movement
+                                <div style={row}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 10
+                                    }}>
+                                        <div>
+                                            <div style={{fontWeight: 600}}>Mouse Sensitivity</div>
+                                            <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = faster camera
+                                                movement
+                                            </div>
+                                        </div>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                            <div style={{
+                                                opacity: 0.85,
+                                                fontVariantNumeric: 'tabular-nums'
+                                            }}>{toUIReal(mouseSensitivity, minSens, maxSens).toFixed(1)}</div>
+                                            <button style={miniBtn} onClick={resetMouseSensitivityToBase}
+                                                    title="Reset to default">Reset
+                                            </button>
                                         </div>
                                     </div>
-                                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                                        <div style={{
-                                            opacity: 0.85,
-                                            fontVariantNumeric: 'tabular-nums'
-                                        }}>{toUIReal(mouseSensitivity, minSens, maxSens).toFixed(1)}</div>
-                                        <button style={miniBtn} onClick={resetMouseSensitivityToBase}
-                                                title="Reset to default">Reset
-                                        </button>
+                                    <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
+                                           value={toUIReal(mouseSensitivity, minSens, maxSens)}
+                                           onChange={(e) => setMouseSensitivity(fromUI(parseFloat(e.target.value), minSens, maxSens))}
+                                           style={{width: '100%', marginTop: 10}}/>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        fontSize: 12,
+                                        opacity: 0.7,
+                                        marginTop: 6
+                                    }}>
+                                        <span>{UI_MIN}</span><span>{UI_MAX}</span>
                                     </div>
                                 </div>
-                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
-                                       value={toUIReal(mouseSensitivity, minSens, maxSens)}
-                                       onChange={(e) => setMouseSensitivity(fromUI(parseFloat(e.target.value), minSens, maxSens))}
-                                       style={{width: '100%', marginTop: 10}}/>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    fontSize: 12,
-                                    opacity: 0.7,
-                                    marginTop: 6
-                                }}>
-                                    <span>{UI_MIN}</span><span>{UI_MAX}</span>
-                                </div>
-                            </div>
 
-                            <div style={row}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: 10
-                                }}>
-                                    <div>
-                                        <div style={{fontWeight: 600}}>Camera Smoothing</div>
-                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = snappier</div>
+                                <div style={row}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 10
+                                    }}>
+                                        <div>
+                                            <div style={{fontWeight: 600}}>Camera Smoothing</div>
+                                            <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Higher = snappier</div>
+                                        </div>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                            <div style={{
+                                                opacity: 0.85,
+                                                fontVariantNumeric: 'tabular-nums'
+                                            }}>{toUIReal(orientDamping, minDamp, maxDamp).toFixed(1)}</div>
+                                            <button style={miniBtn} onClick={resetSmoothingToBase}
+                                                    title="Reset to default">Reset
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                                        <div style={{
-                                            opacity: 0.85,
-                                            fontVariantNumeric: 'tabular-nums'
-                                        }}>{toUIReal(orientDamping, minDamp, maxDamp).toFixed(1)}</div>
-                                        <button style={miniBtn} onClick={resetSmoothingToBase}
-                                                title="Reset to default">Reset
-                                        </button>
+                                    <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
+                                           value={toUIReal(orientDamping, minDamp, maxDamp)}
+                                           onChange={(e) => setOrientDamping(fromUI(parseFloat(e.target.value), minDamp, maxDamp))}
+                                           style={{width: '100%', marginTop: 10}}/>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        fontSize: 12,
+                                        opacity: 0.7,
+                                        marginTop: 6
+                                    }}>
+                                        <span>{UI_MIN}</span><span>{UI_MAX}</span>
                                     </div>
                                 </div>
-                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
-                                       value={toUIReal(orientDamping, minDamp, maxDamp)}
-                                       onChange={(e) => setOrientDamping(fromUI(parseFloat(e.target.value), minDamp, maxDamp))}
-                                       style={{width: '100%', marginTop: 10}}/>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    fontSize: 12,
-                                    opacity: 0.7,
-                                    marginTop: 6
-                                }}>
-                                    <span>{UI_MIN}</span><span>{UI_MAX}</span>
-                                </div>
-                            </div>
                         </section>
-                    ) : (
+                    )}
+
+                    {tab === 'video' && (
                         <section style={group} role="tabpanel" aria-labelledby="video">
                             <div style={groupTitle}>Video Settings</div>
-
                             <div style={row}>
                                 <div style={{
                                     display: 'flex',
@@ -260,51 +296,112 @@ export default function EscapeMenu() {
                                             opacity: 0.85,
                                             fontVariantNumeric: 'tabular-nums'
                                         }}>{toUIReal(pixelateSize, minPx, maxPx).toFixed(1)}</div>
-                                        <button style={miniBtn} onClick={resetPixelizationToBase} title="Reset to default">Reset</button>
+                                        <button style={miniBtn} onClick={resetPixelizationToBase}
+                                                title="Reset to default">Reset
+                                        </button>
                                     </div>
                                 </div>
-                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1} value={toUIReal(pixelateSize, minPx, maxPx)}
-                                       onChange={(e)=>setPixelateSize(fromUI(parseFloat(e.target.value), minPx, maxPx))}
-                                       style={{ width:'100%', marginTop:10 }} />
-                                <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, opacity:0.7, marginTop:6 }}>
+                                <input type="range" min={UI_MIN} max={UI_MAX} step={0.1}
+                                       value={toUIReal(pixelateSize, minPx, maxPx)}
+                                       onChange={(e) => setPixelateSize(fromUI(parseFloat(e.target.value), minPx, maxPx))}
+                                       style={{width: '100%', marginTop: 10}}/>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontSize: 12,
+                                    opacity: 0.7,
+                                    marginTop: 6
+                                }}>
                                     <span>{UI_MIN}</span><span>{UI_MAX}</span>
                                 </div>
                             </div>
 
                             <div style={row}>
-                                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:10}}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 10
+                                }}>
                                     <div>
-                                        <div style={{fontWeight:600}}>Shadows</div>
-                                        <div style={{opacity:0.65, fontSize:12, marginTop:2}}>Lower quality = faster</div>
+                                        <div style={{fontWeight: 600}}>Shadows</div>
+                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>Lower quality =
+                                            faster
+                                        </div>
                                     </div>
-                                    <label style={{display:'flex', alignItems:'center', gap:8}}>
-                                        <input type="checkbox" checked={shadowsEnabled} onChange={e=>setShadowsEnabled(e.target.checked)} />
-                                        <span style={{fontWeight:600}}>Enable</span>
+                                    <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                        <input type="checkbox" checked={shadowsEnabled}
+                                               onChange={e => setShadowsEnabled(e.target.checked)}/>
+                                        <span style={{fontWeight: 600}}>Enable</span>
                                     </label>
                                 </div>
 
-                                <div style={{ marginTop:10, display:'flex', gap:10, opacity: shadowsEnabled ? 1 : 0.5 }}>
-                                    {(['low','medium','high'] as const).map(q => (
+                                <div style={{
+                                    marginTop: 10,
+                                    display: 'flex',
+                                    gap: 10,
+                                    opacity: shadowsEnabled ? 1 : 0.5
+                                }}>
+                                    {(['low', 'medium', 'high'] as const).map(q => (
                                         <button key={q}
-                                                onClick={()=> setShadowQuality(q)}
-                                                aria-pressed={shadowQuality===q}
-                                                style={{ ...btn, outline: shadowQuality===q ? '2px solid rgba(255,255,255,0.9)' : '1px solid rgba(255,255,255,0.15)' }}
+                                                onClick={() => setShadowQuality(q)}
+                                                aria-pressed={shadowQuality === q}
+                                                style={{
+                                                    ...btn,
+                                                    outline: shadowQuality === q ? '2px solid rgba(255,255,255,0.9)' : '1px solid rgba(255,255,255,0.15)'
+                                                }}
                                                 disabled={!shadowsEnabled}>
-                                            {q[0].toUpperCase()+q.slice(1)}
+                                            {q[0].toUpperCase() + q.slice(1)}
                                         </button>
                                     ))}
                                 </div>
                             </div>
                         </section>
                     )}
+
+                    {tab === 'extras' && (
+                        <section style={group} role="tabpanel" aria-labelledby="extras">
+                            <div style={groupTitle}>Extras</div>
+
+                            <div style={row}>
+                                <label
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 10,
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={flyEnabled}
+                                        onChange={(e) => setFlyEnabled(e.target.checked)}
+                                    />
+                                    <span style={{fontWeight: 600}}>Enable fly in room</span>
+                                </label>
+                                <div
+                                    style={{
+                                        opacity: 0.7,
+                                        fontSize: 12,
+                                        marginTop: 6,
+                                    }}
+                                >
+                                    Toggles the small fly that occasionally flies around the
+                                    room. His name is Gilbert.
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
 
-                <div style={{display:'flex', justifyContent:'space-between', gap:10, paddingTop:8, borderTop:'1px solid rgba(255,255,255,0.08)'}}>
-                    <button
-                        style={btn}
-                        onClick={() => (tab === 'controls' ? resetControlsToDefaults() : resetVideoToDefaults())}
-                    >
-                        Reset {tab} to default
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                    paddingTop: 8,
+                    borderTop: '1px solid rgba(255,255,255,0.08)'
+                }}>
+                    <button style={btn} onClick={resetCurrentTab}>
+                        {resetLabel}
                     </button>
                     <button style={btn} onClick={close}>Resume (Esc)</button>
                 </div>
@@ -325,9 +422,9 @@ const group: React.CSSProperties = {
     border: '1px solid rgba(255,255,255,0.09)',
     display: 'grid',
     gap: 12,
-    alignContent:'start',
-    alignItems:'start',
-    gridAutoRows:'min-content'
+    alignContent: 'start',
+    alignItems: 'start',
+    gridAutoRows: 'min-content'
 }
 
 const groupTitle: React.CSSProperties = {
@@ -385,10 +482,15 @@ const kbd: React.CSSProperties = {
 
 function labelForCorner(c: string) {
     switch (c) {
-        case 'top-left': return 'Top-Left'
-        case 'top-right': return 'Top-Right'
-        case 'bottom-left': return 'Bottom-Left'
-        case 'bottom-right': return 'Bottom-Right'
-        default: return c
+        case 'top-left':
+            return 'Top-Left'
+        case 'top-right':
+            return 'Top-Right'
+        case 'bottom-left':
+            return 'Bottom-Left'
+        case 'bottom-right':
+            return 'Bottom-Right'
+        default:
+            return c
     }
 }

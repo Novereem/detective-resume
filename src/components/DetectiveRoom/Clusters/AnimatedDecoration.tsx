@@ -3,10 +3,15 @@ import { ANCHOR } from '@/components/Game/anchors'
 import { Clock } from '@/components/Models/Clock'
 import { PlantBamboo } from '@/components/Models/PlantPot'
 import { clockMaterials, plantPotMaterials } from '@/components/Materials/detectiveRoomMats'
+import {Fly} from "@/components/Models/Fly";
+import {useSettings} from "@/components/UI/SettingsProvider";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void
 
+
 export function AnimatedDecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
+    const { flyEnabled } = useSettings()
+
     return (
         <>
             <group onContextMenu={rcFocus(ANCHOR.clock)} userData={{ movable: true, anchorKey: 'clock' }}>
@@ -31,6 +36,8 @@ export function AnimatedDecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     leavesPerBranch={[3, 5]}
                 />
             </group>
+
+            {flyEnabled && <Fly />}
         </>
     )
 }

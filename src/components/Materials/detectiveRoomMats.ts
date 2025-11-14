@@ -161,3 +161,24 @@ export const bookshelfMaterials: Record<string, PartMaterialOverride> = {
     shelf:  { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.95, metalness: 0.02 },
     back:   { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.98, metalness: 0.01 },
 }
+
+export const detectiveCoatMaterials: Record<string, PartMaterialOverride> = {
+    coatBody:        { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatHem:         { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatFoldFront:   { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatCollarBack:  { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatCollarLeft:  { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatCollarRight: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+
+    coatSleeveL:     { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatSleeveR:     { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+    coatSleeveCuffL: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0, color: '#d3c7aa' },
+    coatSleeveCuffR: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0, color: '#d3c7aa' },
+
+    coatBelt:        { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9,  metalness: 0.0 },
+    coatBeltTail:    { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9,  metalness: 0.0 },
+
+    coatButton:      { color: '#7a6b54', roughness: 0.4, metalness: 0.2 },
+
+    coatHookFold:    { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
+}

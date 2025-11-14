@@ -56,6 +56,10 @@ type SettingsState = {
 
     resetControlsToDefaults: () => void
     resetVideoToDefaults: () => void
+
+    flyEnabled: boolean
+    setFlyEnabled: (v: boolean) => void
+
 }
 
 const Ctx = React.createContext<SettingsState | null>(null)
@@ -71,6 +75,7 @@ const ORIENT_VAL_KEY  = 'cam.smooth.v1'
 const SHADOWS_ENABLED_KEY = 'gfx.shadows.enabled.v1'
 const SHADOW_QUALITY_KEY  = 'gfx.shadows.quality.v1'
 const BACK_TO_DESK_BTN_KEY = 'ui.backToDesk.enabled.v1'
+const FLY_ENABLED_KEY      = 'extra.fly.enabled.v1'
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [menuOpen, setMenuOpen] = React.useState(false)
@@ -102,6 +107,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [shadowsEnabled, setShadowsEnabled] = React.useState(true)
     const [shadowQuality, setShadowQuality] = React.useState<ShadowQuality>('medium')
 
+    const [flyEnabled, setFlyEnabled] = React.useState(false)
+
     React.useEffect(() => {
         const v = localStorage.getItem(VISIBLE_KEY)
         if (v !== null) setControlsHintVisible(v === '1')
@@ -125,6 +132,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const ov = localStorage.getItem(ORIENT_VAL_KEY)
         if (ob !== null) { const n = parseFloat(ob); if (Number.isFinite(n)) { setOrientDampingBase(n); hadOrientBaseRef.current = true } }
         if (ov !== null) { const n = parseFloat(ov); if (Number.isFinite(n)) { setOrientDamping(n); hadOrientValRef.current = true } }
+
+        const fe = localStorage.getItem(FLY_ENABLED_KEY)
+        if (fe !== null) setFlyEnabled(fe === '1')
 
         loadedRef.current = true
     }, [])
@@ -198,6 +208,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setShadowQuality('medium')
     }, [resetVisuals])
 
+    React.useEffect(() => {
+        if (loadedRef.current) {
+            localStorage.setItem(BACK_TO_DESK_BTN_KEY, moveBackToDeskEnabled ? '1' : '0')
+        }
+    }, [moveBackToDeskEnabled])
+
+    React.useEffect(() => {
+        if (loadedRef.current) {
+            localStorage.setItem(FLY_ENABLED_KEY, flyEnabled ? '1' : '0')
+        }
+    }, [flyEnabled])
+
     const value: SettingsState = {
         menuOpen, setMenuOpen,
         controlsHintVisible, setControlsHintVisible,
@@ -218,6 +240,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         shadowPreset,
         resetControlsToDefaults,
         resetVideoToDefaults,
+        flyEnabled, setFlyEnabled,
     }
 
     return <Ctx.Provider value={value}>{children}</Ctx.Provider>

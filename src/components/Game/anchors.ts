@@ -2,7 +2,8 @@ import type { Vec3 } from "@/components/Types/room"
 
 export type AnchorKey =
     | "bulb" | "desk1" | "desk2" | "deskMetal"
-    | "corkBoard" | "mug" | "coatRack" | "hat" | "houseFrame" | "mugFrame"
+    | "corkBoard" | "mug" | "coatRack" | "hat" | "detectiveCoat"
+    | "houseFrame" | "mugFrame"
     | "deskTopSpawn" | "drawerLeftTopContent"
     | "photoClueFrame"| "photoBlueFrame"| "deskTopSpawn2" | "testPuzzle3"
     | "bookA" | "bookB"
@@ -39,6 +40,7 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     mug:        { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.692, 2.340] },
     coatRack: { eye: [-0.200, 1.300, 3.200], position: [2.156, 0.010, 2.597], rotation: [0, 0, 0] },
     hat: { eye: [-0.200, 1.300, 3.200], position: [1.979, 1.632, 2.610], rotation: [Math.PI, 0, 2.000] },
+    detectiveCoat: { eye: [-0.200, 1.300, 3.200], position: [1.979, 1.632, 2.610], rotation: [Math.PI, 0, 2.000] },
 
     houseFrame: { eye: [ 0.2, 1.3, 3.6], position: [0.2, 1.3, 4.965] },
     photoClueFrame: { eye: [ 0.0, 1.3, 3.6], position: [0, 1.5, 4.965] },

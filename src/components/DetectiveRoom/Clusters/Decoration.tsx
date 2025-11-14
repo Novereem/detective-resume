@@ -8,10 +8,11 @@ import { AshTrayWood } from '@/components/Models/AshTray'
 import {
     ashTrayWoodMaterials,
     cardboardMaterials,
-    cigarMaterials, detectiveHatMaterials,
+    cigarMaterials, detectiveCoatMaterials, detectiveHatMaterials,
     trashBinMaterials,
 } from '@/components/Materials/detectiveRoomMats'
 import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
+import {DetectiveCoat} from "@/components/Models/DetectiveCoat";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void
 
@@ -102,6 +103,17 @@ export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     crownTopRadius={0.065}
                 />
             </group>
+
+            {/*<group*/}
+            {/*    onContextMenu={rcFocus(ANCHOR.detectiveCoat)}*/}
+            {/*    userData={{movable: true, anchorKey: 'detectiveCoat'}}*/}
+            {/*>*/}
+            {/*    <DetectiveCoat*/}
+            {/*        position={ANCHOR.detectiveCoat.position}*/}
+            {/*        rotation={ANCHOR.detectiveCoat.rotation}*/}
+            {/*        materialsById={detectiveCoatMaterials}*/}
+            {/*    />*/}
+            {/*</group>*/}
         </>
     )
 }
