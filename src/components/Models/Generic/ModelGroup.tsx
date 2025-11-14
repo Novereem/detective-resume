@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
-import { Outlined } from '@/components/Primitives/Outlined'
+import { Outlined } from '@/components/Models/GenericOutlined/Outlined'
 import * as THREE from 'three'
 import {Vec3} from "@/components/Types/room";
 import {InspectState, OutlinedGroupInspect} from "@/components/Types/inspectModels";
@@ -175,10 +175,24 @@ export function ModelGroup({
                     texturePixelated: ov?.texturePixelated ?? p.texturePixelated,
                     metalness: ov?.metalness ?? p.metalness,
                     roughness: ov?.roughness ?? p.roughness,
+                    transparent: ov?.transparent ?? p.transparent,
+                    opacity: ov?.opacity ?? p.opacity,
+                    depthWrite: ov?.depthWrite ?? p.depthWrite,
+                    side: ov?.side ?? p.side,
                 }
             }),
         }),
-        [parts, color, outlineColor, initialRotation, inspectPixelSize, inspectDistance, resolveScale, materialsById, inspectDisableOutline]
+        [
+            parts,
+            color,
+            outlineColor,
+            initialRotation,
+            inspectPixelSize,
+            inspectDistance,
+            resolveScale,
+            materialsById,
+            inspectDisableOutline,
+        ]
     )
 
     const useHitbox = !!hitbox

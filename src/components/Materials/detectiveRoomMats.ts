@@ -7,7 +7,11 @@ export const deskMaterials: Record<string, PartMaterialOverride> = {
 
 export const mugMaterials: Record<string, PartMaterialOverride> = {
     body:   { textureUrl: '/textures/ceramic_white.jpg', roughness: 0.6, metalness: 0.0 },
-    handle: { textureUrl: '/textures/rainbow_metal.jpg', roughness: 0.6, metalness: 0.0 },
+    handle: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0.6, metalness: 0.0 },
+    wallOuter: { color: '#ffffff',roughness: 0, metalness: 0.0 },
+    wallInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    bottomInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    bottom: { textureUrl: '/textures/testimage.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
 }
 
 export const corkBoardMaterials: Record<string, PartMaterialOverride> = {

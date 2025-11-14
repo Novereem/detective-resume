@@ -1,5 +1,5 @@
 import React from 'react'
-import { FramedPlane } from '@/components/Primitives/FramedPlane'
+import { FramedPlane } from '@/components/Models/GenericOutlined/FramedPlane'
 import { Pin } from '@/components/Models/Pin'
 import { ANCHOR } from '@/components/Game/anchors'
 

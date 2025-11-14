@@ -3,16 +3,18 @@ import {Canvas, useFrame, useThree} from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import * as THREE from 'three'
-import { Outlined } from '@/components/Primitives/Outlined'
-import { FramedPlane } from '@/components/Primitives/FramedPlane'
+import { Outlined } from '@/components/Models/GenericOutlined/Outlined'
+import { FramedPlane } from '@/components/Models/GenericOutlined/FramedPlane'
 import type { InspectState } from '@/components/Types/inspectModels'
 import { PixelateNearestFX } from '@/components/CameraEffects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/SecretFile'
-import {cardboardMaterials, secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
+import {cardboardMaterials, mugMaterials, secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 import {InspectOverlayProps} from "@/components/Types/inspect";
 import {useSettings} from "@/components/UI/SettingsProvider";
 import {CardboardBox} from "@/components/Models/CardboardBox/CardboardBox";
 import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
+import {PZ} from "@/components/Game/state.data";
+import {Mug} from "@/components/Models/Mug";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)
@@ -257,11 +259,6 @@ export default function ObjectInspectOverlay({
     const invalidateRef = React.useRef<() => void>(() => {})
     const canvasElRef = React.useRef<HTMLCanvasElement | null>(null)
 
-    // pixel size
-    const effectivePixelSize = state?.pixelSize ?? defaultPixelSize
-    // camera distance
-    const effectiveCamDist   = state?.inspectDistance ?? camDistance
-
     const { setIsInspecting } = useSettings()
 
     React.useEffect(() => {
@@ -409,6 +406,7 @@ export default function ObjectInspectOverlay({
     }, [renderState])
 
     const metaType = (renderState as any)?.metadata?.type
+    const meta = (renderState as any)?.metadata ?? {}
 
     const isInspectingSecretFile = React.useMemo(() => {
         // 1) Prefer explicit metadata from DetectiveRoom
@@ -433,6 +431,34 @@ export default function ObjectInspectOverlay({
     const isInspectingCardboardBox = metaType === 'cardboard-box'
     const [boxOpenAmt, setBoxOpenAmt] = React.useState(0)
     React.useEffect(() => { if (renderState) setBoxOpenAmt(0) }, [renderState])
+
+    const isInspectingMugFromFrame =
+        metaType === 'puzzle' &&
+        meta.puzzleId === PZ.MugInitials &&
+        renderState?.kind === 'framed'
+
+    const effectivePixelSize =
+        isInspectingMugFromFrame
+            ? 3
+            : state?.pixelSize ?? defaultPixelSize
+
+    const effectiveCamDist = state?.inspectDistance ?? camDistance
+
+    const lightConfig = React.useMemo(
+        () =>
+            isInspectingMugFromFrame
+                ? {
+                    ambient: 0.7,
+                    mainDir: 1.4,
+                    fillDir: 0.45,
+                }
+                : {
+                    ambient: 2.0,
+                    mainDir: 1.0,
+                    fillDir: 0.0,
+                },
+        [isInspectingMugFromFrame]
+    )
 
     return (
         <div
@@ -505,12 +531,38 @@ export default function ObjectInspectOverlay({
                         }
                     }}
                 >
-                    <ambientLight intensity={3}/>
-                    <directionalLight position={[2, 5, 7]}/>
+                    <ambientLight intensity={lightConfig.ambient} />
+                    <directionalLight
+                        position={[2, 5, 7]}
+                        intensity={lightConfig.mainDir}
+                    />
+                    {lightConfig.fillDir > 0 && (
+                        <directionalLight
+                            position={[-3, -4, -2]}
+                            intensity={lightConfig.fillDir}
+                        />
+                    )}
 
                     <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
                         <group ref={contentRef} position={offset}>
-                            {isInspectingCardboardBox ? (
+                            {isInspectingMugFromFrame ? (
+                                <group rotation={[0, Math.PI, 0]}>
+                                    <group rotation={[0, Math.PI, 0]}>
+                                        <Mug
+                                            position={[0, 0, 0]}
+                                            rotation={[0, 0, 0]}
+                                            color="#f3f3f3"
+                                            outlineThickness={0.008}
+                                            inspectDistance={0.5}
+                                            inspectPixelSize={3}
+                                            onInspect={() => {}}
+                                            disablePointer={true}
+
+                                            materialsById={mugMaterials}
+                                        />
+                                    </group>
+                                </group>
+                            ) : isInspectingCardboardBox ? (
                                 <CardboardBoxPreview
                                     targetLift={boxOpenAmt}
                                     size={[0.28, 0.14, 0.28]}
@@ -550,6 +602,10 @@ export default function ObjectInspectOverlay({
                                                     texturePixelated={p.texturePixelated}
                                                     metalness={p.metalness}
                                                     roughness={p.roughness}
+                                                    transparent={p.transparent}
+                                                    opacity={p.opacity}
+                                                    depthWrite={p.depthWrite}
+                                                    side={p.side}
                                                     disablePointer
                                                     disableOutline={(renderState as any).inspectDisableOutline}
                                                 />

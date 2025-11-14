@@ -3,6 +3,7 @@ import type { PuzzleId, SecretFileId } from "@/components/Types/game"
 import type { GameSnapshot } from "./state.data"
 import { initialSnapshot } from "./state.data"
 import {Vec3} from "@/components/Types/room";
+import {PuzzleOverlayMeta, TextPuzzle} from "@/components/Types/inspectModels";
 
 export class GameState {
     private _snapshot: GameSnapshot = initialSnapshot
@@ -20,6 +21,26 @@ export class GameState {
         const map: Record<string, PuzzleId> = {}
         for (const cfg of Object.values(this._snapshot.puzzlesConfig)) map[cfg.solvedFromInspectId] = cfg.id
         return map
+    }
+
+    getPuzzleOverlay(puzzleId: PuzzleId): {
+        puzzle: TextPuzzle & { id: string }
+        metadata: PuzzleOverlayMeta
+    } | null {
+        const cfg = this._snapshot.puzzlesConfig[puzzleId]
+        if (!cfg) return null
+
+        const status = this._snapshot.puzzleStatus[puzzleId]
+
+        return {
+            puzzle: cfg.view.inspect,
+            metadata: {
+                type: 'puzzle',
+                puzzleId: cfg.id,
+                solved: !!status?.solved,
+                solvedAnswer: status?.solvedAnswer,
+            },
+        }
     }
 
     // -------- actions --------

@@ -1,21 +1,10 @@
 import * as THREE from 'three'
-import type { PuzzleId } from "@/components/Types/game"
 
 export type Vec3 = [number, number, number]
 
 export type MoveRequest = {
     camera: Vec3
     lookAt: Vec3
-}
-
-export type SecretFileSpawn = {
-    id: string
-    pos: Vec3
-    rot?: Vec3
-    message: string
-    persistAfterOpen?: boolean
-    unlocksPuzzleId?: PuzzleId
-    poofOnOpen?: boolean
 }
 
 export type DrawerFileLike = {

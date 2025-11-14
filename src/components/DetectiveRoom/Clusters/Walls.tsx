@@ -1,5 +1,5 @@
 import React from 'react'
-import { FramedPlane } from '@/components/Primitives/FramedPlane'
+import { FramedPlane } from '@/components/Models/GenericOutlined/FramedPlane'
 import {wallCutoutMaterials} from "@/components/Materials/detectiveRoomMats";
 import WallWithCutouts, {apertureFromWindow} from "@/components/Models/WallWithCutouts";
 

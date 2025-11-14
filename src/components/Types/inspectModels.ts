@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Vec3 } from '@/components/Types/room'
 import {PuzzleId} from "@/components/Types/game";
+import * as THREE from 'three'
 
 export type TextPuzzle = {
     type: 'text'
@@ -47,6 +48,7 @@ export type OutlinedGroupInspect = {
     initialRotation?: Vec3
     pixelSize?: number
     inspectDistance?: number
+    inspectDisableOutline?: boolean
     parts: Array<{
         geometry: React.ReactElement
         color?: string
@@ -59,6 +61,10 @@ export type OutlinedGroupInspect = {
         texturePixelated?: boolean
         metalness?: number
         roughness?: number
+        transparent?: boolean
+        opacity?: number
+        depthWrite?: boolean
+        side?: THREE.Side
     }>
 }
 export type PuzzleOverlayMeta = {

@@ -30,7 +30,7 @@ import { FlatDecorationCluster } from '@/components/DetectiveRoom/Clusters/FlatD
 import { DecorationCluster } from '@/components/DetectiveRoom/Clusters/Decoration'
 import { WallsCluster } from '@/components/DetectiveRoom/Clusters/Walls'
 import { MovingObjects } from '@/components/DetectiveRoom/FunctionalObjects/MovingObjects'
-import { PuzzleObjects } from '@/components/DetectiveRoom/FunctionalObjects/Puzzles'
+import { PuzzleObjects } from '@/components/DetectiveRoom/FunctionalObjects/PuzzleObjects'
 import { SceneEffects } from '@/components/DetectiveRoom/FunctionalObjects/Effects'
 
 function Scene({

@@ -10,6 +10,7 @@ export const PZ = {
     House: asPuzzleId("puzzle-house"),
     PhotoClue: asPuzzleId("puzzle-photo-clue"),
     FrameBlue: asPuzzleId("puzzle-frame-blue"),
+    MugInitials: asPuzzleId("puzzle-mug-initials"),
 } as const
 
 export const FileId = {
@@ -55,6 +56,7 @@ export type PuzzleConfig = {
     wallAnchorKey: AnchorKey
     view: FramedViewConfig
     connectsTo?: PuzzleId[]
+    deskFramed?: boolean
 }
 
 export type PuzzleStatus = {
@@ -163,13 +165,40 @@ export const initialSnapshot: GameSnapshot = {
                 }
             }
         },
+        [PZ.MugInitials]: {
+            id: PZ.MugInitials,
+            solvedFromInspectId: "mug-initials",
+            deskAnchorKey: "mug",
+            wallAnchorKey: "mugFrame",
+            view: {
+                kind: "framed",
+                width: 0.2,
+                height: 0.2,
+                border: 0.012,
+                textureUrl: "/textures/testimage.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                inspect: {
+                    type: "text",
+                    id: "mug-initials",
+                    prompt: "What is this weird object supposed to be",
+                    answers: ["a mug", "mug", "what?"],
+                    normalize: "trim-lower",
+                    feedback: {
+                        correct: "Correct!",
+                        incorrect: "This is a tricky one!",
+                    },
+                },
+            },
+            deskFramed: false,
+        },
     },
 
     puzzleStatus: {
         [PZ.House]:     { available: false, pinned: false },
         [PZ.PhotoClue]: { available: false, pinned: false },
-
         [PZ.FrameBlue]: { available: true, pinned: false },
+        [PZ.MugInitials]: { available: true, pinned: false },
     },
 
     cardboardBoxes: {},
