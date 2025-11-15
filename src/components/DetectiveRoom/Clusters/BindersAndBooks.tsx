@@ -1,6 +1,6 @@
 import React from 'react'
-import { Book } from '@/components/Models/Book'
-import { Binder } from '@/components/Models/Binder'
+import { Book } from '@/components/Models/Decoration/Book'
+import { Binder } from '@/components/Models/Decoration/Binder'
 import { ANCHOR } from '@/components/Game/anchors'
 import {
     binderMaterials,

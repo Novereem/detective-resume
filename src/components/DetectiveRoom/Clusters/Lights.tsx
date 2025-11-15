@@ -1,6 +1,6 @@
 import React from 'react'
 import { ANCHOR } from '@/components/Game/anchors'
-import { LightBulb } from '@/components/Models/LightBulb'
+import { LightBulb } from '@/components/Models/Functional/LightBulb'
 import { useSettings } from '@/components/UI/SettingsProvider'
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void

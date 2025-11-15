@@ -1,18 +1,19 @@
 import React from 'react'
 import { ANCHOR } from '@/components/Game/anchors'
-import { CardboardBox } from '@/components/Models/CardboardBox/CardboardBox'
-import { CardboardLid } from '@/components/Models/CardboardBox/CardboardLid'
-import TrashBin from '@/components/Models/TrashBin'
-import CigarWithSmoke from '@/components/Models/CigarWithSmoke'
-import { AshTrayWood } from '@/components/Models/AshTray'
+import { CardboardBox } from '@/components/Models/Decoration/CardboardBox/CardboardBox'
+import { CardboardLid } from '@/components/Models/Decoration/CardboardBox/CardboardLid'
+import TrashBin from '@/components/Models/Decoration/TrashBin'
+import CigarWithSmoke from '@/components/Models/Decoration/Cigar/CigarWithSmoke'
+import { AshTrayWood } from '@/components/Models/Decoration/Cigar/AshTray'
 import {
     ashTrayWoodMaterials,
     cardboardMaterials,
-    cigarMaterials, detectiveCoatMaterials, detectiveHatMaterials,
+    cigarMaterials, detectiveCoatMaterials, detectiveHatMaterials, magnifierMaterials,
     trashBinMaterials,
 } from '@/components/Materials/detectiveRoomMats'
-import {DetectiveHatSimple} from "@/components/Models/DetectiveHatSimple";
-import {DetectiveCoat} from "@/components/Models/DetectiveCoat";
+import {DetectiveHatSimple} from "@/components/Models/Decoration/DetectiveHatSimple";
+import {DetectiveCoat} from "@/components/Models/Decoration/DetectiveCoat";
+import Magnifier from "@/components/Models/Decoration/Magnifier";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void
 
@@ -101,6 +102,16 @@ export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     rotation={ANCHOR.hat.rotation}
                     materialsById={detectiveHatMaterials}
                     crownTopRadius={0.065}
+                />
+            </group>
+
+            <group onContextMenu={rcFocus(ANCHOR.magnifier1)} userData={{movable: true, anchorKey: 'magnifier1'}}>
+                <Magnifier
+                    position={ANCHOR.magnifier1.position}
+                    rotation={ANCHOR.magnifier1.rotation}
+                    materialsById={magnifierMaterials}
+                    disableOutline
+                    inspectDisableOutline
                 />
             </group>
 

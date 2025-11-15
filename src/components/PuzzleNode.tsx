@@ -4,8 +4,8 @@ import { ANCHOR } from "@/components/Game/anchors"
 import type { Vec3, FocusOpts } from "@/components/Types/room"
 import type { InspectState, TextPuzzle } from "@/components/Types/inspectModels"
 import type { AnchorKey, PuzzleId } from "@/components/Types/game"
-import { FramedPlane } from "@/components/Models/GenericOutlined/FramedPlane"
-import { Pin } from "@/components/Models/Pin"
+import { FramedPlane } from "@/components/Models/Generic/Outlined/FramedPlane"
+import { Pin } from "@/components/Models/Functional/Pin"
 
 type DefLite = {
     puzzleId: PuzzleId

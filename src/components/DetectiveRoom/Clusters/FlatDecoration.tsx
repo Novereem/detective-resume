@@ -1,6 +1,6 @@
 import React from 'react'
-import { FramedPlane } from '@/components/Models/GenericOutlined/FramedPlane'
-import { Pin } from '@/components/Models/Pin'
+import { FramedPlane } from '@/components/Models/Generic/Outlined/FramedPlane'
+import { Pin } from '@/components/Models/Functional/Pin'
 import { ANCHOR } from '@/components/Game/anchors'
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void

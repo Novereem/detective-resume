@@ -1,7 +1,7 @@
 import React from 'react'
-import { FramedPlane } from '@/components/Models/GenericOutlined/FramedPlane'
+import { FramedPlane } from '@/components/Models/Generic/Outlined/FramedPlane'
 import {wallCutoutMaterials} from "@/components/Materials/detectiveRoomMats";
-import WallWithCutouts, {apertureFromWindow} from "@/components/Models/WallWithCutouts";
+import WallWithCutouts, {apertureFromWindow} from "@/components/Models/Functional/WallWithCutouts";
 
 export function WallsCluster() {
     return (

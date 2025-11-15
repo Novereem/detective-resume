@@ -182,3 +182,10 @@ export const detectiveCoatMaterials: Record<string, PartMaterialOverride> = {
 
     coatHookFold:    { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
 }
+
+export const magnifierMaterials: Record<string, PartMaterialOverride> = {
+    ring:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
+    neck:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
+    handle: { textureUrl: '/textures/clear_metal.jpg', color: '#111111', roughness: 0.85, metalness: 0.1 },
+    lens:   { color: '#f5f7ff', roughness: 0, metalness: 0, transparent: true, opacity: 0.05, depthWrite: false },
+}

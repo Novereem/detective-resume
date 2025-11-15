@@ -3,7 +3,7 @@ import React, { memo, useMemo } from 'react'
 import * as THREE from 'three'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import type { Vec3 } from '@/components/Types/room'
-import {CardboardLid} from "@/components/Models/CardboardBox/CardboardLid";
+import {CardboardLid} from "@/components/Models/Decoration/CardboardBox/CardboardLid";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts' | 'materialsById'>
 

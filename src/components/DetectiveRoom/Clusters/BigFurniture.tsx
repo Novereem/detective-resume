@@ -1,12 +1,12 @@
 import React from 'react'
 import { ANCHOR } from '@/components/Game/anchors'
 
-import { Desk } from '@/components/Models/Desk'
-import { CorkBoard } from '@/components/Models/CorkBoard'
-import { CoatRack } from '@/components/Models/CoatRack'
-import WoodBlinds from '@/components/Models/WoodBlinds'
-import RectWindow from '@/components/Models/RectWindow'
-import { Bookshelf } from '@/components/Models/Bookshelf'
+import { Desk } from '@/components/Models/BigFurniture/Desk'
+import { CorkBoard } from '@/components/Models/BigFurniture/CorkBoard'
+import { CoatRack } from '@/components/Models/BigFurniture/CoatRack'
+import WoodBlinds from '@/components/Models/BigFurniture/WoodBlinds'
+import RectWindow from '@/components/Models/BigFurniture/RectWindow'
+import { Bookshelf } from '@/components/Models/BigFurniture/Bookshelf'
 
 import {
     coatRackMaterials,

@@ -2,9 +2,9 @@
 import React from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
-import { MetalCabinet } from '@/components/Models/MetalDesk/MetalCabinet'
-import { MetalDeskTop } from '@/components/Models/MetalDesk/MetalDeskTop'
-import { MetalDrawer } from '@/components/Models/MetalDesk/MetalDrawer'
+import { MetalCabinet } from '@/components/Models/BigFurniture/MetalDesk/MetalCabinet'
+import { MetalDeskTop } from '@/components/Models/BigFurniture/MetalDesk/MetalDeskTop'
+import { MetalDrawer } from '@/components/Models/BigFurniture/MetalDesk/MetalDrawer'
 
 type Vec3 = [number, number, number]
 type Mats = Record<string, any>

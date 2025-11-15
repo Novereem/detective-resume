@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
-import { Outlined } from '@/components/Models/GenericOutlined/Outlined'
+import { Outlined } from '@/components/Models/Generic/Outlined/Outlined'
 import * as THREE from 'three'
 import {Vec3} from "@/components/Types/room";
 import {InspectState, OutlinedGroupInspect} from "@/components/Types/inspectModels";

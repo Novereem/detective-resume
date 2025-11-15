@@ -2,9 +2,9 @@
 import React from 'react'
 import * as THREE from 'three'
 import { ANCHOR } from '@/components/Game/anchors'
-import { CardboardBoxInteractive } from '@/components/Models/CardboardBox/CardboardBoxInteractive'
-import { MetalDesk } from '@/components/Models/MetalDesk/MetalDesk'
-import { SecretFile } from '@/components/Models/SecretFile'
+import { CardboardBoxInteractive } from '@/components/Models/Functional/CardboardBoxInteractive'
+import { MetalDesk } from '@/components/Models/BigFurniture/MetalDesk/MetalDesk'
+import { SecretFile } from '@/components/Models/Functional/SecretFile'
 import {
     cardboardMaterials,
     metalCabinetMaterials,
