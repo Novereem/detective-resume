@@ -6,14 +6,24 @@ import { NotificationsProvider, NotificationsViewport } from '@/components/Notif
 import { ControlsHint } from '@/components/UI/ControlsHint'
 import EscapeMenu from '@/components/UI/EscapeMenu'
 import { SettingsProvider, useSettings } from '@/components/Settings/SettingsProvider'
-import BackToDeskButton from "@/components/UI/BackToDeskButton";
+import BackToDeskButton from '@/components/UI/BackToDeskButton'
+import { preloadTextures } from '@/components/Textures/TextureManager'
+import { DETECTIVE_ROOM_TEXTURES } from '@/components/Textures/detectiveRoomTextures'
 
 function StaticLoader({ message }: { message: string }) {
     return (
-        <div style={{
-            position: 'fixed', inset: 0, display: 'grid', placeItems: 'center',
-            background: 'black', color: 'white', zIndex: 50, pointerEvents: 'none'
-        }}>
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                display: 'grid',
+                placeItems: 'center',
+                background: 'black',
+                color: 'white',
+                zIndex: 50,
+                pointerEvents: 'none',
+            }}
+        >
             <p>{message}</p>
         </div>
     )
@@ -43,20 +53,41 @@ const FADE_MS = 200
 export default function DetectiveRoomPage() {
     const { isLoading, pending } = useTextureLoading()
 
+    const [bootPreloadDone, setBootPreloadDone] = React.useState(false)
     const [overlayVisible, setOverlayVisible] = React.useState(true)
     const [opacity, setOpacity] = React.useState(1)
     const [booted, setBooted] = React.useState(false)
     const hideTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
     React.useEffect(() => {
+        let cancelled = false
+        preloadTextures(DETECTIVE_ROOM_TEXTURES)
+            .catch(() => {
+                if (!cancelled) setBootPreloadDone(true)
+            })
+            .then(() => {
+                if (!cancelled) setBootPreloadDone(true)
+            })
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const isBootLoading = !bootPreloadDone || isLoading
+
+    React.useEffect(() => {
         if (booted) return
 
-        if (isLoading) {
-            if (hideTimer.current) { clearTimeout(hideTimer.current); hideTimer.current = null }
+        if (isBootLoading) {
+            if (hideTimer.current) {
+                clearTimeout(hideTimer.current)
+                hideTimer.current = null
+            }
             setOverlayVisible(true)
             setOpacity(1)
             return
         }
+
         if (!hideTimer.current) {
             hideTimer.current = setTimeout(() => {
                 setOpacity(0)
@@ -67,10 +98,14 @@ export default function DetectiveRoomPage() {
                 hideTimer.current = null
             }, HIDE_DELAY_MS)
         }
+
         return () => {
-            if (hideTimer.current) { clearTimeout(hideTimer.current); hideTimer.current = null }
+            if (hideTimer.current) {
+                clearTimeout(hideTimer.current)
+                hideTimer.current = null
+            }
         }
-    }, [isLoading, booted])
+    }, [isBootLoading, booted])
 
     return (
         <NotificationsProvider>
@@ -90,7 +125,10 @@ export default function DetectiveRoomPage() {
                             transition: `opacity ${FADE_MS}ms ease`,
                         }}
                     >
-                        <p>Loading detective room. . . {!booted && isLoading && pending > 0 ? ` (${pending})` : ''}</p>
+                        <p>
+                            Loading detective room. . .
+                            {!booted && isBootLoading && pending > 0 ? ` (${pending})` : ''}
+                        </p>
                     </div>
                 )}
 

@@ -96,7 +96,7 @@ export function releaseManagedTexture(url: string) {
     if (e.refs === 0 && e.tex) { e.tex.dispose(); cache.delete(url) }
 }
 
-export function preloadTextures(urls: (string | undefined)[], opts?: LoadOpts) {
+export function preloadTextures(urls: readonly (string | undefined)[], opts?: LoadOpts) {
     const list = Array.from(new Set(urls.filter(Boolean) as string[]))
     return Promise.all(list.map(u => loadManagedTexture(u, opts))).then(() => void 0)
 }
