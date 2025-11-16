@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useSettings } from './SettingsProvider'
+import { useSettings } from '../Settings/SettingsProvider'
 
 type TabKey = 'controls' | 'video' | 'extras'
 
@@ -15,6 +15,7 @@ export default function EscapeMenu() {
         isInspecting,
         orientDampingBase, orientDamping, setOrientDamping,
         shadowsEnabled, setShadowsEnabled, shadowQuality, setShadowQuality,
+        modelQuality, setModelQuality,
         resetControlsToDefaults, resetVideoToDefaults,
         flyEnabled, setFlyEnabled,
     } = useSettings()
@@ -351,6 +352,46 @@ export default function EscapeMenu() {
                                                     outline: shadowQuality === q ? '2px solid rgba(255,255,255,0.9)' : '1px solid rgba(255,255,255,0.15)'
                                                 }}
                                                 disabled={!shadowsEnabled}>
+                                            {q[0].toUpperCase() + q.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div style={row}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 10,
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{fontWeight: 600}}>Graphics quality</div>
+                                        <div style={{opacity: 0.65, fontSize: 12, marginTop: 2}}>
+                                            Lower quality can improve performance
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{marginTop: 10, display: 'flex', gap: 10}}>
+                                    {(['low', 'medium', 'high'] as const).map((q) => (
+                                        <button
+                                            key={q}
+                                            onClick={() => setModelQuality(q)}
+                                            aria-pressed={modelQuality === q}
+                                            style={{
+                                                ...btn,
+                                                outline:
+                                                    modelQuality === q
+                                                        ? '2px solid rgba(255,255,255,0.9)'
+                                                        : '1px solid rgba(255,255,255,0.15)',
+                                                background:
+                                                    modelQuality === q
+                                                        ? 'rgba(255,255,255,0.10)'
+                                                        : 'rgba(255,255,255,0.03)',
+                                            }}
+                                        >
                                             {q[0].toUpperCase() + q.slice(1)}
                                         </button>
                                     ))}

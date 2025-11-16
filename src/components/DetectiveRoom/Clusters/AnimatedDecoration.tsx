@@ -4,7 +4,7 @@ import { Clock } from '@/components/Models/AnimatedDecoration/Clock'
 import { PlantBamboo } from '@/components/Models/AnimatedDecoration/PlantPot'
 import {clockMaterials, globeMaterials, plantPotMaterials} from '@/components/Materials/detectiveRoomMats'
 import {Fly} from "@/components/Models/AnimatedDecoration/Fly";
-import {useSettings} from "@/components/UI/SettingsProvider";
+import {useSettings} from "@/components/Settings/SettingsProvider";
 import Globe from "@/components/Models/Decoration/Globe";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void

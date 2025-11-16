@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import type { Vec3 } from '@/components/Types/room'
 import {useManagedTexture} from "@/components/Textures/useManagedTexture";
+import {useQuality} from "@/components/Settings/QualityContext";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts' | 'materialsById'>
 
@@ -93,6 +94,10 @@ export const PlantBamboo = memo(function PlantBamboo({
                                                          materialsById,
                                                          ...rest
                                                      }: PlantBambooProps) {
+    const quality = useQuality()
+    const showBranchesAndLeaves = quality === 'high'
+    const showNodes = quality !== 'low'
+
     const innerTopR = Math.max(0.02, radiusTop - wall)
 
     const lipGeom = React.useMemo(() => {
@@ -257,23 +262,26 @@ export const PlantBamboo = memo(function PlantBamboo({
                     <cylinderGeometry args={[c.Rt, c.Rb, c.H, 12]}/>
                 </mesh>
             )
-            c.nodes.forEach((ny, i) => {
-                const col = ringColors[Math.floor(rand() * ringColors.length)]
-                const rMul = THREE.MathUtils.lerp(1.0, 1.08, rand())
-                items.push(
-                    <mesh key={`node_${idx}_${i}`} position={[c.base.x, ny, c.base.z]} castShadow receiveShadow={false}>
-                        <cylinderGeometry args={[c.Rb * rMul, c.Rb * rMul, nodeThick, 12]} />
-                        <meshStandardMaterial color={col} roughness={0.6} metalness={0.05} />
-                    </mesh>
-                )
-            })
+            if (showNodes) {
+                c.nodes.forEach((ny, i) => {
+                    const col = ringColors[Math.floor(rand() * ringColors.length)]
+                    const rMul = THREE.MathUtils.lerp(1.0, 1.08, rand())
+                    items.push(
+                        <mesh key={`node_${idx}_${i}`} position={[c.base.x, ny, c.base.z]} castShadow receiveShadow={false}>
+                            <cylinderGeometry args={[c.Rb * rMul, c.Rb * rMul, nodeThick, 12]} />
+                            <meshStandardMaterial color={col} roughness={0.6} metalness={0.05} />
+                        </mesh>
+                    )
+                })
+            }
         })
         return <group>{items}</group>
-    }, [culms, nodeThick])
+    }, [culms, nodeThick, culmMat, showNodes])
 
     // YELLOW TWIGS
     type Branch = { pos: THREE.Vector3; quat: THREE.Quaternion; len: number; rad: number; phase: number }
     const branches = useMemo<Branch[]>(() => {
+        if (!showBranchesAndLeaves) return []
         const rand = rng(5678)
         const arr: Branch[] = []
 
@@ -309,7 +317,7 @@ export const PlantBamboo = memo(function PlantBamboo({
             })
         })
         return arr
-    }, [culms, branchesPerNode, branchLen, branchRadius, branchUpTiltDeg, branchSpreadDeg])
+    }, [culms, branchesPerNode, branchLen, branchRadius, branchUpTiltDeg, branchSpreadDeg, showBranchesAndLeaves])
 
     const BranchMeshes = useMemo(() => {
         return (
@@ -382,6 +390,7 @@ export const PlantBamboo = memo(function PlantBamboo({
 
     type LeafAnchor = { pos: THREE.Vector3; quat: THREE.Quaternion; len: number; wid: number; phase: number }
     const leafAnchors = useMemo<LeafAnchor[]>(() => {
+        if (!showBranchesAndLeaves) return []
         const rand = rng(91011)
         const arr: LeafAnchor[] = []
 
@@ -440,7 +449,7 @@ export const PlantBamboo = memo(function PlantBamboo({
         })
 
         return arr
-    }, [branches, leavesPerBranch, leafLen, leafWidth, leafTiltDeg])
+    }, [branches, leavesPerBranch, leafLen, leafWidth, leafTiltDeg, showBranchesAndLeaves])
 
     const leafRef = useRef<THREE.InstancedMesh>(null)
 
@@ -459,7 +468,7 @@ export const PlantBamboo = memo(function PlantBamboo({
     }, [leafAnchors])
 
     useFrame(({ clock }) => {
-        if (!sway || !leafRef.current) return
+        if (!sway || !leafRef.current || !showBranchesAndLeaves || leafAnchors.length === 0) return
         const t = clock.getElapsedTime() * swaySpeed * Math.PI * 0.5
         const amp = THREE.MathUtils.degToRad(swayAmpDeg)
         const dummy = new THREE.Object3D()
@@ -495,11 +504,17 @@ export const PlantBamboo = memo(function PlantBamboo({
             {StalksAndNodes}
 
             {/* Yellow twigs */}
-            {BranchMeshes}
+            {showBranchesAndLeaves && BranchMeshes}
 
             {/* Reversed leaves at twig tips */}
-            <instancedMesh key={`leaves-${leafAnchors.length}`} ref={leafRef}
-                           args={[leafGeom, leafMat, leafAnchors.length]} castShadow/>
+            {showBranchesAndLeaves && leafAnchors.length > 0 && (
+                <instancedMesh
+                    key={`leaves-${leafAnchors.length}`}
+                    ref={leafRef}
+                    args={[leafGeom, leafMat, leafAnchors.length]}
+                    castShadow
+                />
+            )}
 
         </group>
     )

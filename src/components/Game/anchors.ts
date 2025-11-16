@@ -38,12 +38,12 @@ export type AnchorKey =
     | "bookshelf2"
 
 export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: Vec3 }> = {
-    bulb:       { eye: [ 0.6, 1.6, 3.3], position: [0, 2, 4.3] },
-    desk1:      { eye: [ 0.8, 1.1, 2.8], position: [1.6, 0, 4.3] },
-    desk2:      { eye: [-0.5, 1.1, 2.8], position: [-2, 0, 3] },
-    deskMetal:  { eye: [ 0, 1.1, 2.8], position: [0, 0, 4.2] },
-    corkBoard:  { eye: [ 0, 1.3, 3.2], position: [0, 1.3, 4.98] },
-    mug:        { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.692, 2.340] },
+    bulb: { eye: [ 0.6, 1.6, 3.3], position: [0, 2, 4.3] },
+    desk1: { eye: [ 0.8, 1.1, 2.8], position: [1.6, 0, 4.3] },
+    desk2: { eye: [-0.5, 1.1, 2.8], position: [-2, 0, 3] },
+    deskMetal: { eye: [ 0, 1.1, 2.8], position: [0, 0, 4.2] },
+    corkBoard: { eye: [ 0, 1.3, 3.2], position: [0, 1.3, 4.98] },
+    mug: { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.892, 2.340] },
     coatRack: { eye: [-0.200, 1.300, 3.200], position: [2.156, 0.010, 2.597], rotation: [0, 0, 0] },
     hat: { eye: [-0.200, 1.300, 3.200], position: [1.979, 1.632, 2.610], rotation: [Math.PI, 0, 2.000] },
     magnifier1: { eye: [-0.200, 1.300, 3.200], position: [0.714, 0.768, 4.253], rotation: [Math.PI, -0.594, 0] },
@@ -60,7 +60,7 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     paperclip3: { eye: [-0.200, 1.300, 3.200], position: [-0.731, 0.768, 4.126], rotation: [1.511, 0.16, -Math.PI/2] },
 
     mugDeco1: { eye: [-0.200, 1.300, 3.200], position: [0.744, 0.811, 4.014], rotation: [0, 0.585, 0] },
-    globe: { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.692, 2.640] },
+    globe: { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.850, 2.640] },
 
     houseFrame: { eye: [ 0.2, 1.3, 3.6], position: [0.2, 1.3, 4.965] },
     photoClueFrame: { eye: [ 0.0, 1.3, 3.6], position: [0, 1.5, 4.965] },
@@ -74,24 +74,27 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
 
     book1: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
     book2: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
-    book3: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.421], rotation: [Math.PI/2, 0, Math.PI] },
-    book4: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.381], rotation: [Math.PI/2, 0, Math.PI] },
-    book5: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.341], rotation: [1.665, 0, Math.PI] },
-    book6: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.417, 3.232], rotation: [2.506, 0, Math.PI] },
-    book7: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.393, 3.089], rotation: [-0.266, 0, Math.PI] },
+    book3: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.549, 3.421], rotation: [Math.PI/2, 0, Math.PI] },
+    book4: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.549, 3.381], rotation: [Math.PI/2, 0, Math.PI] },
+    book5: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.549, 3.341], rotation: [1.665, 0, Math.PI] },
+    book6: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.517, 3.232], rotation: [2.506, 0, Math.PI] },
+    book7: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.493, 3.089], rotation: [-0.266, 0, Math.PI] },
 
-    binder1: { eye: [0.200, 1.300, 3.600], position: [2.380, 0.613, 3.753], rotation: [-Math.PI/2, 0, 0] },
-    binder2: { eye: [0.200, 1.300, 3.600], position: [2.384, 1.372, 3.451], rotation: [-Math.PI/2, 0, 0] },
+    binder1: { eye: [0.200, 1.300, 3.600], position: [-1.366, 0.061, 3.000], rotation: [Math.PI, 0, Math.PI] },
+    binder2: { eye: [0.200, 1.300, 3.600], position: [-1.366, 0.121, 3.000], rotation: [Math.PI, 0, Math.PI] },
 
+    //Unused
     binder3: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.75], rotation: [-Math.PI/2, 0, 0] },
     binder4: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.69], rotation: [-Math.PI/2, 0, 0] },
     binder5: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.63], rotation: [-Math.PI/2, 0, 0] },
-    binder6: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.57], rotation: [-Math.PI/2, 0, 0] },
-    binder7: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.51], rotation: [-Math.PI/2, 0, 0] },
-    binder8: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.45], rotation: [-Math.PI/2, 0, 0] },
-    binder9: { eye: [0.200, 1.300, 3.600], position: [2.373, 0.993, 3.39], rotation: [-Math.PI/2, 0, 0] },
 
-    binder20: { eye: [0.200, 1.300, 3.600], position: [2.377, 1.369, 2.986], rotation: [-Math.PI/2, 0, 0] },
+    binder6: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.416], rotation: [-Math.PI/2, 0, -Math.PI] },
+    binder7: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.356], rotation: [-Math.PI/2, 0, -Math.PI] },
+    binder8: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.296], rotation: [-Math.PI/2, 0, -Math.PI] },
+    binder9: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.236], rotation: [-Math.PI/2, 0, -Math.PI] },
+
+    //Unused
+    binder20: { eye: [0.200, 1.300, 3.600], position: [2.377, 1.369, 3.388], rotation: [-Math.PI/2, 0, 0] },
 
     clock: { eye: [2.000, 1.600, 3.600], position: [-1.110, 1.730, 4.968], rotation: [-Math.PI, 0, -Math.PI] },
 

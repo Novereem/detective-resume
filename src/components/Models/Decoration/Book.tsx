@@ -3,6 +3,7 @@ import React, { memo, useMemo } from 'react'
 import * as THREE from 'three'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import type { Vec3 } from '@/components/Types/room'
+import { useQuality } from '@/components/Settings/QualityContext'
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts' | 'materialsById'>
 
@@ -30,6 +31,8 @@ export const Book = memo(function Book({
                                            materialsById,
                                            ...rest
                                        }: BookProps) {
+    const quality = useQuality()
+
     const [W, T, H] = size
     const WScaled = W * sizeMultiplier
     const TScaled = T * sizeMultiplier
@@ -47,34 +50,40 @@ export const Book = memo(function Book({
         // Back cover
         p.push({
             id: 'coverBack',
-            geometry: <boxGeometry args={[WScaled - spineThickness, clampedCover, HScaled]} />,
+            geometry: <boxGeometry args={[WScaled - spineThickness, clampedCover, HScaled]}/>,
             position: [spineThickness / 2, -TScaled / 2 + clampedCover / 2, 0],
             color, outlineColor, boundingRadius: Math.max(WScaled, HScaled) * 0.5,
             roughness: 0.9, metalness: 0.0,
+            castShadow: quality !== 'low',
+            receiveShadow: true,
         })
 
         // Front cover
         p.push({
             id: 'coverFront',
-            geometry: <boxGeometry args={[WScaled - spineThickness, clampedCover, HScaled]} />,
-            position: [spineThickness / 2,  TScaled / 2 - clampedCover / 2, 0],
+            geometry: <boxGeometry args={[WScaled - spineThickness, clampedCover, HScaled]}/>,
+            position: [spineThickness / 2, TScaled / 2 - clampedCover / 2, 0],
             color, outlineColor, boundingRadius: Math.max(WScaled, HScaled) * 0.5,
             roughness: 0.9, metalness: 0.0,
+            castShadow: quality !== 'low',
+            receiveShadow: true,
         })
 
         // Spine
         p.push({
             id: 'spine',
-            geometry: <boxGeometry args={[clampedSpine, TScaled, HScaled]} />,
+            geometry: <boxGeometry args={[clampedSpine, TScaled, HScaled]}/>,
             position: [-WScaled / 2 + clampedSpine / 2, 0, 0],
             color, outlineColor, boundingRadius: Math.max(TScaled, HScaled) * 0.5,
             roughness: 0.85, metalness: 0.0,
+            castShadow: quality !== 'low',
+            receiveShadow: true,
         })
 
         // Page block
         p.push({
             id: 'pages',
-            geometry: <boxGeometry args={[innerW, innerT, innerH]} />,
+            geometry: <boxGeometry args={[innerW, innerT, innerH]}/>,
             position: [
                 -WScaled / 2 + clampedSpine + innerW / 2,
                 0,
@@ -82,10 +91,12 @@ export const Book = memo(function Book({
             ],
             color, outlineColor, boundingRadius: Math.max(innerW, innerH) * 0.5,
             roughness: 0.95, metalness: 0.0,
+            castShadow: quality === 'high',
+            receiveShadow: true,
         })
 
         return p
-    }, [WScaled, TScaled, HScaled, clampedSpine, clampedCover, innerW, innerT, innerH, pageInset, color, outlineColor])
+    }, [WScaled, TScaled, HScaled, clampedSpine, clampedCover, innerW, innerT, innerH, pageInset, color, outlineColor, quality])
 
     const hitboxSize: Vec3 = [WScaled, TScaled, HScaled]
     const hitboxCenter: Vec3 = [0, 0, 0]
@@ -95,7 +106,7 @@ export const Book = memo(function Book({
             {...rest}
             parts={parts}
             materialsById={materialsById}
-            hitbox={{ size: hitboxSize, center: hitboxCenter }}
+            hitbox={{size: hitboxSize, center: hitboxCenter}}
             color={color}
             outlineColor={outlineColor}
             hoverColor={hoverColor}

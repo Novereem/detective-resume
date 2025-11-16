@@ -6,10 +6,13 @@ import {
     binderMaterials,
     bookMaterials,
 } from '@/components/Materials/detectiveRoomMats'
+import {useQuality} from "@/components/Settings/QualityContext";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void
 
 export function BindersAndBooksCluster({ rcFocus }: { rcFocus: RcFocus }) {
+    const quality = useQuality()
+
     return (
         <>
             <group onContextMenu={rcFocus(ANCHOR.book1)} userData={{movable: true, anchorKey: 'book1'}}>
@@ -168,59 +171,59 @@ export function BindersAndBooksCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.binder3)} userData={{movable: true, anchorKey: 'binder3'}}>
-                <Binder
-                    position={ANCHOR.binder3.position}
-                    rotation={ANCHOR.binder3.rotation}
-                    materialsById={{
-                        ...binderMaterials,
-                        coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},
-                        coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},
-                        spine: {...binderMaterials.spine, color: '#104326'},
-                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
-                    }}
-                    paperFill={0.4}
-                    disableOutline
-                    inspectDisableOutline
-                    inspectPixelSize={3}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.binder3)} userData={{movable: true, anchorKey: 'binder3'}}>*/}
+            {/*    <Binder*/}
+            {/*        position={ANCHOR.binder3.position}*/}
+            {/*        rotation={ANCHOR.binder3.rotation}*/}
+            {/*        materialsById={{*/}
+            {/*            ...binderMaterials,*/}
+            {/*            coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},*/}
+            {/*            coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},*/}
+            {/*            spine: {...binderMaterials.spine, color: '#104326'},*/}
+            {/*            ring: {...binderMaterials.ring, color: '#f3f3f3'},*/}
+            {/*        }}*/}
+            {/*        paperFill={0.4}*/}
+            {/*        disableOutline*/}
+            {/*        inspectDisableOutline*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
-            <group onContextMenu={rcFocus(ANCHOR.binder4)} userData={{movable: true, anchorKey: 'binder4'}}>
-                <Binder
-                    position={ANCHOR.binder4.position}
-                    rotation={ANCHOR.binder4.rotation}
-                    materialsById={{
-                        ...binderMaterials,
-                        coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},
-                        coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},
-                        spine: {...binderMaterials.spine, color: '#104326'},
-                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
-                    }}
-                    paperFill={0.4}
-                    disableOutline
-                    inspectDisableOutline
-                    inspectPixelSize={3}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.binder4)} userData={{movable: true, anchorKey: 'binder4'}}>*/}
+            {/*    <Binder*/}
+            {/*        position={ANCHOR.binder4.position}*/}
+            {/*        rotation={ANCHOR.binder4.rotation}*/}
+            {/*        materialsById={{*/}
+            {/*            ...binderMaterials,*/}
+            {/*            coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},*/}
+            {/*            coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},*/}
+            {/*            spine: {...binderMaterials.spine, color: '#104326'},*/}
+            {/*            ring: {...binderMaterials.ring, color: '#f3f3f3'},*/}
+            {/*        }}*/}
+            {/*        paperFill={0.4}*/}
+            {/*        disableOutline*/}
+            {/*        inspectDisableOutline*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
-            <group onContextMenu={rcFocus(ANCHOR.binder5)} userData={{movable: true, anchorKey: 'binder5'}}>
-                <Binder
-                    position={ANCHOR.binder5.position}
-                    rotation={ANCHOR.binder5.rotation}
-                    materialsById={{
-                        ...binderMaterials,
-                        coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},
-                        coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},
-                        spine: {...binderMaterials.spine, color: '#104326'},
-                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
-                    }}
-                    paperFill={0.4}
-                    disableOutline
-                    inspectDisableOutline
-                    inspectPixelSize={3}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.binder5)} userData={{movable: true, anchorKey: 'binder5'}}>*/}
+            {/*    <Binder*/}
+            {/*        position={ANCHOR.binder5.position}*/}
+            {/*        rotation={ANCHOR.binder5.rotation}*/}
+            {/*        materialsById={{*/}
+            {/*            ...binderMaterials,*/}
+            {/*            coverFront: {...binderMaterials.coverFront, color: '#1f5c3a'},*/}
+            {/*            coverBack: {...binderMaterials.coverBack, color: '#1f5c3a'},*/}
+            {/*            spine: {...binderMaterials.spine, color: '#104326'},*/}
+            {/*            ring: {...binderMaterials.ring, color: '#f3f3f3'},*/}
+            {/*        }}*/}
+            {/*        paperFill={0.4}*/}
+            {/*        disableOutline*/}
+            {/*        inspectDisableOutline*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.binder6)} userData={{movable: true, anchorKey: 'binder6'}}>
                 <Binder
@@ -294,23 +297,23 @@ export function BindersAndBooksCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.binder20)} userData={{movable: true, anchorKey: 'binder20'}}>
-                <Binder
-                    position={ANCHOR.binder20.position}
-                    rotation={ANCHOR.binder20.rotation}
-                    materialsById={{
-                        ...binderMaterials,
-                        coverFront: {...binderMaterials.coverFront, color: '#262626'},
-                        coverBack: {...binderMaterials.coverBack, color: '#262626'},
-                        spine: {...binderMaterials.spine, color: '#141414'},
-                        ring: {...binderMaterials.ring, color: '#f3f3f3'},
-                    }}
-                    paperFill={0.15}
-                    disableOutline
-                    inspectDisableOutline
-                    inspectPixelSize={3}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.binder20)} userData={{movable: true, anchorKey: 'binder20'}}>*/}
+            {/*    <Binder*/}
+            {/*        position={ANCHOR.binder20.position}*/}
+            {/*        rotation={ANCHOR.binder20.rotation}*/}
+            {/*        materialsById={{*/}
+            {/*            ...binderMaterials,*/}
+            {/*            coverFront: {...binderMaterials.coverFront, color: '#262626'},*/}
+            {/*            coverBack: {...binderMaterials.coverBack, color: '#262626'},*/}
+            {/*            spine: {...binderMaterials.spine, color: '#141414'},*/}
+            {/*            ring: {...binderMaterials.ring, color: '#f3f3f3'},*/}
+            {/*        }}*/}
+            {/*        paperFill={0.15}*/}
+            {/*        disableOutline*/}
+            {/*        inspectDisableOutline*/}
+            {/*        inspectPixelSize={3}*/}
+            {/*    />*/}
+            {/*</group>*/}
         </>
     )
 }

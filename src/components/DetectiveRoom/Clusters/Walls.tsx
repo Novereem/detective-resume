@@ -6,10 +6,11 @@ import WallWithCutouts, {apertureFromWindow} from "@/components/Models/Functiona
 export function WallsCluster() {
     return (
         <group>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 2.5]} raycast={() => null}>
+            {/* Floor */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.5, 0, 3]} raycast={() => null}>
                 <FramedPlane
-                    width={5}
-                    height={5}
+                    width={4}
+                    height={4}
                     textureUrl="/textures/dark_planks.jpg"
                     textureFit="contain"
                     border={0}
@@ -23,10 +24,11 @@ export function WallsCluster() {
                 />
             </mesh>
 
-            <mesh rotation={[-Math.PI / 2, Math.PI, Math.PI]} position={[0, 2.5, 2.5]} raycast={() => null}>
+            {/* Roof */}
+            <mesh rotation={[-Math.PI / 2, Math.PI, Math.PI]} position={[0.5, 2.5, 3]} raycast={() => null}>
                 <FramedPlane
-                    width={5}
-                    height={5}
+                    width={4}
+                    height={4}
                     textureUrl="/textures/light_concrete.jpg"
                     textureFit="stretch"
                     border={0}
@@ -40,10 +42,11 @@ export function WallsCluster() {
                 />
             </mesh>
 
-            <mesh position={[0, 2.5, 5]} rotation={[-Math.PI, 0, 0]} raycast={() => null}>
+            {/* Front Wall */}
+            <mesh position={[0, 1.25, 5]} rotation={[-Math.PI, 0, 0]} raycast={() => null}>
                 <FramedPlane
                     width={5}
-                    height={5}
+                    height={2.5}
                     textureUrl="/textures/felt_beige.jpg"
                     textureFit="stretch"
                     border={0}

@@ -5,7 +5,7 @@ import { useTextureLoading } from '@/components/Textures/useTextureLoading'
 import { NotificationsProvider, NotificationsViewport } from '@/components/Notifications'
 import { ControlsHint } from '@/components/UI/ControlsHint'
 import EscapeMenu from '@/components/UI/EscapeMenu'
-import { SettingsProvider, useSettings } from '@/components/UI/SettingsProvider'
+import { SettingsProvider, useSettings } from '@/components/Settings/SettingsProvider'
 import BackToDeskButton from "@/components/UI/BackToDeskButton";
 
 function StaticLoader({ message }: { message: string }) {

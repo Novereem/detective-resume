@@ -112,26 +112,26 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookshelf1)} userData={{ movable: false, anchorKey: 'bookshelf1' }}>
-                <Bookshelf
-                    position={ANCHOR.bookshelf1.position}
-                    rotation={ANCHOR.bookshelf1.rotation}
-                    materialsById={bookshelfMaterials}
-                    size={[0.9, 2.0, 0.26]}
-                    frameThickness={0.03}
-                    shelfCount={4}
-                    disableOutline
-                    inspectDisableOutline
-                    outlineScale={1.02}
-                />
-            </group>
+            {/*<group onContextMenu={rcFocus(ANCHOR.bookshelf1)} userData={{ movable: false, anchorKey: 'bookshelf1' }}>*/}
+            {/*    <Bookshelf*/}
+            {/*        position={ANCHOR.bookshelf1.position}*/}
+            {/*        rotation={ANCHOR.bookshelf1.rotation}*/}
+            {/*        materialsById={bookshelfMaterials}*/}
+            {/*        size={[0.9, 2.0, 0.26]}*/}
+            {/*        frameThickness={0.03}*/}
+            {/*        shelfCount={4}*/}
+            {/*        disableOutline*/}
+            {/*        inspectDisableOutline*/}
+            {/*        outlineScale={1.02}*/}
+            {/*    />*/}
+            {/*</group>*/}
 
             <group onContextMenu={rcFocus(ANCHOR.bookshelf2)} userData={{ movable: false, anchorKey: 'bookshelf2' }}>
                 <Bookshelf
                     position={ANCHOR.bookshelf2.position}
                     rotation={ANCHOR.bookshelf2.rotation}
                     materialsById={bookshelfMaterials}
-                    size={[1.3, 0.65, 0.26]}
+                    size={[1.3, 0.85, 0.26]}
                     frameThickness={0.03}
                     shelfCount={1}
                     disableOutline

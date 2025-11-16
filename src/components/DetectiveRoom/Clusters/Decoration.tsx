@@ -23,10 +23,16 @@ import Stapler from "@/components/Models/Decoration/Stapler";
 import Paperclip from "@/components/Models/Decoration/Paperclip";
 import Pen from "@/components/Models/Decoration/Pen";
 import Mug from "@/components/Models/Decoration/Mug";
+import {useQuality} from "@/components/Settings/QualityContext";
 
 type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.MouseEvent) => void
 
 export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
+    const quality = useQuality()
+    const showPaperclips = quality === 'high'
+    const showExtraPens = quality !== 'low'
+    const showMugDeco = quality !== 'low'
+
     return (
         <>
             <group onContextMenu={rcFocus(ANCHOR.cardboard1)} userData={{movable: true, anchorKey: 'cardboard1'}}>
@@ -146,81 +152,91 @@ export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.pen2)} userData={{movable: true, anchorKey: 'pen2'}}>
-                <Pen
-                    position={ANCHOR.pen2.position}
-                    rotation={ANCHOR.pen2.rotation}
-                    materialsById={penMaterials}
-                    colorBody={"#673238"}
-                    colorTip={"#35191e"}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+            {showExtraPens && (
+                <>
+                    <group onContextMenu={rcFocus(ANCHOR.pen2)} userData={{movable: true, anchorKey: 'pen2'}}>
+                        <Pen
+                            position={ANCHOR.pen2.position}
+                            rotation={ANCHOR.pen2.rotation}
+                            materialsById={penMaterials}
+                            colorBody={"#673238"}
+                            colorTip={"#35191e"}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.pen3)} userData={{movable: true, anchorKey: 'pen3'}}>
-                <Pen
-                    position={ANCHOR.pen3.position}
-                    rotation={ANCHOR.pen3.rotation}
-                    materialsById={penMaterials}
-                    colorBody={"#326739"}
-                    colorTip={"#19351a"}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+                    <group onContextMenu={rcFocus(ANCHOR.pen3)} userData={{movable: true, anchorKey: 'pen3'}}>
+                        <Pen
+                            position={ANCHOR.pen3.position}
+                            rotation={ANCHOR.pen3.rotation}
+                            materialsById={penMaterials}
+                            colorBody={"#326739"}
+                            colorTip={"#19351a"}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.pen4)} userData={{movable: true, anchorKey: 'pen4'}}>
-                <Pen
-                    position={ANCHOR.pen4.position}
-                    rotation={ANCHOR.pen4.rotation}
-                    materialsById={penMaterials}
-                    colorBody={"#111111"}
-                    colorTip={"#111111"}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+                    <group onContextMenu={rcFocus(ANCHOR.pen4)} userData={{movable: true, anchorKey: 'pen4'}}>
+                        <Pen
+                            position={ANCHOR.pen4.position}
+                            rotation={ANCHOR.pen4.rotation}
+                            materialsById={penMaterials}
+                            colorBody={"#111111"}
+                            colorTip={"#111111"}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
+                </>
+            )}
 
-            <group onContextMenu={rcFocus(ANCHOR.paperclip1)} userData={{movable: true, anchorKey: 'paperclip1'}}>
-                <Paperclip
-                    position={ANCHOR.paperclip1.position}
-                    rotation={ANCHOR.paperclip1.rotation}
-                    materialsById={paperclipMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+            {showPaperclips && (
+                <>
+                    <group onContextMenu={rcFocus(ANCHOR.paperclip1)} userData={{movable: true, anchorKey: 'paperclip1'}}>
+                        <Paperclip
+                            position={ANCHOR.paperclip1.position}
+                            rotation={ANCHOR.paperclip1.rotation}
+                            materialsById={paperclipMaterials}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.paperclip2)} userData={{movable: true, anchorKey: 'paperclip2'}}>
-                <Paperclip
-                    position={ANCHOR.paperclip2.position}
-                    rotation={ANCHOR.paperclip2.rotation}
-                    materialsById={paperclipMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+                    <group onContextMenu={rcFocus(ANCHOR.paperclip2)} userData={{movable: true, anchorKey: 'paperclip2'}}>
+                        <Paperclip
+                            position={ANCHOR.paperclip2.position}
+                            rotation={ANCHOR.paperclip2.rotation}
+                            materialsById={paperclipMaterials}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.paperclip3)} userData={{movable: true, anchorKey: 'paperclip3'}}>
-                <Paperclip
-                    position={ANCHOR.paperclip3.position}
-                    rotation={ANCHOR.paperclip3.rotation}
-                    materialsById={paperclipMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+                    <group onContextMenu={rcFocus(ANCHOR.paperclip3)} userData={{movable: true, anchorKey: 'paperclip3'}}>
+                        <Paperclip
+                            position={ANCHOR.paperclip3.position}
+                            rotation={ANCHOR.paperclip3.rotation}
+                            materialsById={paperclipMaterials}
+                            disableOutline
+                            inspectDisableOutline
+                        />
+                    </group>
+                </>
+            )}
 
-            <group onContextMenu={rcFocus(ANCHOR.mugDeco1)} userData={{movable: true, anchorKey: 'mugDeco1'}}>
-                <Mug
-                    position={ANCHOR.mugDeco1.position}
-                    rotation={ANCHOR.mugDeco1.rotation}
-                    materialsById={mugMaterials}
-                    disableOutline
-                    inspectDisableOutline
-                />
-            </group>
+            {showMugDeco && (
+                <group onContextMenu={rcFocus(ANCHOR.mugDeco1)} userData={{movable: true, anchorKey: 'mugDeco1'}}>
+                    <Mug
+                        position={ANCHOR.mugDeco1.position}
+                        rotation={ANCHOR.mugDeco1.rotation}
+                        materialsById={mugMaterials}
+                        disableOutline
+                        inspectDisableOutline
+                    />
+                </group>
+            )}
         </>
     )
 }

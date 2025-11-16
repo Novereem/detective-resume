@@ -21,7 +21,7 @@ import { InspectState } from '@/components/Types/inspectModels'
 import { ANCHOR } from '@/components/Game/anchors'
 import { useGameActions, useGameState } from '@/components/Game/state'
 import { DrawerFileSpawn, PositionedSecretFile } from '@/components/Game/state.data'
-import { useSettings } from '@/components/UI/SettingsProvider'
+import { useSettings } from '@/components/Settings/SettingsProvider'
 import { BindersAndBooksCluster } from '@/components/DetectiveRoom/Clusters/BindersAndBooks'
 import { BigFurnitureCluster } from '@/components/DetectiveRoom/Clusters/BigFurniture'
 import { LightsCluster } from '@/components/DetectiveRoom/Clusters/Lights'
@@ -32,6 +32,9 @@ import { WallsCluster } from '@/components/DetectiveRoom/Clusters/Walls'
 import { MovingObjects } from '@/components/DetectiveRoom/FunctionalObjects/MovingObjects'
 import { PuzzleObjects } from '@/components/DetectiveRoom/FunctionalObjects/PuzzleObjects'
 import { SceneEffects } from '@/components/DetectiveRoom/FunctionalObjects/Effects'
+import {TriangleLogger} from "@/components/Debug/TriangleLogger";
+import {Preload} from "@react-three/drei";
+import {QualityLevel, QualityProvider} from "@/components/Settings/QualityContext";
 
 function Scene({
                    openInspect,
@@ -54,6 +57,7 @@ function Scene({
     const rcFocus = useRightClickFocus(requestMove)
 
     scene.background = new THREE.Color('#3c3c3c')
+    const isDev = true;
 
     return (
         <>
@@ -77,6 +81,8 @@ function Scene({
             <PuzzleObjects rcFocus={rcFocus} openInspect={openInspect} files={files} />
 
             <SceneEffects poofs={poofs} onPoofDone={onPoofDone} />
+
+            {isDev && <TriangleLogger />}
         </>
     )
 }
@@ -154,6 +160,7 @@ export default function DetectiveRoom() {
         <div style={{ position: 'fixed', inset: 0 }} onContextMenu={(e) => e.preventDefault()}>
             <div style={{ position: 'absolute', inset: 0 }}>
                 <Canvas
+                    //frameloop="demand" //Makes the camera not rotate at the start?
                     shadows={shadowsEnabled ? { type: shadowType } : false}
                     dpr={[1, 1.25]}
                     camera={{ position: [0, 1, 3], fov: 80, rotation: [0, Math.PI, 0] }}
@@ -167,15 +174,17 @@ export default function DetectiveRoom() {
                     }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
-                    <Scene
-                        openInspect={setInspect}
-                        requestMove={setMoveReq}
-                        files={files}
-                        drawerFiles={drawer_files}
-                        poofs={poofs}
-                        onPoofDone={removePoof}
-                        drawers={drawers}
-                    />
+                    <QualityProvider>
+                        <Scene
+                            openInspect={setInspect}
+                            requestMove={setMoveReq}
+                            files={files}
+                            drawerFiles={drawer_files}
+                            poofs={poofs}
+                            onPoofDone={removePoof}
+                            drawers={drawers}
+                        />
+                    </QualityProvider>
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
 
@@ -190,6 +199,7 @@ export default function DetectiveRoom() {
 
                     <PixelateNearestFX size={pixelateSize} />
                     <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
+                    <Preload all/>
                 </Canvas>
             </div>
 

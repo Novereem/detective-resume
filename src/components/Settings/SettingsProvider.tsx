@@ -4,6 +4,8 @@ import React from 'react'
 type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 type ShadowQuality = 'low' | 'medium' | 'high'
 
+type ModelQuality = 'low' | 'medium' | 'high'
+
 export type ShadowPreset = {
     type: 'basic' | 'pcf' | 'pcfsoft'
     mapSize: number
@@ -54,6 +56,9 @@ type SettingsState = {
     setShadowQuality: (q: ShadowQuality) => void
     shadowPreset: ShadowPreset
 
+    setModelQuality: (q: ModelQuality) => void
+    modelQuality: ModelQuality
+
     resetControlsToDefaults: () => void
     resetVideoToDefaults: () => void
 
@@ -74,6 +79,7 @@ const ORIENT_BASE_KEY = 'cam.smooth.base.v1'
 const ORIENT_VAL_KEY  = 'cam.smooth.v1'
 const SHADOWS_ENABLED_KEY = 'gfx.shadows.enabled.v1'
 const SHADOW_QUALITY_KEY  = 'gfx.shadows.quality.v1'
+const MODELS_QUALITY_KEY  = 'gfx.models.quality.v1'
 const BACK_TO_DESK_BTN_KEY = 'ui.backToDesk.enabled.v1'
 const FLY_ENABLED_KEY      = 'extra.fly.enabled.v1'
 
@@ -105,7 +111,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const hadOrientValRef  = React.useRef(false)
 
     const [shadowsEnabled, setShadowsEnabled] = React.useState(true)
-    const [shadowQuality, setShadowQuality] = React.useState<ShadowQuality>('medium')
+    const [shadowQuality, setShadowQuality] = React.useState<ShadowQuality>('low')
+
+    const [modelQuality, setModelQuality] = React.useState<ModelQuality>('high')
 
     const [flyEnabled, setFlyEnabled] = React.useState(false)
 
@@ -195,6 +203,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     const shadowPreset = SHADOW_PRESETS[shadowQuality]
 
+    React.useEffect(() => {
+        const se = localStorage.getItem(SHADOWS_ENABLED_KEY)
+        const sq = localStorage.getItem(SHADOW_QUALITY_KEY) as ShadowQuality | null
+        if (se !== null) { setShadowsEnabled(se === '1') }
+        if (sq === 'low' || sq === 'medium' || sq === 'high') { setShadowQuality(sq) }
+
+        const mq = localStorage.getItem(MODELS_QUALITY_KEY) as ModelQuality | null
+        if (mq === 'low' || mq === 'medium' || mq === 'high') {
+            setModelQuality(mq)
+        }
+    }, [])
+    React.useEffect(() => { if (loadedRef.current) { localStorage.setItem(MODELS_QUALITY_KEY, modelQuality) } }, [modelQuality])
+
     const resetControlsToDefaults = React.useCallback(() => {
         setControlsHintVisible(true)
         setControlsHintPosition('bottom-left')
@@ -206,6 +227,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         resetVisuals()
         setShadowsEnabled(true)
         setShadowQuality('medium')
+        setModelQuality('high')
     }, [resetVisuals])
 
     React.useEffect(() => {
@@ -237,6 +259,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         orientDampingBase, initializeOrientDamping, setOrientDampingBase, setOrientDamping, orientDamping,
         shadowsEnabled, setShadowsEnabled,
         shadowQuality, setShadowQuality,
+        modelQuality, setModelQuality,
         shadowPreset,
         resetControlsToDefaults,
         resetVideoToDefaults,

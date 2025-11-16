@@ -10,7 +10,7 @@ import { PixelateNearestFX } from '@/components/CameraEffects/PixelateNearestFX'
 import { SecretFile } from '@/components/Models/Functional/SecretFile'
 import {cardboardMaterials, mugMaterials, secretFileMaterials} from "@/components/Materials/detectiveRoomMats";
 import {InspectOverlayProps} from "@/components/Types/inspect";
-import {useSettings} from "@/components/UI/SettingsProvider";
+import {useSettings} from "@/components/Settings/SettingsProvider";
 import {CardboardBox} from "@/components/Models/Decoration/CardboardBox/CardboardBox";
 import {CardboardLid} from "@/components/Models/Decoration/CardboardBox/CardboardLid";
 import {PZ} from "@/components/Game/state.data";

@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useSettings } from '@/components/UI/SettingsProvider'
+import { useSettings } from '@/components/Settings/SettingsProvider'
 
 const EV_MOVE_BACK_TO_DESK = 'tt:moveBackToDesk'
 
