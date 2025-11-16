@@ -12,6 +12,7 @@ import type { InspectState } from '@/components/Types/inspectModels'
 import { FocusOpts } from '@/components/Types/room'
 import { usePuzzleInspect } from '@/components/Game/usePuzzleInspect'
 import { PZ } from '@/components/Game/state.data'
+import {SecretNoteOnDesk} from "@/components/DetectiveRoom/FunctionalObjects/SecretNote";
 
 type RcFocus = (opts: FocusOpts) => (e: any) => void
 
@@ -82,6 +83,8 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                     />
                 )
             })}
+
+            <SecretNoteOnDesk/>
 
             {showMug && (
                 <group onContextMenu={rcFocus(ANCHOR.mug)}>

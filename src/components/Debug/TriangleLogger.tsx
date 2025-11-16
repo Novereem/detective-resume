@@ -11,7 +11,7 @@ export function TriangleLogger() {
         if (t - lastLogRef.current > 1) {
             lastLogRef.current = t
             const { triangles, calls } = gl.info.render
-            console.log('[Perf] triangles =', triangles, 'drawCalls =', calls)
+            //console.log('[Perf] triangles =', triangles, 'drawCalls =', calls)
         }
     })
 

@@ -3,6 +3,7 @@ import React, { memo, useMemo } from 'react'
 import * as THREE from 'three'
 import { ModelGroup, PartSpec } from '@/components/Models/Generic/ModelGroup'
 import type { Vec3 } from '@/components/Types/room'
+import { useMagnifierState} from "@/components/MagnifierStateContext";
 
 type Inherited = Omit<React.ComponentProps<typeof ModelGroup>, 'parts' | 'materialsById'>
 
@@ -33,6 +34,8 @@ export const Magnifier = memo(function Magnifier({
                                                      materialsById,
                                                      ...rest
                                                  }: MagnifierProps) {
+    const { held } = useMagnifierState()
+
     const parts = useMemo<PartSpec[]>(() => {
         const p: PartSpec[] = []
 
@@ -48,7 +51,7 @@ export const Magnifier = memo(function Magnifier({
             id: 'ring',
             geometry: <torusGeometry args={[R + ringT * 0.1, ringT * 0.5, 24, 64]} />,
             position: [0, 0, 0],
-            rotation: [Math.PI/2, 0, 0],
+            rotation: [Math.PI / 2, 0, 0],
             color,
             outlineColor,
             roughness: 0.35,
@@ -114,6 +117,25 @@ export const Magnifier = memo(function Magnifier({
         outlineColor,
     ])
 
+    const derivedMaterials = useMemo(() => {
+        const base = materialsById ?? {}
+        const lensBase = (base as any).lens ?? {}
+
+        const activeColor = held ? '#86b8ff' : (lensBase.color ?? '#f5f7ff')
+        const activeOpacity = held ? 0.35 : (typeof lensBase.opacity === 'number' ? lensBase.opacity : 0.05)
+
+        return {
+            ...base,
+            lens: {
+                ...lensBase,
+                color: activeColor,
+                transparent: true,
+                opacity: activeOpacity,
+                depthWrite: false,
+            },
+        }
+    }, [materialsById, held])
+
     const Rmax = lensRadius + ringThickness
     const depth = lensRadius + neckLength + handleLength
     const hitboxSize: Vec3 = [Rmax * 2, Rmax * 2, depth]
@@ -123,7 +145,7 @@ export const Magnifier = memo(function Magnifier({
         <ModelGroup
             {...rest}
             parts={parts}
-            materialsById={materialsById}
+            materialsById={derivedMaterials}
             hitbox={{ size: hitboxSize, center: hitboxCenter }}
             color={color}
             outlineColor={outlineColor}

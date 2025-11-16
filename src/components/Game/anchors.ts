@@ -93,7 +93,7 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     binder8: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.296], rotation: [-Math.PI/2, 0, -Math.PI] },
     binder9: { eye: [0.200, 1.300, 3.600], position: [-1.381, 0.191, 2.236], rotation: [-Math.PI/2, 0, -Math.PI] },
 
-    //Unused
+
     binder20: { eye: [0.200, 1.300, 3.600], position: [2.377, 1.369, 3.388], rotation: [-Math.PI/2, 0, 0] },
 
     clock: { eye: [2.000, 1.600, 3.600], position: [-1.110, 1.730, 4.968], rotation: [-Math.PI, 0, -Math.PI] },

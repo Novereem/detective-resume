@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import type {FocusOpts, MoveRequest, V3Like, Vec3} from '@/components/Types/room'
 import {ANCHOR} from "@/components/Game/anchors";
+import {useMagnifierState} from "@/components/MagnifierStateContext";
 
 type DevObjectMoveProps = {
     enabled?: boolean
@@ -818,6 +819,202 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
             selectionStartById.current.clear()
         }
     }, [enabled, gl, camera, scene, setBusy])
+
+    return null
+}
+
+export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean }) {
+    const { camera, scene, gl } = useThree()
+    const { setHeld, lensMaskRef } = useMagnifierState()
+
+    const magnifierRef = React.useRef<THREE.Object3D | null>(null)
+    const holdingRef = React.useRef(false)
+    const savedRef = React.useRef<{
+        parent: THREE.Object3D
+        position: THREE.Vector3
+        quaternion: THREE.Quaternion
+        scale: THREE.Vector3
+    } | null>(null)
+
+    const raycasterRef = React.useRef(new THREE.Raycaster())
+    const mouseNdc = React.useRef(new THREE.Vector2())
+
+    const tmp = React.useMemo(
+        () => ({
+            camPos: new THREE.Vector3(),
+            forward: new THREE.Vector3(),
+            worldUp: new THREE.Vector3(0, 1, 0),
+            right: new THREE.Vector3(),
+            up: new THREE.Vector3(),
+            targetWorld: new THREE.Vector3(),
+            invParent: new THREE.Matrix4(),
+            lensDir: new THREE.Vector3(),
+            qOffset: new THREE.Quaternion().setFromEuler(
+                new THREE.Euler(Math.PI + Math.PI / 2, Math.PI, Math.PI)
+            ),
+        }),
+        []
+    )
+
+    const dist = 0.875
+    const offsetRight = -0.713
+    const offsetUp = 4.25
+
+    const setMouseFromEvent = React.useCallback(
+        (ev: MouseEvent) => {
+            const rect = gl.domElement.getBoundingClientRect()
+            mouseNdc.current.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1
+            mouseNdc.current.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1
+        },
+        [gl]
+    )
+
+    const findMagnifier = React.useCallback(() => {
+        if (magnifierRef.current) return magnifierRef.current
+        let found: THREE.Object3D | null = null
+        scene.traverse((o) => {
+            if (found) return
+            if ((o as any).userData?.pickupId === 'magnifier') {
+                found = o
+            }
+        })
+        magnifierRef.current = found
+        return found
+    }, [scene])
+
+    React.useEffect(() => {
+        if (!enabled) return
+
+        const el = gl.domElement
+
+        const onMouseDown = (ev: MouseEvent) => {
+            if (!enabled || ev.button !== 0) return
+            if (holdingRef.current) return
+
+            const magnifier = findMagnifier()
+            if (!magnifier) return
+
+            setMouseFromEvent(ev)
+
+            const raycaster = raycasterRef.current
+            raycaster.setFromCamera(mouseNdc.current, camera)
+            const hit = raycaster.intersectObject(magnifier, true)[0]
+            if (!hit) return
+
+            ev.preventDefault()
+            ev.stopPropagation()
+
+            const parent: THREE.Object3D = magnifier.parent ?? scene
+            const pos = magnifier.position.clone()
+            const quat = magnifier.quaternion.clone()
+            const scl = magnifier.scale.clone()
+            savedRef.current = { parent, position: pos, quaternion: quat, scale: scl }
+
+            holdingRef.current = true
+            setHeld(true)
+        }
+
+        const onMouseUp = (ev: MouseEvent) => {
+            if (!enabled || ev.button !== 2) return
+            if (!holdingRef.current) return
+            if (!magnifierRef.current || !savedRef.current) return
+
+            ev.preventDefault()
+            ev.stopPropagation()
+
+            const obj = magnifierRef.current
+            const { parent, position, quaternion, scale } = savedRef.current
+
+            if (obj.parent !== parent) {
+                parent.add(obj)
+            }
+
+            obj.position.copy(position)
+            obj.quaternion.copy(quaternion)
+            obj.scale.copy(scale)
+
+            holdingRef.current = false
+            setHeld(false)
+            lensMaskRef.current.active = false
+        }
+
+        el.addEventListener('mousedown', onMouseDown)
+        window.addEventListener('mouseup', onMouseUp)
+
+        return () => {
+            el.removeEventListener('mousedown', onMouseDown)
+            window.removeEventListener('mouseup', onMouseUp)
+        }
+    }, [camera, gl, enabled, findMagnifier, setMouseFromEvent, scene, setHeld, lensMaskRef])
+
+    React.useEffect(() => {
+        return () => {
+            setHeld(false)
+            lensMaskRef.current.active = false
+        }
+    }, [setHeld, lensMaskRef])
+
+    useFrame(() => {
+        const mask = lensMaskRef.current
+
+        if (!enabled || !holdingRef.current) {
+            mask.active = false
+            return
+        }
+
+        const obj = magnifierRef.current
+        const saved = savedRef.current
+        if (!obj || !saved) {
+            mask.active = false
+            return
+        }
+
+        const {
+            camPos,
+            forward,
+            worldUp,
+            right,
+            up,
+            targetWorld,
+            invParent,
+            lensDir,
+            qOffset,
+        } = tmp
+
+        camPos.copy(camera.position)
+        camera.getWorldDirection(forward)
+        forward.normalize()
+
+        right.crossVectors(forward, worldUp).normalize()
+        up.crossVectors(right, forward).normalize()
+
+        targetWorld
+            .copy(camPos)
+            .addScaledVector(forward, dist)
+            .addScaledVector(right, offsetRight)
+            .addScaledVector(up, offsetUp)
+
+        const parent = saved.parent
+        parent.updateMatrixWorld()
+        invParent.copy(parent.matrixWorld).invert()
+        const targetLocal = targetWorld.clone().applyMatrix4(invParent)
+
+        if (obj.parent !== parent) {
+            parent.add(obj)
+        }
+
+        obj.position.copy(targetLocal)
+        obj.quaternion.copy(camera.quaternion).multiply(qOffset)
+
+        // Build ray from camera through the lens center in world space
+        lensDir.copy(targetWorld).sub(camPos).normalize()
+
+        // origin = lens center in world space
+        mask.active = true
+        mask.origin = [targetWorld.x, targetWorld.y, targetWorld.z]
+        mask.dir = [lensDir.x, lensDir.y, lensDir.z]
+        mask.radius = 0.3  // tweak to match lens size visually
+    })
 
     return null
 }

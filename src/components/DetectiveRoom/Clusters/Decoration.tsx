@@ -10,7 +10,6 @@ import {
     cardboardMaterials,
     cigarMaterials,
     detectiveHatMaterials,
-    magnifierMaterials,
     mugMaterials,
     paperclipMaterials,
     penMaterials,
@@ -18,7 +17,6 @@ import {
     trashBinMaterials,
 } from '@/components/Materials/detectiveRoomMats'
 import {DetectiveHatSimple} from "@/components/Models/Decoration/DetectiveHatSimple";
-import Magnifier from "@/components/Models/Decoration/Magnifier";
 import Stapler from "@/components/Models/Decoration/Stapler";
 import Paperclip from "@/components/Models/Decoration/Paperclip";
 import Pen from "@/components/Models/Decoration/Pen";
@@ -117,16 +115,6 @@ export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     rotation={ANCHOR.hat.rotation}
                     materialsById={detectiveHatMaterials}
                     crownTopRadius={0.065}
-                />
-            </group>
-
-            <group onContextMenu={rcFocus(ANCHOR.magnifier1)} userData={{movable: true, anchorKey: 'magnifier1'}}>
-                <Magnifier
-                    position={ANCHOR.magnifier1.position}
-                    rotation={ANCHOR.magnifier1.rotation}
-                    materialsById={magnifierMaterials}
-                    disableOutline
-                    inspectDisableOutline
                 />
             </group>
 
