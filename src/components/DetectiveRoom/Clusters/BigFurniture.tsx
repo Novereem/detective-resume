@@ -126,7 +126,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.bookshelf2)} userData={{ movable: true, anchorKey: 'bookshelf2' }}>
+            <group onContextMenu={rcFocus(ANCHOR.bookshelf2)} userData={{ movable: false, anchorKey: 'bookshelf2' }}>
                 <Bookshelf
                     position={ANCHOR.bookshelf2.position}
                     rotation={ANCHOR.bookshelf2.rotation}

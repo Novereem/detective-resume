@@ -14,7 +14,7 @@ import {useSettings} from "@/components/UI/SettingsProvider";
 import {CardboardBox} from "@/components/Models/Decoration/CardboardBox/CardboardBox";
 import {CardboardLid} from "@/components/Models/Decoration/CardboardBox/CardboardLid";
 import {PZ} from "@/components/Game/state.data";
-import {Mug} from "@/components/Models/Functional/Mug";
+import {Mug} from "@/components/Models/Decoration/Mug";
 
 function SecretFilePreview({ targetAngle }: { targetAngle: number }) {
     const invalidate = useThree((s) => s.invalidate)

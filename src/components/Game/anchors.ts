@@ -2,11 +2,17 @@ import type { Vec3 } from "@/components/Types/room"
 
 export type AnchorKey =
     | "bulb" | "desk1" | "desk2" | "deskMetal"
-    | "corkBoard" | "mug" | "coatRack" | "hat" | "magnifier1" | "detectiveCoat"
+    | "corkBoard"
+    | "mug" | "coatRack" | "hat" | "magnifier1" | "stapler1"
+    | "pen1" | "pen2" | "pen3" | "pen4"
+    | "paperclip1" | "paperclip2" | "paperclip3"
+    | "mugDeco1"
+    | "globe"
+    | "detectiveCoat"
     | "houseFrame" | "mugFrame"
     | "deskTopSpawn" | "drawerLeftTopContent"
     | "photoClueFrame"| "photoBlueFrame"| "deskTopSpawn2" | "testPuzzle3"
-    | "bookA" | "bookB"
+    | "book1" | "book2" | "book3" | "book4" | "book5" | "book6" | "book7"
     | "binder1" | "binder2"
     | "binder3" | "binder4" | "binder5" | "binder6" | "binder7" | "binder8" | "binder9"
     | "binder20"
@@ -41,7 +47,20 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     coatRack: { eye: [-0.200, 1.300, 3.200], position: [2.156, 0.010, 2.597], rotation: [0, 0, 0] },
     hat: { eye: [-0.200, 1.300, 3.200], position: [1.979, 1.632, 2.610], rotation: [Math.PI, 0, 2.000] },
     magnifier1: { eye: [-0.200, 1.300, 3.200], position: [0.714, 0.768, 4.253], rotation: [Math.PI, -0.594, 0] },
+    stapler1: { eye: [-0.200, 1.300, 3.200], position: [-0.800, 0.767, 4.089], rotation: [0, 1.118, 0] },
     detectiveCoat: { eye: [-0.200, 1.300, 3.200], position: [1.979, 1.632, 2.610], rotation: [Math.PI, 0, 2.000] },
+
+    pen1: { eye: [-0.200, 1.300, 3.200], position: [0.647, 0.764, 4.071], rotation: [1.993, 1.070, -0.474] },
+    pen2: { eye: [-0.200, 1.300, 3.200], position: [0.756, 0.857, 3.991], rotation: [-0.085, 1.118, 0] },
+    pen3: { eye: [-0.200, 1.300, 3.200], position: [0.767, 0.835, 4.038], rotation: [0.255, 1.107, -0.438] },
+    pen4: { eye: [-0.200, 1.300, 3.200], position: [0.743, 0.862, 4.047], rotation: [0.188, 1.118, 0] },
+
+    paperclip1: { eye: [-0.200, 1.300, 3.200], position: [-0.711, 0.768, 4.166], rotation: [1.511, 0, -Math.PI/2 - 0.3] },
+    paperclip2: { eye: [-0.200, 1.300, 3.200], position: [-0.729, 0.771, 4.146], rotation: [1.522, -0.052, -0.955] },
+    paperclip3: { eye: [-0.200, 1.300, 3.200], position: [-0.731, 0.768, 4.126], rotation: [1.511, 0.16, -Math.PI/2] },
+
+    mugDeco1: { eye: [-0.200, 1.300, 3.200], position: [0.744, 0.811, 4.014], rotation: [0, 0.585, 0] },
+    globe: { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.692, 2.640] },
 
     houseFrame: { eye: [ 0.2, 1.3, 3.6], position: [0.2, 1.3, 4.965] },
     photoClueFrame: { eye: [ 0.0, 1.3, 3.6], position: [0, 1.5, 4.965] },
@@ -53,8 +72,13 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     deskTopSpawn2: { eye: [0.2, 1.3, 3.6], position: [0.62, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
     drawerLeftTopContent: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 3.2] },
 
-    bookA:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
-    bookB:   { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
+    book1: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
+    book2: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
+    book3: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.421], rotation: [Math.PI/2, 0, Math.PI] },
+    book4: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.381], rotation: [Math.PI/2, 0, Math.PI] },
+    book5: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.449, 3.341], rotation: [1.665, 0, Math.PI] },
+    book6: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.417, 3.232], rotation: [2.506, 0, Math.PI] },
+    book7: { eye: [0.200, 1.300, 3.600], position: [-1.319, 0.393, 3.089], rotation: [-0.266, 0, Math.PI] },
 
     binder1: { eye: [0.200, 1.300, 3.600], position: [2.380, 0.613, 3.753], rotation: [-Math.PI/2, 0, 0] },
     binder2: { eye: [0.200, 1.300, 3.600], position: [2.384, 1.372, 3.451], rotation: [-Math.PI/2, 0, 0] },

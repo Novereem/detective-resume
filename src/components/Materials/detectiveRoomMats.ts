@@ -60,7 +60,7 @@ export const detectiveHatMaterials: Record<string, PartMaterialOverride> = {
 export const bookMaterials: Record<string, PartMaterialOverride> = {
     coverFront: { textureUrl: '/textures/leather_white.jpg', color: '#ffffff', roughness: 0.9, metalness: 0.0,},
     coverBack:  { textureUrl: '/textures/leather_white.jpg', color: '#ffffff', roughness: 0.9, metalness: 0.0 },
-    spine:      { textureUrl: '/textures/fabric_leather_brown.jpg', color: '#ffffff', roughness: 0.88, metalness: 0.0 },
+    spine:      { textureUrl: '/textures/leather_white.jpg', color: '#ffffff', roughness: 0.88, metalness: 0.0 },
     pages:      { textureUrl: '/textures/paper_collages_whites.jpg', roughness: 0.95, metalness: 0.0 },
 }
 
@@ -162,30 +162,44 @@ export const bookshelfMaterials: Record<string, PartMaterialOverride> = {
     back:   { textureUrl: '/textures/vintage_clear_plywood.jpg', roughness: 0.98, metalness: 0.01 },
 }
 
-export const detectiveCoatMaterials: Record<string, PartMaterialOverride> = {
-    coatBody:        { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatHem:         { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatFoldFront:   { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatCollarBack:  { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatCollarLeft:  { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatCollarRight: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-
-    coatSleeveL:     { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatSleeveR:     { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-    coatSleeveCuffL: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0, color: '#d3c7aa' },
-    coatSleeveCuffR: { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0, color: '#d3c7aa' },
-
-    coatBelt:        { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9,  metalness: 0.0 },
-    coatBeltTail:    { textureUrl: '/textures/fabric_leather_brown.jpg', roughness: 0.9,  metalness: 0.0 },
-
-    coatButton:      { color: '#7a6b54', roughness: 0.4, metalness: 0.2 },
-
-    coatHookFold:    { textureUrl: '/textures/felt_beige.jpg',  roughness: 0.96, metalness: 0.0 },
-}
-
 export const magnifierMaterials: Record<string, PartMaterialOverride> = {
     ring:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
     neck:   { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
     handle: { textureUrl: '/textures/clear_metal.jpg', color: '#111111', roughness: 0.85, metalness: 0.1 },
     lens:   { color: '#f5f7ff', roughness: 0, metalness: 0, transparent: true, opacity: 0.05, depthWrite: false },
+}
+
+export const staplerMaterials: Record<string, PartMaterialOverride> = {
+    baseBody: { color: '#050608', roughness: 0.9, metalness: 0.02 },
+    backBlock: { color: '#050608', roughness: 0.9, metalness: 0.02 },
+    topBody: { color: '#050608', roughness: 0.92, metalness: 0.03 },
+    metalRail: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 0 },
+    frontFoot: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.4, metalness: 1 },
+    hingePin: { textureUrl: '/textures/clear_metal.jpg', roughness: 0.3, metalness: 1 },
+}
+
+export const penMaterials: Record<string, PartMaterialOverride> = {
+    body:  { textureUrl: '/textures/clear_metal.jpg',roughness: 0.9, metalness: 0.08 },
+    tip:   { textureUrl: '/textures/clear_metal.jpg', roughness: 0.9, metalness: 0.1 },
+    tail:  { textureUrl: '/textures/clear_metal.jpg', roughness: 0.92, metalness: 0.06 },
+    clip:  { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.3, metalness: 1 },
+}
+
+export const paperclipMaterials: Record<string, PartMaterialOverride> = {
+    outerLoop: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.3, metalness: 1 },
+    innerLoop: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.3, metalness: 1 },
+}
+
+export const globeMaterials: Record<string, PartMaterialOverride> = {
+    globe: {
+        textureUrl: '/textures/globe_earth.jpg',
+        roughness: 0.9,
+        metalness: 0.0,
+    },
+    ring:      { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.35, metalness: 1 },
+    topCap:    { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.4, metalness: 1 },
+    bottomCap: { textureUrl: '/textures/stainless_steel.jpg', roughness: 0.4, metalness: 1 },
+    stand:     { textureUrl: '/textures/clear_metal.jpg', roughness: 0.4, metalness: 1 },
+    arm:       { textureUrl: '/textures/clear_metal.jpg', roughness: 0.4, metalness: 1 },
+    base:      { textureUrl: '/textures/clear_metal.jpg', roughness: 0.4, metalness: 1 },
 }

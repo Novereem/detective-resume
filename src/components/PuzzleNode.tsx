@@ -5,7 +5,7 @@ import type { Vec3, FocusOpts } from "@/components/Types/room"
 import type { InspectState, TextPuzzle } from "@/components/Types/inspectModels"
 import type { AnchorKey, PuzzleId } from "@/components/Types/game"
 import { FramedPlane } from "@/components/Models/Generic/Outlined/FramedPlane"
-import { Pin } from "@/components/Models/Functional/Pin"
+import { Pin } from "@/components/Models/Decoration/Pin"
 
 type DefLite = {
     puzzleId: PuzzleId
