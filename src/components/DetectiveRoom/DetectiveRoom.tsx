@@ -15,6 +15,7 @@ import {
     PlayerMover,
     requestZoomPeek,
     useRightClickFocus,
+    MagnifierPickupControls,
 } from '@/components/PlayerControls'
 import type { MoveRequest, Vec3 } from '@/components/Types/room'
 import { InspectState } from '@/components/Types/inspectModels'
@@ -35,6 +36,9 @@ import { SceneEffects } from '@/components/DetectiveRoom/FunctionalObjects/Effec
 import {TriangleLogger} from "@/components/Debug/TriangleLogger";
 import {Preload} from "@react-three/drei";
 import {QualityLevel, QualityProvider} from "@/components/Settings/QualityContext";
+import {UsableItemObjects} from "@/components/DetectiveRoom/FunctionalObjects/UsableItemObjects";
+import {MagnifierStateProvider} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
+import {MagnifierDebug} from "@/components/Debug/MagnifierDebug";
 
 function Scene({
                    openInspect,
@@ -79,6 +83,7 @@ function Scene({
             />
 
             <PuzzleObjects rcFocus={rcFocus} openInspect={openInspect} files={files} />
+            <UsableItemObjects/>
 
             <SceneEffects poofs={poofs} onPoofDone={onPoofDone} />
 
@@ -194,12 +199,19 @@ export default function DetectiveRoom() {
                         lookSensitivity={mouseSensitivity}
                         orientDamping={orientDamping}
                     />
+
+                    <MagnifierPickupControls
+                        enabled={moveReq === null && !isMove && !moverBusy}
+                    />
+
                     <DevFlyMove enabled={isDev} speed={3} verticalSpeed={3} smoothing={0} />
                     <DevObjectMove enabled={isMove} onBusyChange={setMoverBusy} />
 
                     <PixelateNearestFX size={pixelateSize} />
                     <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
                     <Preload all/>
+
+                    <MagnifierDebug />
                 </Canvas>
             </div>
 

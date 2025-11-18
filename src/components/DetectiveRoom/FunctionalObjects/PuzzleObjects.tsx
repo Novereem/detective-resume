@@ -12,6 +12,8 @@ import type { InspectState } from '@/components/Types/inspectModels'
 import { FocusOpts } from '@/components/Types/room'
 import { usePuzzleInspect } from '@/components/Game/usePuzzleInspect'
 import { PZ } from '@/components/Game/state.data'
+import MagnifierRevealMaterial from "@/components/CameraEffects/Magnifier/MagnifierRevealMaterial";
+import {FramedPlane} from "@/components/Models/Generic/Outlined/FramedPlane";
 
 type RcFocus = (opts: FocusOpts) => (e: any) => void
 
@@ -82,6 +84,47 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                     />
                 )
             })}
+
+            {/*<mesh position={[0.2, 0.9, 3.8]}>*/}
+            {/*    <boxGeometry args={[0.2, 0.2, 0.1]}/>*/}
+            {/*    <MagnifierRevealMaterial*/}
+            {/*        color="#ffffff"*/}
+            {/*        emissive="#222222"*/}
+            {/*        maxDistance={20}*/}
+            {/*        debug={false}*/}
+            {/*    />*/}
+            {/*</mesh>*/}
+
+            <FramedPlane
+                width={0.22}
+                height={0.14}
+                position={[-0.169, 0.795, 4.408]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                textureUrl="/textures/paper_collages_whites.jpg"
+                textureFit={"stretch"}
+                border={0.005}
+                color="#222222"
+                onInspect={openInspect}
+                canInteract={true}
+                lit
+                roughness={0.9}
+                metalness={0}
+                receiveShadow
+                textureMagnifierOnly
+            />
+
+            <group onContextMenu={rcFocus(ANCHOR.mug)}>
+                <Mug
+                    position={[-0.169, 0.895, 4.408]}
+                    rotation={[0, Math.PI / 6, 0]}
+                    color="#fff"
+                    disableOutline={false}
+                    castShadow={false}
+                    materialsById={mugMaterials}
+                    magnifierOnly
+                    onInspect={openMugInspect}
+                />
+            </group>
 
             {showMug && (
                 <group onContextMenu={rcFocus(ANCHOR.mug)}>

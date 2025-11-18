@@ -3,6 +3,9 @@ import React from 'react'
 import { useCursor } from '@react-three/drei'
 import type { InspectState, FramedInspect } from '@/components/Types/inspectModels'
 import { useManagedTexture } from '@/components/Textures/useManagedTexture'
+import MagnifierRevealMaterial from "@/components/CameraEffects/Magnifier/MagnifierRevealMaterial";
+import {useMagnifierState} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
+import {useThree} from "@react-three/fiber";
 
 type CommonTransform = {
     position?: [number, number, number]
@@ -42,6 +45,7 @@ type FramedPlaneProps = CommonTransform & {
     envMapIntensity?: number
     castShadow?: boolean
     devPickable?: boolean
+    textureMagnifierOnly?: boolean
 }
 
 export function FramedPlane({
@@ -79,6 +83,7 @@ export function FramedPlane({
                                 envMapIntensity = 1,
                                 castShadow = false,
                                 devPickable = true,
+                                textureMagnifierOnly = false,
                             }: FramedPlaneProps) {
     const [hovered, setHovered] = React.useState(false)
     useCursor(canInteract && hovered)
@@ -166,6 +171,7 @@ export function FramedPlane({
 
     const handleOver = (e: any) => {
         e.stopPropagation()
+        if (textureMagnifierOnly && !isUnderMagnifier()) return
         setHovered(true)
     }
     const handleOut = (e: any) => {
@@ -174,6 +180,7 @@ export function FramedPlane({
     }
     const handleClick = (e: any) => {
         e.stopPropagation()
+        if (textureMagnifierOnly && !isUnderMagnifier()) return
         onInspect?.(payload)
     }
 
@@ -182,8 +189,38 @@ export function FramedPlane({
     const hitWidth = width + 2 * (hasFrame ? border : 0)
     const hitHeight = height + 2 * (hasFrame ? border : 0)
 
+    const groupRef = React.useRef<THREE.Group | null>(null)
+    const { camera } = useThree()
+    const { lensMaskRef, held } = useMagnifierState()
+
+    const isUnderMagnifier = React.useCallback(() => {
+        if (!textureMagnifierOnly) return true
+
+        const mask = lensMaskRef.current
+        if (!held || !mask.active || !groupRef.current) return false
+
+        const centerWorld = new THREE.Vector3()
+        groupRef.current.getWorldPosition(centerWorld)
+
+        const ndc = centerWorld.clone().project(camera as THREE.PerspectiveCamera)
+        const persp = camera as THREE.PerspectiveCamera
+        const aspect = persp.aspect || 1
+
+        const lensX = mask.origin[0]
+        const lensY = mask.origin[1]
+
+        let dx = ndc.x - lensX
+        let dy = ndc.y - lensY
+        dx *= aspect
+
+        const d = Math.sqrt(dx * dx + dy * dy)
+        const extra = 0.05
+
+        return d <= (mask.radius + extra)
+    }, [textureMagnifierOnly, lensMaskRef, held, camera])
+
     return (
-        <group position={position} rotation={rotation} scale={scale}>
+        <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
             <mesh
                 raycast={() => null}
                 castShadow={lit && castShadow}
@@ -210,18 +247,30 @@ export function FramedPlane({
                     receiveShadow={lit && receiveShadow}
                 >
                     <planeGeometry args={finalArtSize} />
-                    {matKind === 'basic' && (
-                        <meshBasicMaterial map={tex} toneMapped={false} side={side} />
-                    )}
-                    {matKind === 'lambert' && <meshLambertMaterial map={tex} side={side} />}
-                    {matKind === 'standard' && (
-                        <meshStandardMaterial
+                    {textureMagnifierOnly ? (
+                        <MagnifierRevealMaterial
                             map={tex}
+                            color="#ffffff"
                             side={side}
                             metalness={0}
                             roughness={1}
-                            envMapIntensity={envMapIntensity}
                         />
+                    ) : (
+                        <>
+                            {matKind === 'basic' && (
+                                <meshBasicMaterial map={tex} toneMapped={false} side={side} />
+                            )}
+                            {matKind === 'lambert' && <meshLambertMaterial map={tex} side={side} />}
+                            {matKind === 'standard' && (
+                                <meshStandardMaterial
+                                    map={tex}
+                                    side={side}
+                                    metalness={0}
+                                    roughness={1}
+                                    envMapIntensity={envMapIntensity}
+                                />
+                            )}
+                        </>
                     )}
                 </mesh>
             )}

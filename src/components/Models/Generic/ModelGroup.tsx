@@ -5,6 +5,7 @@ import { Outlined } from '@/components/Models/Generic/Outlined/Outlined'
 import * as THREE from 'three'
 import {Vec3} from "@/components/Types/room";
 import {InspectState, OutlinedGroupInspect} from "@/components/Types/inspectModels";
+import {useMagnifierState} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
 
 export type PartSpec = {
     id?: string
@@ -29,6 +30,7 @@ export type PartSpec = {
     side?: THREE.Side
     castShadow?: boolean
     receiveShadow?: boolean
+    magnifierOnly?: boolean
 }
 
 export type PartMaterialOverride = {
@@ -65,6 +67,7 @@ type ModelGroupProps = ThreeElements['group'] & {
     visualizeColor?: string
     castShadowDefault?: boolean
     receiveShadowDefault?: boolean
+    magnifierOnly?: boolean
 }
 
 type BoxSpec = { size: Vec3; center: Vec3 }
@@ -134,6 +137,7 @@ export function ModelGroup({
                                visualizeColor = '#00ffff',
                                castShadowDefault = true,
                                receiveShadowDefault = true,
+                               magnifierOnly = false,
                                ...groupProps
                            }: ModelGroupProps) {
     const [hovered, setHovered] = React.useState(false)
@@ -141,6 +145,12 @@ export function ModelGroup({
 
     const groupRef = React.useRef<THREE.Group>(null)
     const partsRef = React.useRef<THREE.Group>(null)
+
+    const { lensMaskRef, held } = useMagnifierState()
+    const visibleToMagnifierRef = React.useRef(true)
+    const centerLocalRef = React.useRef(new THREE.Vector3())
+    const centerWorldRef = React.useRef(new THREE.Vector3())
+    const centerNdcRef = React.useRef(new THREE.Vector3())
 
     const groupThickness = outlineThickness ?? outlineWorldThickness
     const resolveScale = React.useCallback(
@@ -219,14 +229,71 @@ export function ModelGroup({
         if (!same) setAutoBox(next)
     })
 
+    useFrame((state) => {
+        if (!magnifierOnly) {
+            visibleToMagnifierRef.current = true
+            return
+        }
+
+        const mask = lensMaskRef.current
+        if (!held || !mask.active || !groupRef.current) {
+            visibleToMagnifierRef.current = false
+            return
+        }
+
+        // choose a local center: hitbox center -> autoBox center -> origin
+        let centerLocal: Vec3 = [0, 0, 0]
+        if (hitbox?.center) {
+            centerLocal = hitbox.center
+        } else if (autoBox) {
+            centerLocal = autoBox.center as Vec3
+        }
+
+        const cl = centerLocalRef.current
+        cl.set(centerLocal[0], centerLocal[1], centerLocal[2])
+
+        const cw = centerWorldRef.current
+        cw.copy(cl)
+        groupRef.current.localToWorld(cw)
+
+        const ndc = centerNdcRef.current
+        ndc.copy(cw).project(state.camera as THREE.PerspectiveCamera)
+
+        const persp = state.camera as THREE.PerspectiveCamera
+        const aspect = persp.aspect || 1
+
+        const lensX = mask.origin[0]
+        const lensY = mask.origin[1]
+
+        let dx = ndc.x - lensX
+        let dy = ndc.y - lensY
+        dx *= aspect
+
+        const d = Math.sqrt(dx * dx + dy * dy)
+        const extra = 0.05
+
+        visibleToMagnifierRef.current = d <= (mask.radius + extra)
+    })
+
     const { onPointerDown, ...restGroupProps } = groupProps as any
 
     const autoHandlers =
         !disablePointer && !useHitbox
             ? {
-                onPointerOver: (e: any) => { e.stopPropagation(); setHovered(true) },
-                onPointerOut:  (e: any) => { e.stopPropagation(); setHovered(false) },
-                onClick:       (e: any) => { e.stopPropagation(); onInspect?.(payload) },
+                onPointerOver: (e: any) => {
+                    e.stopPropagation()
+                    if (magnifierOnly && !visibleToMagnifierRef.current) return
+                    setHovered(true)
+                },
+                onPointerOut: (e: any) => {
+                    e.stopPropagation()
+                    setHovered(false)
+                },
+                onClick: (e: any) => {
+                    e.stopPropagation()
+                    if (magnifierOnly && !visibleToMagnifierRef.current) return
+                    onInspect?.(payload)
+                },
                 onPointerDown,
             }
             : {}
@@ -244,15 +311,17 @@ export function ModelGroup({
                     userData={{noBounds: true}}
                     position={hitbox!.center ?? [0, 0, 0]}
                     onPointerOver={(e: any) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
+                        if (magnifierOnly && !visibleToMagnifierRef.current) return
                         setHovered(true)
                     }}
                     onPointerOut={(e: any) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
                         setHovered(false)
                     }}
                     onClick={(e: any) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
+                        if (magnifierOnly && !visibleToMagnifierRef.current) return
                         onInspect?.(payload)
                     }}
                     onPointerDown={onPointerDown}
@@ -270,34 +339,37 @@ export function ModelGroup({
             {showManualViz && !showManualProxy && (
                 <mesh
                     name="__manual_hitbox_vis"
-                    userData={{ noBounds: true }}
+                    userData={{noBounds: true}}
                     raycast={() => null}
                     position={hitbox!.center ?? [0, 0, 0]}
                 >
-                    <boxGeometry args={hitbox!.size} />
-                    <meshBasicMaterial transparent opacity={0.2} depthWrite={false} />
+                    <boxGeometry args={hitbox!.size}/>
+                    <meshBasicMaterial transparent opacity={0.2} depthWrite={false}/>
                 </mesh>
             )}
 
-                    <group ref={partsRef} {...autoHandlers}>
-                        {parts.map((p, i) => {
-                            const ov = p.id ? materialsById?.[p.id] : undefined
-                            const effColor = ov?.color ?? p.color ?? color
-                            const effOutline = ov?.outlineColor ?? p.outlineColor ?? outlineColor
-                            const effTex = ov?.textureUrl ?? p.textureUrl
-                            const effPix = ov?.texturePixelated ?? p.texturePixelated
-                            const effMetal = ov?.metalness ?? p.metalness
-                            const effRough = ov?.roughness ?? p.roughness
-                            const effTransparent = ov?.transparent ?? p.transparent
-                            const effOpacity     = ov?.opacity ?? p.opacity
-                            const effDepthWrite  = ov?.depthWrite ?? p.depthWrite
-                            const effSide        = ov?.side ?? p.side
-                            const effCast = p.castShadow ?? castShadowDefault
-                            const effReceive = p.receiveShadow ?? receiveShadowDefault
+            <group ref={partsRef} {...autoHandlers}>
+                {parts.map((p, i) => {
+                    const ov = p.id ? materialsById?.[p.id] : undefined
+                    const effColor = ov?.color ?? p.color ?? color
+                    const effOutline = ov?.outlineColor ?? p.outlineColor ?? outlineColor
+                    const effTex = ov?.textureUrl ?? p.textureUrl
+                    const effPix = ov?.texturePixelated ?? p.texturePixelated
+                    const effMetal = ov?.metalness ?? p.metalness
+                    const effRough = ov?.roughness ?? p.roughness
+                    const effTransparent = ov?.transparent ?? p.transparent
+                    const effOpacity = ov?.opacity ?? p.opacity
+                    const effDepthWrite  = ov?.depthWrite ?? p.depthWrite
+                    const effSide        = ov?.side ?? p.side
+                    const effCast = p.castShadow ?? castShadowDefault
+                    const effReceive = p.receiveShadow ?? receiveShadowDefault
+                    const effMagnifierOnly = p.magnifierOnly ?? magnifierOnly
+                    const effDisablePointer = disablePointer || effMagnifierOnly
+
                             return (
                                 <Outlined
                                     key={i}
-                                    disablePointer={disablePointer}
+                                    disablePointer={effDisablePointer}
                                     hovered={!disablePointer && hovered}
                                     geometry={p.geometry}
                                     color={effColor}
@@ -318,6 +390,7 @@ export function ModelGroup({
                                     side={effSide}
                                     castShadow={effCast}
                                     receiveShadow={effReceive}
+                                    magnifierRevealMaterial={effMagnifierOnly}
                                 />
                             )
                         })}
@@ -326,24 +399,30 @@ export function ModelGroup({
                     {showAutoProxy && (
                         <mesh
                             name="__auto_hitbox_interaction"
-                            userData={{noBounds: true}}
+                            userData={{ noBounds: true }}
                             position={autoBox.center as Vec3}
                             onPointerOver={(e: any) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
+                                if (magnifierOnly && !visibleToMagnifierRef.current) return
                                 setHovered(true)
                             }}
                             onPointerOut={(e: any) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
                                 setHovered(false)
                             }}
                             onClick={(e: any) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
+                                if (magnifierOnly && !visibleToMagnifierRef.current) return
                                 onInspect?.(payload)
                             }}
                             onPointerDown={onPointerDown}
                         >
-                            <boxGeometry args={autoBox.size as Vec3}/>
-                            <meshBasicMaterial transparent opacity={visualizeHitbox ? 0.2 : 0} depthWrite={false}/>
+                            <boxGeometry args={autoBox.size as Vec3} />
+                            <meshBasicMaterial
+                                transparent
+                                opacity={visualizeHitbox ? 0.2 : 0}
+                                depthWrite={false}
+                            />
                         </mesh>
                     )}
 

@@ -9,6 +9,8 @@ import { SettingsProvider, useSettings } from '@/components/Settings/SettingsPro
 import BackToDeskButton from '@/components/UI/BackToDeskButton'
 import { preloadTextures } from '@/components/Textures/TextureManager'
 import { DETECTIVE_ROOM_TEXTURES } from '@/components/Textures/detectiveRoomTextures'
+import { MagnifierHint } from '@/components/UI/MagnifierHint'
+import {MagnifierStateProvider, useMagnifierState} from '@/components/CameraEffects/Magnifier/MagnifierStateContext'
 
 function StaticLoader({ message }: { message: string }) {
     return (
@@ -34,13 +36,16 @@ const DetectiveRoom = dynamic(() => import('@/components/DetectiveRoom/Detective
     loading: () => <StaticLoader message="Loading detective room…" />,
 })
 
+
 function OverlayedRoom() {
     const { controlsHintVisible, controlsHintPosition } = useSettings()
+    const { held } = useMagnifierState()
     return (
         <>
             <DetectiveRoom />
             <NotificationsViewport position="top-left" />
-            <ControlsHint position={controlsHintPosition} scale={1.3} />
+            {controlsHintVisible && <ControlsHint position={controlsHintPosition} scale={1.3} />}
+            <MagnifierHint held={held} position="bottom-right" scale={1.25} />
             <BackToDeskButton />
             <EscapeMenu />
         </>
@@ -51,7 +56,7 @@ const HIDE_DELAY_MS = 400
 const FADE_MS = 200
 
 export default function DetectiveRoomPage() {
-    const { isLoading, pending } = useTextureLoading()
+    const { isLoading } = useTextureLoading()
 
     const [bootPreloadDone, setBootPreloadDone] = React.useState(false)
     const [overlayVisible, setOverlayVisible] = React.useState(true)
@@ -110,29 +115,27 @@ export default function DetectiveRoomPage() {
     return (
         <NotificationsProvider>
             <SettingsProvider>
-                {overlayVisible && (
-                    <div
-                        style={{
-                            position: 'fixed',
-                            inset: 0,
-                            display: 'grid',
-                            placeItems: 'center',
-                            background: 'black',
-                            color: 'white',
-                            zIndex: 60,
-                            pointerEvents: 'none',
-                            opacity,
-                            transition: `opacity ${FADE_MS}ms ease`,
-                        }}
-                    >
-                        <p>
-                            Loading detective room. . .
-                            {!booted && isBootLoading && pending > 0 ? ` (${pending})` : ''}
-                        </p>
-                    </div>
-                )}
-
-                <OverlayedRoom />
+                <MagnifierStateProvider>
+                    {overlayVisible && (
+                        <div
+                            style={{
+                                position: 'fixed',
+                                inset: 0,
+                                display: 'grid',
+                                placeItems: 'center',
+                                background: 'black',
+                                color: 'white',
+                                opacity,
+                                transition: `opacity ${FADE_MS}ms`,
+                                zIndex: 40,
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            <p>Loading detective room…</p>
+                        </div>
+                    )}
+                    <OverlayedRoom />
+                </MagnifierStateProvider>
             </SettingsProvider>
         </NotificationsProvider>
     )
