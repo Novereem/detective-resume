@@ -12,6 +12,7 @@ type DevObjectMoveProps = {
     snap?: number | null
 }
 
+const MAG_LENS_LOCAL = new THREE.Vector3(0.72, 0, 4.276)
 
 export function FreeLookControls({
                                      enabled = true,
@@ -99,22 +100,29 @@ export function PlayerMover({
     moveDamping?: number
 }) {
     const { camera } = useThree()
+
     const camGoal = React.useRef(new THREE.Vector3())
     const active = React.useRef(false)
 
     React.useEffect(() => {
         if (!move) return
+
         const cam = new THREE.Vector3().fromArray(move.camera)
         const tgt = new THREE.Vector3().fromArray(move.lookAt)
+
         camGoal.current.copy(cam)
+
         const m = new THREE.Matrix4().lookAt(cam, tgt, new THREE.Vector3(0, 1, 0))
         qGoalRef.current.setFromRotationMatrix(m)
+
         active.current = true
-    }, [move])
+    }, [move, qGoalRef])
 
     useFrame((_, dt) => {
         if (!active.current) return
+
         const λ = moveDamping
+
         camera.position.x = THREE.MathUtils.damp(camera.position.x, camGoal.current.x, λ, dt)
         camera.position.y = THREE.MathUtils.damp(camera.position.y, camGoal.current.y, λ, dt)
         camera.position.z = THREE.MathUtils.damp(camera.position.z, camGoal.current.z, λ, dt)
@@ -123,6 +131,7 @@ export function PlayerMover({
         const dot = THREE.MathUtils.clamp(camera.quaternion.dot(qGoalRef.current), -1, 1)
         const ang = 2 * Math.acos(Math.abs(dot))
         const oriOk = ang < THREE.MathUtils.degToRad(1.0)
+
         if (posOk && oriOk) {
             active.current = false
             onArrive?.()
@@ -131,6 +140,7 @@ export function PlayerMover({
 
     return null
 }
+
 
 type ZoomMode = 'fov' | 'dolly'
 export function MouseZoom({
@@ -838,6 +848,10 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
 
     const raycasterRef = React.useRef(new THREE.Raycaster())
     const mouseNdc = React.useRef(new THREE.Vector2())
+    const clickStateRef = React.useRef<{ downPos: { x: number; y: number } | null; moved: boolean }>({
+        downPos: null,
+        moved: false,
+    })
 
     const tmp = React.useMemo(
         () => ({
@@ -849,16 +863,9 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
             targetWorld: new THREE.Vector3(),
             invParent: new THREE.Matrix4(),
             lensDir: new THREE.Vector3(),
-            qOffset: new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(Math.PI + Math.PI / 2, Math.PI, Math.PI)
-            ),
         }),
         []
     )
-
-    const dist = 0.875
-    const offsetRight = -0.713
-    const offsetUp = 4.25
 
     const setMouseFromEvent = React.useCallback(
         (ev: MouseEvent) => {
@@ -889,7 +896,12 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
 
         const onMouseDown = (ev: MouseEvent) => {
             if (!enabled || ev.button !== 0) return
-            if (holdingRef.current) return
+
+            if (holdingRef.current) {
+                clickStateRef.current.downPos = { x: ev.clientX, y: ev.clientY }
+                clickStateRef.current.moved = false
+                return
+            }
 
             const magnifier = findMagnifier()
             if (!magnifier) return
@@ -914,13 +926,33 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
             setHeld(true)
         }
 
-        const onMouseUp = (ev: MouseEvent) => {
-            if (!enabled || ev.button !== 2) return
-            if (!holdingRef.current) return
-            if (!magnifierRef.current || !savedRef.current) return
+        const onMouseMove = (ev: MouseEvent) => {
+            if (!enabled) return
+            const state = clickStateRef.current
+            if (!state.downPos) return
+            const dx = ev.clientX - state.downPos.x
+            const dy = ev.clientY - state.downPos.y
+            if (dx * dx + dy * dy > 4) {
+                state.moved = true
+            }
+        }
 
-            ev.preventDefault()
-            ev.stopPropagation()
+        const onMouseUp = (ev: MouseEvent) => {
+            if (!enabled || ev.button !== 0) return
+
+            const state = clickStateRef.current
+            const isClick = state.downPos && !state.moved
+            state.downPos = null
+            state.moved = false
+
+            if (!holdingRef.current || !magnifierRef.current || !savedRef.current) return
+            if (!isClick) return
+
+            setMouseFromEvent(ev)
+            const raycaster = raycasterRef.current
+            raycaster.setFromCamera(mouseNdc.current, camera)
+            const hit = raycaster.intersectObject(magnifierRef.current, true)[0]
+            if (hit) return
 
             const obj = magnifierRef.current
             const { parent, position, quaternion, scale } = savedRef.current
@@ -939,10 +971,12 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
         }
 
         el.addEventListener('mousedown', onMouseDown)
+        window.addEventListener('mousemove', onMouseMove)
         window.addEventListener('mouseup', onMouseUp)
 
         return () => {
             el.removeEventListener('mousedown', onMouseDown)
+            window.removeEventListener('mousemove', onMouseMove)
             window.removeEventListener('mouseup', onMouseUp)
         }
     }, [camera, gl, enabled, findMagnifier, setMouseFromEvent, scene, setHeld, lensMaskRef])
@@ -957,7 +991,7 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
     useFrame(() => {
         const mask = lensMaskRef.current
 
-        if (!enabled || !holdingRef.current) {
+        if (!holdingRef.current) {
             mask.active = false
             return
         }
@@ -978,21 +1012,29 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
             targetWorld,
             invParent,
             lensDir,
-            qOffset,
         } = tmp
 
         camPos.copy(camera.position)
+
         camera.getWorldDirection(forward)
         forward.normalize()
 
         right.crossVectors(forward, worldUp).normalize()
         up.crossVectors(right, forward).normalize()
 
+        const MAG_DIST = 0.875
+        const MAG_OFFSET_RIGHT = -0.713
+        const MAG_OFFSET_UP = 4.25
+
+        const MAG_Q_OFFSET = new THREE.Quaternion().setFromEuler(
+            new THREE.Euler(Math.PI + Math.PI / 2, Math.PI, Math.PI)
+        )
+
         targetWorld
             .copy(camPos)
-            .addScaledVector(forward, dist)
-            .addScaledVector(right, offsetRight)
-            .addScaledVector(up, offsetUp)
+            .addScaledVector(forward, MAG_DIST)
+            .addScaledVector(right,   MAG_OFFSET_RIGHT)
+            .addScaledVector(up,      MAG_OFFSET_UP)
 
         const parent = saved.parent
         parent.updateMatrixWorld()
@@ -1004,30 +1046,16 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
         }
 
         obj.position.copy(targetLocal)
-        obj.quaternion.copy(camera.quaternion).multiply(qOffset)
+        obj.quaternion.copy(camera.quaternion).multiply(MAG_Q_OFFSET)
 
-        const lensLocal = new THREE.Vector3(
-            0.72,      // left/right in magnifier local space
-            0,     // up/down
-            4.276      // forward/backward along magnifier's local Z
-        )
-        const lensWorld = obj.localToWorld(lensLocal.clone())
+        const lensWorld = obj.localToWorld(MAG_LENS_LOCAL.clone())
 
-        // Direction from camera through the lens center (for future use if needed)
         lensDir.copy(lensWorld).sub(camPos).normalize()
-
-        // 3) Project lens center to NDC (screen space)
         const lensNdc = lensWorld.clone().project(camera)
 
-        // Small extra offset in NDC to nudge the circle relative to the glass
-        const ndcOffsetX = 0
-        const ndcOffsetY = -0
-
         mask.active = true
-        mask.origin = [lensNdc.x + ndcOffsetX, lensNdc.y + ndcOffsetY, 0]
+        mask.origin = [lensNdc.x, lensNdc.y, 0]
         mask.dir = [lensDir.x, lensDir.y, lensDir.z]
-
-        // Screen-space radius
         mask.radius = 0.47
     })
 

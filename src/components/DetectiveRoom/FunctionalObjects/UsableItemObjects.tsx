@@ -12,7 +12,6 @@ export function UsableItemObjects() {
                     position={ANCHOR.magnifier1.position}
                     rotation={ANCHOR.magnifier1.rotation}
                     materialsById={magnifierMaterials}
-                    disableOutline
                     inspectDisableOutline
                 />
             </group>

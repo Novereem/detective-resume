@@ -4,9 +4,9 @@ import React from 'react'
 
 export type LensMask = {
     active: boolean
-    origin: [number, number, number]  // camera position
-    dir: [number, number, number]     // normalized world-space ray direction
-    radius: number                    // world-space radius around that ray
+    origin: [number, number, number]
+    dir: [number, number, number]
+    radius: number
 }
 
 export type MagnifierState = {
@@ -16,6 +16,23 @@ export type MagnifierState = {
 }
 
 const MagnifierStateContext = React.createContext<MagnifierState | null>(null)
+
+const defaultLensMask: LensMask = {
+    active: false,
+    origin: [0, 0, 0],
+    dir: [0, 0, -1],
+    radius: 0.25,
+}
+
+const defaultLensMaskRef: React.MutableRefObject<LensMask> = {
+    current: defaultLensMask,
+} as React.MutableRefObject<LensMask>
+
+const defaultState: MagnifierState = {
+    held: false,
+    setHeld: () => {},
+    lensMaskRef: defaultLensMaskRef,
+}
 
 export function MagnifierStateProvider({ children }: { children: React.ReactNode }) {
     const [held, setHeld] = React.useState(false)
@@ -46,7 +63,7 @@ export function MagnifierStateProvider({ children }: { children: React.ReactNode
 export function useMagnifierState(): MagnifierState {
     const ctx = React.useContext(MagnifierStateContext)
     if (!ctx) {
-        throw new Error('useMagnifierState must be used within MagnifierStateProvider')
+        return defaultState
     }
     return ctx
 }

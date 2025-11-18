@@ -17,6 +17,8 @@ export type MugProps = Inherited & {
     handleTubeRadius?: number
     handleYOffset?: number
 
+    magnifierOnly?: boolean
+
     materialsById: React.ComponentProps<typeof ModelGroup>['materialsById']
 }
 
@@ -37,6 +39,7 @@ export const Mug = memo(function Mug({
                                                    outlineScale = 1.03,
                                                    initialRotation = [0, 0, 0] as Vec3,
                                                    materialsById,
+                                                   magnifierOnly = false,
                                                    ...rest
                                                }: MugProps) {
     const parts = useMemo<PartSpec[]>(() => {
@@ -58,6 +61,7 @@ export const Mug = memo(function Mug({
             metalness: 0.02,
             castShadow: true,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         // inner wall
@@ -72,6 +76,7 @@ export const Mug = memo(function Mug({
             side: THREE.DoubleSide,
             castShadow: false,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         // rounded top rim (fills gap between inner and outer walls)
@@ -88,6 +93,7 @@ export const Mug = memo(function Mug({
             metalness: 0.02,
             castShadow: true,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         p.push({
@@ -101,6 +107,7 @@ export const Mug = memo(function Mug({
             metalness: 0.02,
             castShadow: true,
             receiveShadow: true,
+            magnifierOnly,
         })
 
 
@@ -115,6 +122,7 @@ export const Mug = memo(function Mug({
             metalness: 0.02,
             castShadow: true,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         // extra inner bottom to avoid see-through at grazing angles
@@ -129,6 +137,7 @@ export const Mug = memo(function Mug({
             side: THREE.FrontSide,
             castShadow: false,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         // handle – smaller and rotated like you tested
@@ -153,6 +162,7 @@ export const Mug = memo(function Mug({
             metalness: 0.02,
             castShadow: true,
             receiveShadow: true,
+            magnifierOnly,
         })
 
         return p
@@ -186,6 +196,7 @@ export const Mug = memo(function Mug({
             hoverColor={hoverColor}
             initialRotation={initialRotation}
             outlineScale={outlineScale}
+            magnifierOnly={magnifierOnly}
         />
     )
 })

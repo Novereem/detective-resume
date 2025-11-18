@@ -74,6 +74,7 @@ export const Magnifier = memo(function Magnifier({
             side: THREE.DoubleSide,
             castShadow: false,
             receiveShadow: false,
+            outlineScale: 0,
         })
 
         const neckZ = -(R + neckL * 0.5)
@@ -122,7 +123,9 @@ export const Magnifier = memo(function Magnifier({
         const lensBase = (base as any).lens ?? {}
 
         const activeColor = held ? '#86b8ff' : (lensBase.color ?? '#f5f7ff')
-        const activeOpacity = held ? 0.35 : (typeof lensBase.opacity === 'number' ? lensBase.opacity : 0.05)
+        const activeOpacity = held
+            ? 0.35
+            : (typeof lensBase.opacity === 'number' ? lensBase.opacity : 0.05)
 
         return {
             ...base,
@@ -148,10 +151,12 @@ export const Magnifier = memo(function Magnifier({
             materialsById={derivedMaterials}
             hitbox={{ size: hitboxSize, center: hitboxCenter }}
             color={color}
+            disableOutline={held}
             outlineColor={outlineColor}
             hoverColor={hoverColor}
             initialRotation={initialRotation}
             outlineScale={outlineScale}
+            disablePointer={held}
         />
     )
 })

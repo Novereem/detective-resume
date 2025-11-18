@@ -179,41 +179,39 @@ export default function DetectiveRoom() {
                     }}
                     style={{ width: '100%', height: '100%', imageRendering: 'pixelated' }}
                 >
-                    <MagnifierStateProvider>
-                        <QualityProvider>
-                            <Scene
-                                openInspect={setInspect}
-                                requestMove={setMoveReq}
-                                files={files}
-                                drawerFiles={drawer_files}
-                                poofs={poofs}
-                                onPoofDone={removePoof}
-                                drawers={drawers}
-                            />
-                        </QualityProvider>
-                        <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
-                        <MouseZoom enabled={moveReq === null} mode="fov" />
-
-                        <FreeLookControls
-                            qGoalRef={qGoalRef}
-                            enabled={!isMove || !moverBusy}
-                            lookSensitivity={mouseSensitivity}
-                            orientDamping={orientDamping}
+                    <QualityProvider>
+                        <Scene
+                            openInspect={setInspect}
+                            requestMove={setMoveReq}
+                            files={files}
+                            drawerFiles={drawer_files}
+                            poofs={poofs}
+                            onPoofDone={removePoof}
+                            drawers={drawers}
                         />
+                    </QualityProvider>
+                    <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
+                    <MouseZoom enabled={moveReq === null} mode="fov" />
 
-                        <MagnifierPickupControls
-                            enabled={moveReq === null && !isMove && !moverBusy}
-                        />
+                    <FreeLookControls
+                        qGoalRef={qGoalRef}
+                        enabled={!isMove || !moverBusy}
+                        lookSensitivity={mouseSensitivity}
+                        orientDamping={orientDamping}
+                    />
 
-                        <DevFlyMove enabled={isDev} speed={3} verticalSpeed={3} smoothing={0} />
-                        <DevObjectMove enabled={isMove} onBusyChange={setMoverBusy} />
+                    <MagnifierPickupControls
+                        enabled={moveReq === null && !isMove && !moverBusy}
+                    />
 
-                        <PixelateNearestFX size={pixelateSize} />
-                        <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
-                        <Preload all/>
+                    <DevFlyMove enabled={isDev} speed={3} verticalSpeed={3} smoothing={0} />
+                    <DevObjectMove enabled={isMove} onBusyChange={setMoverBusy} />
 
-                        <MagnifierDebug />
-                    </MagnifierStateProvider>
+                    <PixelateNearestFX size={pixelateSize} />
+                    <CameraPoseBridge posRef={prevCamPosRef} lookAtRef={prevLookAtRef} />
+                    <Preload all/>
+
+                    <MagnifierDebug />
                 </Canvas>
             </div>
 
