@@ -37,7 +37,7 @@ import {TriangleLogger} from "@/components/Debug/TriangleLogger";
 import {Preload} from "@react-three/drei";
 import {QualityLevel, QualityProvider} from "@/components/Settings/QualityContext";
 import {UsableItemObjects} from "@/components/DetectiveRoom/FunctionalObjects/UsableItemObjects";
-import {MagnifierStateProvider} from "@/components/MagnifierStateContext";
+import {MagnifierStateProvider} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
 import {MagnifierDebug} from "@/components/Debug/MagnifierDebug";
 
 function Scene({

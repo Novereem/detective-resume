@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useMagnifierState } from '@/components/MagnifierStateContext'
+import { useMagnifierState } from '@/components/CameraEffects/Magnifier/MagnifierStateContext'
 
 export function MagnifierDebug() {
     const { held, lensMaskRef } = useMagnifierState()

@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import type {FocusOpts, MoveRequest, V3Like, Vec3} from '@/components/Types/room'
 import {ANCHOR} from "@/components/Game/anchors";
-import {useMagnifierState} from "@/components/MagnifierStateContext";
+import {useMagnifierState} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
 
 type DevObjectMoveProps = {
     enabled?: boolean
@@ -1006,14 +1006,29 @@ export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean 
         obj.position.copy(targetLocal)
         obj.quaternion.copy(camera.quaternion).multiply(qOffset)
 
-        // Build ray from camera through the lens center in world space
-        lensDir.copy(targetWorld).sub(camPos).normalize()
+        const lensLocal = new THREE.Vector3(
+            0.72,      // left/right in magnifier local space
+            0,     // up/down
+            4.276      // forward/backward along magnifier's local Z
+        )
+        const lensWorld = obj.localToWorld(lensLocal.clone())
 
-        // origin = lens center in world space
+        // Direction from camera through the lens center (for future use if needed)
+        lensDir.copy(lensWorld).sub(camPos).normalize()
+
+        // 3) Project lens center to NDC (screen space)
+        const lensNdc = lensWorld.clone().project(camera)
+
+        // Small extra offset in NDC to nudge the circle relative to the glass
+        const ndcOffsetX = 0
+        const ndcOffsetY = -0
+
         mask.active = true
-        mask.origin = [targetWorld.x, targetWorld.y, targetWorld.z]
+        mask.origin = [lensNdc.x + ndcOffsetX, lensNdc.y + ndcOffsetY, 0]
         mask.dir = [lensDir.x, lensDir.y, lensDir.z]
-        mask.radius = 0.3  // tweak to match lens size visually
+
+        // Screen-space radius
+        mask.radius = 0.47
     })
 
     return null

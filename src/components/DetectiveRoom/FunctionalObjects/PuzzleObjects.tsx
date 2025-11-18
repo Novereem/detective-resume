@@ -12,7 +12,8 @@ import type { InspectState } from '@/components/Types/inspectModels'
 import { FocusOpts } from '@/components/Types/room'
 import { usePuzzleInspect } from '@/components/Game/usePuzzleInspect'
 import { PZ } from '@/components/Game/state.data'
-import {SecretNoteOnDesk} from "@/components/DetectiveRoom/FunctionalObjects/SecretNote";
+import MagnifierRevealMaterial from "@/components/CameraEffects/Magnifier/MagnifierRevealMaterial";
+import {FramedPlane} from "@/components/Models/Generic/Outlined/FramedPlane";
 
 type RcFocus = (opts: FocusOpts) => (e: any) => void
 
@@ -84,7 +85,32 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 )
             })}
 
-            <SecretNoteOnDesk/>
+            <mesh position={[0.2, 0.9, 3.8]}>
+                <boxGeometry args={[0.5, 0.5, 0.5]}/>
+                <MagnifierRevealMaterial
+                    color="#ffffff"
+                    emissive="#222222"
+                    maxDistance={20}
+                    debug={false}
+                />
+            </mesh>
+
+            <FramedPlane
+                width={0.22}
+                height={0.14}
+                position={[-0.169, 0.795, 4.408]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                textureUrl="/textures/paper_collages_whites.jpg"
+                textureRepeat={[1, 1]}
+                border={0.005}
+                color="#222222"
+                canInteract={false}
+                lit
+                roughness={0.9}
+                metalness={0}
+                receiveShadow
+
+            />
 
             {showMug && (
                 <group onContextMenu={rcFocus(ANCHOR.mug)}>
@@ -94,10 +120,10 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                         color="#fff"
                         outlineThickness={0.008}
                         inspectDistance={0.5}
-                        inspectPixelSize={3}
-                        onInspect={openMugInspect}
-                        materialsById={mugMaterials}
-                    />
+                            inspectPixelSize={3}
+                            onInspect={openMugInspect}
+                            materialsById={mugMaterials}
+                        />
                 </group>
             )}
 
