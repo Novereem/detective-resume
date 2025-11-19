@@ -59,7 +59,8 @@ export function WallsCluster() {
                 />
             </mesh>
 
-            <mesh position={[0, 2.5, 1]} rotation={[0, 0, Math.PI]} raycast={() => null}>
+            {/* Back Wall */}
+            <mesh position={[0, 2.5, 1.5]} rotation={[0, 0, Math.PI]} raycast={() => null}>
                 <FramedPlane
                     width={5}
                     height={5}
@@ -75,6 +76,7 @@ export function WallsCluster() {
                 />
             </mesh>
 
+            {/* Right Wall City Background */}
             <mesh position={[-1.7, 1.5, 2.5]} rotation={[0, Math.PI / 2, 0]} raycast={() => null}>
                 <FramedPlane
                     width={3}
@@ -91,6 +93,26 @@ export function WallsCluster() {
                 />
             </mesh>
 
+            {/* Right Wall Cutouts For Windows */}
+            <WallWithCutouts
+                position={[-1.5, 2.5, 2.5]}
+                rotation={[-Math.PI, Math.PI / 2, 0]}
+                size={[5, 5]}
+                textureRepeat={[1, 1]}
+                materialsById={wallCutoutMaterials}
+                holes={[
+                    {
+                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
+                        center: [0.1, 1.2]
+                    },
+                    {
+                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
+                        center: [1.1, 1.2]
+                    },
+                ]}
+            />
+
+            {/* Left Wall */}
             <mesh
                 position={[2.5, 2.5, 2.5]}
                 rotation={[-Math.PI, Math.PI + Math.PI / 2, 0]}
@@ -111,23 +133,7 @@ export function WallsCluster() {
                 />
             </mesh>
 
-            <WallWithCutouts
-                position={[-1.5, 2.5, 2.5]}
-                rotation={[-Math.PI, Math.PI / 2, 0]}
-                size={[5, 5]}
-                textureRepeat={[1, 1]}
-                materialsById={wallCutoutMaterials}
-                holes={[
-                    {
-                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
-                        center: [-0.2, 1.2]
-                    },
-                    {
-                        ...apertureFromWindow({size: [0.85, 1.5, 0.05], surroundBorder: 0.07, clearance: 0.006}),
-                        center: [0.8, 1.2]
-                    },
-                ]}
-            />
+
         </group>
     )
 }

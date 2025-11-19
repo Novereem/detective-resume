@@ -4,7 +4,7 @@ import { useSettings } from '@/components/Settings/SettingsProvider'
 
 const EV_MOVE_BACK_TO_DESK = 'tt:moveBackToDesk'
 
-export default function BackToDeskButton() {
+export default function BackToDeskButton({ scale = 1.25}: { scale?: number}) {
     const { moveBackToDeskEnabled } = useSettings()
 
     const onClick = React.useCallback(() => {
@@ -16,10 +16,10 @@ export default function BackToDeskButton() {
     return (
         <div
             style={{
+                transform: `scale(${scale}) translateX(-50%)`,
                 position: 'fixed',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                bottom: 12,
+                left: `${(scale * 1.25) + 50}%`,
+                bottom: 12*scale,
                 zIndex: 70
             }}
         >

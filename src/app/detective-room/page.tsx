@@ -11,6 +11,7 @@ import { preloadTextures } from '@/components/Textures/TextureManager'
 import { DETECTIVE_ROOM_TEXTURES } from '@/components/Textures/detectiveRoomTextures'
 import { MagnifierHint } from '@/components/UI/MagnifierHint'
 import {MagnifierStateProvider, useMagnifierState} from '@/components/CameraEffects/Magnifier/MagnifierStateContext'
+import {CaseProgressHud} from "@/components/UI/PuzzleProgressHud";
 
 function StaticLoader({ message }: { message: string }) {
     return (
@@ -46,7 +47,8 @@ function OverlayedRoom() {
             <NotificationsViewport position="top-left" />
             {controlsHintVisible && <ControlsHint position={controlsHintPosition} scale={1.3} />}
             <MagnifierHint held={held} position="bottom-right" scale={1.25} />
-            <BackToDeskButton />
+            <BackToDeskButton scale={1.5}/>
+            <CaseProgressHud position="top-right" scale={1.5} />
             <EscapeMenu />
         </>
     )

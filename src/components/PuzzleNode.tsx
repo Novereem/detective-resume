@@ -19,7 +19,6 @@ type ViewFramed = {
     frame: { width: number; height: number; border?: number }
     textureUrl: string
     inspect: (TextPuzzle & { id: string })
-    rotateY180WhenPinned?: boolean
     textureFit?: "stretch" | "contain"
     pixelSize?: number
     inspectDistance?: number
@@ -53,42 +52,42 @@ export function PuzzleNode({
     const activeAnchor = ANCHOR[pinned ? def.wallAnchorKey : def.deskAnchorKey]
     const baseRot = (activeAnchor.rotation ?? [0, 0, 0]) as Vec3
 
-    const yFlip = view.rotateY180WhenPinned ? Math.PI : 0
     const rot: Vec3 = pinned
-        ? ([baseRot[0] + rotationOffsetWhenPinned[0],
-            baseRot[1] + rotationOffsetWhenPinned[1] + yFlip,
-            baseRot[2] + rotationOffsetWhenPinned[2]] as Vec3)
+        ? ([
+            baseRot[0] + rotationOffsetWhenPinned[0],
+            baseRot[1] + rotationOffsetWhenPinned[1],
+            baseRot[2] + rotationOffsetWhenPinned[2],
+        ] as Vec3)
         : baseRot
 
-    const pinPos: Vec3 | null = pinned && view.kind === "framed"
-        ? ([0, view.frame.height / 2 + (view.frame.border ?? 0.01) * 0.5, 0.015] as Vec3)
-        : null
+    const pinPos: Vec3 | null =
+        pinned && view.kind === 'framed'
+            ? ([0, view.frame.height / 2 + (view.frame.border ?? 0.01) * 0.5, 0.015] as Vec3)
+            : null
 
     const inspectStateBase: InspectState = {
-        kind: "framed",
+        kind: 'framed',
         width: view.frame.width,
         height: view.frame.height,
         border: view.frame.border ?? 0.01,
         textureUrl: view.textureUrl,
-        textureFit: view.textureFit ?? "stretch",
+        textureFit: view.textureFit ?? 'stretch',
         pixelSize: view.pixelSize ?? 1,
         inspectDistance: view.inspectDistance ?? 0.4,
         puzzle: view.inspect,
-
         metadata: {
-            type: "puzzle",
+            type: 'puzzle',
             puzzleId: def.puzzleId,
             solved: !!solved,
             solvedAnswer: solvedAnswer ?? undefined,
         },
     }
 
-    const handleInspect = (p: InspectState) =>
-        openInspect({ ...inspectStateBase, ...p })
+    const handleInspect = (p: InspectState) => openInspect({ ...inspectStateBase, ...p })
 
     return (
         <group position={activeAnchor.position} rotation={rot} onContextMenu={rcFocus(activeAnchor)}>
-            {view.kind === "framed" && (
+            {view.kind === 'framed' && (
                 <FramedPlane
                     width={view.frame.width}
                     height={view.frame.height}
@@ -98,7 +97,7 @@ export function PuzzleNode({
                     inspectOverrides={{ pixelSize: inspectStateBase.pixelSize }}
                     onInspect={handleInspect}
                     textureUrl={view.textureUrl}
-                    textureFit={inspectStateBase.textureFit ?? "stretch"}
+                    textureFit={inspectStateBase.textureFit ?? 'stretch'}
                     lit
                     roughness={1}
                     metalness={0}

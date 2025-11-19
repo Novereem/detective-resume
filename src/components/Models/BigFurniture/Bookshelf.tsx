@@ -12,6 +12,7 @@ export type BookshelfProps = Inherited & {
     frameThickness?: number
     shelfCount?: number
     backThickness?: number
+    heightReduction?: number
     materialsById: React.ComponentProps<typeof ModelGroup>['materialsById']
 }
 
@@ -20,6 +21,7 @@ export const Bookshelf = memo(function Bookshelf({
                                                      frameThickness = 0.03,
                                                      shelfCount = 4,
                                                      backThickness = 0.008,
+                                                     heightReduction = 0.1,
                                                      color = '#ffffff',
                                                      outlineColor = '#ffffff',
                                                      hoverColor = '#ff3b30',
@@ -43,8 +45,8 @@ export const Bookshelf = memo(function Bookshelf({
         p.push(
             {
                 id: 'side',
-                geometry: <boxGeometry args={[t, H, D]} />,
-                position: [-W / 2 + t / 2, H / 2, 0],
+                geometry: <boxGeometry args={[t, H - heightReduction, D]} />,
+                position: [-W / 2 + t / 2, H / 2 - heightReduction / 2, 0],
                 color,
                 outlineColor,
                 boundingRadius: boundR,
@@ -55,8 +57,8 @@ export const Bookshelf = memo(function Bookshelf({
             },
             {
                 id: 'side',
-                geometry: <boxGeometry args={[t, H, D]} />,
-                position: [W / 2 - t / 2, H / 2, 0],
+                geometry: <boxGeometry args={[t, H - heightReduction, D]} />,
+                position: [W / 2 - t / 2, H / 2 - heightReduction / 2, 0],
                 color,
                 outlineColor,
                 boundingRadius: boundR,
@@ -83,7 +85,7 @@ export const Bookshelf = memo(function Bookshelf({
             {
                 id: 'top',
                 geometry: <boxGeometry args={[innerW, t, D]} />,
-                position: [0, H - t / 2, 0],
+                position: [0, H - t / 2 - heightReduction, 0],
                 color,
                 outlineColor,
                 boundingRadius: boundR,
@@ -96,8 +98,8 @@ export const Bookshelf = memo(function Bookshelf({
 
         p.push({
             id: 'back',
-            geometry: <boxGeometry args={[W, H, backT]} />,
-            position: [0, H / 2, -D / 2 + backT / 2],
+            geometry: <boxGeometry args={[W, H - heightReduction, backT]} />,
+            position: [0, H / 2 - heightReduction / 2, -D / 2 + backT / 2],
             color,
             outlineColor,
             boundingRadius: boundR,

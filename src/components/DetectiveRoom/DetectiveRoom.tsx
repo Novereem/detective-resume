@@ -120,7 +120,7 @@ export default function DetectiveRoom() {
 
     const SECRETFILE_VIEW_BEFORE_CLOSE_MS = 900
     const OVERLAY_CLOSE_ANIM_MS = 200
-    const PUZZLE_SOLVE_ZOOM_MS = 1500
+    const PUZZLE_SOLVE_ZOOM_MS = 1750
 
     const viewTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const deleteTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -235,6 +235,17 @@ export default function DetectiveRoom() {
                     const CLOSE_ANIM_MS =
                         typeof OVERLAY_CLOSE_ANIM_MS === 'number' ? OVERLAY_CLOSE_ANIM_MS : 300
 
+                    const SOLVE_ZOOM_FACTOR = 0.6
+
+                    function makeSolveZoomEye(anchorEye: Vec3, anchorPos: Vec3, factor = SOLVE_ZOOM_FACTOR): Vec3 {
+                        const t = factor
+                        return [
+                            anchorPos[0] + (anchorEye[0] - anchorPos[0]) * t,
+                            anchorPos[1] + (anchorEye[1] - anchorPos[1]) * t,
+                            anchorPos[2] + (anchorEye[2] - anchorPos[2]) * t,
+                        ]
+                    }
+
                     if (viewTimerRef.current) clearTimeout(viewTimerRef.current)
                     if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
 
@@ -245,10 +256,18 @@ export default function DetectiveRoom() {
                             const cfg = puzzlesConfig[puzzleId]
                             const a = cfg ? ANCHOR[cfg.wallAnchorKey] : undefined
                             if (a?.eye && a?.position) {
+                                const zoomEye = makeSolveZoomEye(
+                                    a.eye as Vec3,
+                                    a.position as Vec3
+                                )
+
                                 requestZoomPeek(
                                     setMoveReq,
-                                    { camera: a.eye as Vec3, lookAt: a.position as Vec3 },
-                                    { camera: prevCamPosRef.current, lookAt: prevLookAtRef.current },
+                                    { camera: zoomEye, lookAt: a.position as Vec3 },
+                                    {
+                                        camera: prevCamPosRef.current,
+                                        lookAt: prevLookAtRef.current,
+                                    },
                                     PUZZLE_SOLVE_ZOOM_MS
                                 )
                             }

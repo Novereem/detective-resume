@@ -34,7 +34,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     disableOutline
                     inspectDisableOutline
                     visualizeHitbox={false}
-                    disablePointer
+                    disablePointer={true}
                 />
             </group>
 
@@ -48,6 +48,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     inspectPixelSize={3}
                     disableOutline
                     inspectDisableOutline
+                    disablePointer={true}
                 />
             </group>
 
@@ -65,6 +66,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     groundY={0}
                     baseSpread={0.3}
                     footPadRadius={0.012}
+                    disablePointer={true}
                 />
             </group>
 
@@ -74,6 +76,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     rotation={ANCHOR.blinds1.rotation}
                     size={[0.62, 1.2, 0.05]}
                     materialsById={woodBlindsMaterials}
+                    disablePointer={true}
                 />
             </group>
 
@@ -83,6 +86,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     rotation={ANCHOR.blinds2.rotation}
                     size={[0.62, 1, 0.05]}
                     materialsById={woodBlindsMaterials}
+                    disablePointer={true}
                 />
             </group>
 
@@ -96,6 +100,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     frameDepth={0.02}
                     windowOffset={-0.02}
                     materialsById={rectWindowMaterials}
+                    disablePointer={true}
                 />
             </group>
 
@@ -109,6 +114,7 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     frameDepth={0.02}
                     windowOffset={-0.02}
                     materialsById={rectWindowMaterials}
+                    disablePointer={true}
                 />
             </group>
 
@@ -131,12 +137,12 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     position={ANCHOR.bookshelf2.position}
                     rotation={ANCHOR.bookshelf2.rotation}
                     materialsById={bookshelfMaterials}
-                    size={[1.3, 0.85, 0.26]}
+                    size={[1.3, 0.75, 0.26]}
                     frameThickness={0.03}
                     shelfCount={1}
                     disableOutline
                     inspectDisableOutline
-                    outlineScale={1.02}
+                    disablePointer={true}
                 />
             </group>
         </>

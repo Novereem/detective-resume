@@ -489,8 +489,8 @@ export default function ObjectInspectOverlay({
                 ref={cardRef}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                    width: 'min(80vw, 820px)',
-                    height: 'min(80vh, 540px)',
+                    width: 'min(55vw)',
+                    height: 'min(65vh)',
                     borderRadius: 16,
                     overflow: 'hidden',
                     boxShadow: '0 12px 48px rgba(0,0,0,0.45)',
@@ -665,7 +665,7 @@ export default function ObjectInspectOverlay({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            padding: '12px 14px',
+                            padding: '16px 20px',
                             background: (puzzleSolved || status === 'correct')
                                 ? 'rgba(0,128,0,0.22)'
                                 : status === 'incorrect'
@@ -678,7 +678,7 @@ export default function ObjectInspectOverlay({
                             backdropFilter: 'blur(2px)',
                         }}
                     >
-                        <div style={{ color: '#ddd', fontSize: 14, whiteSpace: 'nowrap' }}>
+                        <div style={{ color: '#ddd', fontSize: 20, whiteSpace: 'nowrap' }}>
                             {puzzle.prompt ?? 'Type your answer:'}
                         </div>
 
@@ -688,7 +688,7 @@ export default function ObjectInspectOverlay({
                                     style={{
                                         flex: 1,
                                         color: '#fff',
-                                        fontSize: 14,
+                                        fontSize: 18,
                                         padding: '8px 10px',
                                         background: 'rgba(255,255,255,0.06)',
                                         border: '1px solid rgba(255,255,255,0.12)',
@@ -697,7 +697,7 @@ export default function ObjectInspectOverlay({
                                 >
                                     <strong>Solved answer:</strong> {puzzleSolvedAnswer || '(empty)'}
                                 </div>
-                                <div style={{ minWidth: 90, textAlign: 'right', color: '#00d323', fontSize: 13 }}>
+                                <div style={{ minWidth: 90, textAlign: 'right', color: '#00d323', fontSize: 20 }}>
                                     {puzzle.feedback?.correct ?? 'Correct!'}
                                 </div>
                             </>
@@ -717,7 +717,7 @@ export default function ObjectInspectOverlay({
                                         padding: '8px 10px',
                                         borderRadius: 8,
                                         outline: 'none',
-                                        fontSize: 14,
+                                        fontSize: 18,
                                     }}
                                 />
                                 <button
@@ -735,7 +735,7 @@ export default function ObjectInspectOverlay({
                                 >
                                     Confirm
                                 </button>
-                                <div style={{ minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 13 }}>
+                                <div style={{ minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 18 }}>
                                     {status === 'correct' && (puzzle.feedback?.correct ?? 'Correct!')}
                                     {status === 'incorrect' && (puzzle.feedback?.incorrect ?? 'Try again')}
                                 </div>

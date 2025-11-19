@@ -157,7 +157,6 @@ export default function EscapeMenu() {
                 >
                     {tab === 'controls' && (
                         <section style={group} role="tabpanel" aria-labelledby="controls">
-                            <div style={groupTitle}>Game Controls</div>
                                 <div style={row}>
                                     <div style={{fontWeight: 600, marginBottom: 6}}>Controls Hint</div>
                                     <div style={{
@@ -278,7 +277,6 @@ export default function EscapeMenu() {
 
                     {tab === 'video' && (
                         <section style={group} role="tabpanel" aria-labelledby="video">
-                            <div style={groupTitle}>Video Settings</div>
                             <div style={row}>
                                 <div style={{
                                     display: 'flex',
@@ -402,8 +400,6 @@ export default function EscapeMenu() {
 
                     {tab === 'extras' && (
                         <section style={group} role="tabpanel" aria-labelledby="extras">
-                            <div style={groupTitle}>Extras</div>
-
                             <div style={row}>
                                 <label
                                     style={{

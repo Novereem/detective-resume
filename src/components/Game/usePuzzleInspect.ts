@@ -21,16 +21,21 @@ export function usePuzzleInspect(
 
             const status = puzzleStatus[puzzleId]
 
-            openInspect({
+            const merged: InspectState = {
                 ...base,
+                pixelSize: cfg.view.pixelSize ?? base.pixelSize,
+                inspectDistance: cfg.view.inspectDistance ?? base.inspectDistance,
                 puzzle: cfg.view.inspect,
                 metadata: {
+                    ...(base as any).metadata,
                     type: 'puzzle',
                     puzzleId: cfg.id,
                     solved: !!status?.solved,
                     solvedAnswer: status?.solvedAnswer,
                 },
-            })
+            }
+
+            openInspect(merged)
         },
         [puzzleId, openInspect, puzzlesConfig, puzzleStatus]
     )

@@ -9,11 +9,10 @@ import { Mug } from '@/components/Models/Decoration/Mug'
 import { secretFileMaterials, mugMaterials } from '@/components/Materials/detectiveRoomMats'
 import type { PositionedSecretFile } from '@/components/Game/state.data'
 import type { InspectState } from '@/components/Types/inspectModels'
-import { FocusOpts } from '@/components/Types/room'
+import type { FocusOpts, Vec3 } from '@/components/Types/room'
 import { usePuzzleInspect } from '@/components/Game/usePuzzleInspect'
 import { PZ } from '@/components/Game/state.data'
-import MagnifierRevealMaterial from "@/components/CameraEffects/Magnifier/MagnifierRevealMaterial";
-import {FramedPlane} from "@/components/Models/Generic/Outlined/FramedPlane";
+import { FramedPlane } from '@/components/Models/Generic/Outlined/FramedPlane'
 
 type RcFocus = (opts: FocusOpts) => (e: any) => void
 
@@ -53,6 +52,10 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 const availableForFrame =
                     cfg.deskFramed === false ? false : !!status?.available
 
+                const rotationOffsetWhenPinned: Vec3 = cfg.view.rotateY180WhenPinned
+                    ? [0, Math.PI, 0]
+                    : [0, 0, 0]
+
                 return (
                     <PuzzleNode
                         key={cfg.id}
@@ -70,6 +73,9 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                                 border: cfg.view.border,
                             },
                             textureUrl: cfg.view.textureUrl,
+                            textureFit: cfg.view.textureFit,
+                            pixelSize: cfg.view.pixelSize,
+                            inspectDistance: cfg.view.inspectDistance,
                             inspect: cfg.view.inspect,
                         }}
                         available={availableForFrame}
@@ -78,22 +84,10 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                         solvedAnswer={status?.solvedAnswer}
                         openInspect={openInspect}
                         rcFocus={rcFocus}
-                        rotationOffsetWhenPinned={
-                            cfg.view.rotateY180WhenPinned ? [0, Math.PI, 0] : [0, 0, 0]
-                        }
+                        rotationOffsetWhenPinned={rotationOffsetWhenPinned}
                     />
                 )
             })}
-
-            {/*<mesh position={[0.2, 0.9, 3.8]}>*/}
-            {/*    <boxGeometry args={[0.2, 0.2, 0.1]}/>*/}
-            {/*    <MagnifierRevealMaterial*/}
-            {/*        color="#ffffff"*/}
-            {/*        emissive="#222222"*/}
-            {/*        maxDistance={20}*/}
-            {/*        debug={false}*/}
-            {/*    />*/}
-            {/*</mesh>*/}
 
             <FramedPlane
                 width={0.22}
@@ -101,11 +95,11 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 position={[-0.169, 0.795, 4.408]}
                 rotation={[-Math.PI / 2, 0, 0]}
                 textureUrl="/textures/paper_collages_whites.jpg"
-                textureFit={"stretch"}
+                textureFit="stretch"
                 border={0.005}
                 color="#222222"
                 onInspect={openInspect}
-                canInteract={true}
+                canInteract
                 lit
                 roughness={0.9}
                 metalness={0}

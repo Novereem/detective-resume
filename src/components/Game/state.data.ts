@@ -9,8 +9,10 @@ export const asFileId   = <T extends string>(s: T) => s as unknown as SecretFile
 export const PZ = {
     House: asPuzzleId("puzzle-house"),
     PhotoClue: asPuzzleId("puzzle-photo-clue"),
-    FrameBlue: asPuzzleId("puzzle-frame-blue"),
     MugInitials: asPuzzleId("puzzle-mug-initials"),
+
+    HboIct: asPuzzleId("puzzle-hbo-ict"),
+    Semester: asPuzzleId("puzzle-semester"),
 } as const
 
 export const FileId = {
@@ -46,6 +48,8 @@ export type FramedViewConfig = {
     textureUrl: string
     textureFit?: "stretch" | "contain"
     rotateY180WhenPinned?: boolean
+    pixelSize?: number
+    inspectDistance?: number
     inspect: TextPuzzle & { id: string }
 }
 
@@ -109,6 +113,8 @@ export const initialSnapshot: GameSnapshot = {
                 textureUrl: "/textures/house_szn1.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
+                pixelSize: 1,
+                inspectDistance: 0.45,
                 inspect: {
                     type: "text",
                     id: "frame-code-desk",
@@ -124,13 +130,15 @@ export const initialSnapshot: GameSnapshot = {
             solvedFromInspectId: "photo-red-circle",
             deskAnchorKey: "deskTopSpawn",
             wallAnchorKey: "photoClueFrame",
-            connectsTo: [PZ.FrameBlue],
+            connectsTo: [PZ.HboIct],
             view: {
                 kind: "framed",
                 width: 0.20, height: 0.20, border: 0.012,
                 textureUrl: "/textures/testimage.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
+                pixelSize: 2.5,
+                inspectDistance: 0.45,
                 inspect: {
                     type: "text",
                     id: "photo-red-circle",
@@ -142,29 +150,70 @@ export const initialSnapshot: GameSnapshot = {
             }
         },
 
-        [PZ.FrameBlue]: {
-            id: PZ.FrameBlue,
-            solvedFromInspectId: "frame-code",
-            deskAnchorKey: "testPuzzle3",
-            wallAnchorKey: "photoBlueFrame",
+        [PZ.HboIct]: {
+            id: PZ.HboIct,
+            solvedFromInspectId: "puzzle-hbo-ict",
+            deskAnchorKey: "hboIct",
+            wallAnchorKey: "hboIctFrame",
+            connectsTo: [PZ.Semester],
             view: {
                 kind: "framed",
-                width: 0.17,
+                width: 0.40,
                 height: 0.20,
-                border: 0.01,
-                textureUrl: "/textures/paper_collages_whites.jpg",
+                border: 0.007,
+                textureUrl: "/textures/puzzle_hboictpropedeuse.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
+                pixelSize: 0,
+                inspectDistance: 0.43,
                 inspect: {
                     type: "text",
-                    id: "frame-code",
-                    prompt: "Please type the answer: blue",
-                    answers: ["blue"],
+                    id: "puzzle-hbo-ict",
+                    prompt: "What is my current education?",
+                    answers: [
+                        "hbo ict",
+                        "hbo-ict",
+                        /hbo\s*-?\s*ict/i,
+                    ],
                     normalize: "trim-lower",
-                    feedback: { correct: "Very good!", incorrect: "Ahem..." },
-                }
-            }
+                    feedback: {
+                        correct: "Exactly. HBO-ICT.",
+                        incorrect: "Check the diploma again.",
+                    },
+                },
+            },
         },
+
+
+        [PZ.Semester]: {
+            id: PZ.Semester,
+            solvedFromInspectId: "puzzle-semester-7",
+            deskAnchorKey: "semester7",
+            wallAnchorKey: "semester7Frame",
+            view: {
+                kind: "framed",
+                width: 0.20,
+                height: 0.07,
+                border: 0.008,
+                textureUrl: "/textures/puzzle_semesterplanning.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                pixelSize: 0.5,
+                inspectDistance: 0.25,
+                inspect: {
+                    type: "text",
+                    id: "puzzle-semester-7",
+                    prompt: "Which semester am I in right now?",
+                    answers: ["7", "seven"],
+                    normalize: "trim-lower",
+                    feedback: {
+                        correct: "Yep, semester 7.",
+                        incorrect: "Check the study plan again.",
+                    },
+                },
+            },
+        },
+
         [PZ.MugInitials]: {
             id: PZ.MugInitials,
             solvedFromInspectId: "mug-initials",
@@ -178,6 +227,8 @@ export const initialSnapshot: GameSnapshot = {
                 textureUrl: "/textures/testimage.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
+                pixelSize: 3,
+                inspectDistance: 0.2,
                 inspect: {
                     type: "text",
                     id: "mug-initials",
@@ -197,7 +248,8 @@ export const initialSnapshot: GameSnapshot = {
     puzzleStatus: {
         [PZ.House]:     { available: false, pinned: false },
         [PZ.PhotoClue]: { available: false, pinned: false },
-        [PZ.FrameBlue]: { available: true, pinned: false },
+        [PZ.HboIct]: { available: true, pinned: false },
+        [PZ.Semester]: { available: true, pinned: false },
         [PZ.MugInitials]: { available: true, pinned: false },
     },
 
