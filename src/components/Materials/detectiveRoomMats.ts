@@ -11,7 +11,7 @@ export const mugMaterials: Record<string, PartMaterialOverride> = {
     wallOuter: { color: '#ffffff',roughness: 0, metalness: 0.0 },
     wallInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
     bottomInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
-    bottom: { textureUrl: '/textures/testimage.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    bottom: { textureUrl: '/textures/puzzle_scratchedinitials.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
 }
 
 export const corkBoardMaterials: Record<string, PartMaterialOverride> = {

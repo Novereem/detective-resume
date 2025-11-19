@@ -13,6 +13,7 @@ export type TextPuzzle = {
         correct?: string
         incorrect?: string
     }
+    multipleAnswers?: number
 }
 
 export type OutlinedInspect = {

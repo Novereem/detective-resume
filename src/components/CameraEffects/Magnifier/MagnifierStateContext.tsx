@@ -36,6 +36,7 @@ const defaultState: MagnifierState = {
 
 export function MagnifierStateProvider({ children }: { children: React.ReactNode }) {
     const [held, setHeld] = React.useState(false)
+    const [active, setActive] = React.useState(false)
 
     const lensMaskRef = React.useRef<LensMask>({
         active: false,
@@ -48,6 +49,8 @@ export function MagnifierStateProvider({ children }: { children: React.ReactNode
         () => ({
             held,
             setHeld,
+            active,
+            setActive,
             lensMaskRef,
         }),
         [held]

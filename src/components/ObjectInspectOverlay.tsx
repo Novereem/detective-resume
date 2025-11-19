@@ -315,9 +315,9 @@ export default function ObjectInspectOverlay({
     const puzzleSolved = !!puzzleMeta?.solved
     const puzzleSolvedAnswer = (puzzleMeta?.solvedAnswer ?? '') as string
 
-    const [answer, setAnswer] = React.useState('')
+    const [answers, setAnswers] = React.useState<string[]>([''])
     const [status, setStatus] = React.useState<'idle' | 'correct' | 'incorrect'>('idle')
-    const inputRef = React.useRef<HTMLInputElement | null>(null)
+    const inputRefs = React.useRef<Array<HTMLInputElement | null>>([])
     const cardRef = React.useRef<HTMLDivElement | null>(null)
 
     React.useEffect(() => {
@@ -349,7 +349,10 @@ export default function ObjectInspectOverlay({
     React.useEffect(() => {
         if (!visible) return
 
-        setAnswer('')
+        const slotsRaw = puzzle?.multipleAnswers ?? 1
+        const slots = Math.min(Math.max(slotsRaw, 1), 4)
+
+        setAnswers(Array(slots).fill(''))
         setStatus('idle')
 
         const node = cardRef.current
@@ -357,14 +360,16 @@ export default function ObjectInspectOverlay({
 
         const onEnd = (e: TransitionEvent) => {
             if (e.propertyName === 'transform') {
-                if (puzzle && !puzzleSolved) inputRef.current?.focus()
+                if (puzzle && !puzzleSolved) {
+                    inputRefs.current[0]?.focus()
+                }
                 node.removeEventListener('transitionend', onEnd)
             }
         }
 
         node.addEventListener('transitionend', onEnd)
         return () => node.removeEventListener('transitionend', onEnd)
-    }, [visible, puzzle?.id])
+    }, [visible, puzzle?.id, puzzle?.multipleAnswers])
 
     const normalize = React.useCallback((s: string) => {
         const mode = puzzle?.normalize ?? 'trim-lower'
@@ -376,22 +381,53 @@ export default function ObjectInspectOverlay({
 
     const submitAnswer = React.useCallback(() => {
         if (!puzzle || !renderState) return
-        const strAnswers = puzzle.answers.filter(a => typeof a === 'string') as string[]
-        const rxAnswers  = puzzle.answers.filter(a => a instanceof RegExp) as RegExp[]
 
-        const raw = answer
-        const norm = normalize(answer)
+        const strAnswers = puzzle.answers.filter((a) => typeof a === 'string') as string[]
+        const rxAnswers = puzzle.answers.filter((a) => a instanceof RegExp) as RegExp[]
 
-        const strOk = strAnswers.some(a => normalize(a) === norm)
-        const rxOk  = rxAnswers.some(rx => rx.test(raw))
+        const slotsRaw = puzzle.multipleAnswers ?? 1
+        const slots = Math.min(Math.max(slotsRaw, 1), 4)
+        const usedAnswers = answers.slice(0, slots)
+        const trimmed = usedAnswers.map((a) => a.trim())
 
-        const ok = strOk || rxOk
+        if (slots === 1) {
+            const raw = trimmed[0] ?? ''
+            const norm = normalize(raw)
+
+            const strOk = strAnswers.some((a) => normalize(a) === norm)
+            const rxOk = rxAnswers.some((rx) => rx.test(raw))
+
+            const ok = strOk || rxOk
+            setStatus(ok ? 'correct' : 'incorrect')
+
+            if (ok && renderState) {
+                onSolved?.({ state: renderState, answer: raw })
+            }
+            return
+        }
+
+        // multiple answer mode: require that every configured string answer appears
+        const normRequired = strAnswers.map((a) => normalize(a))
+        const normUser = trimmed.map((a) => normalize(a))
+        const userSet = new Set(normUser.filter((v) => v.length > 0))
+
+        const allStrOk =
+            normRequired.length === 0
+                ? false
+                : normRequired.every((req) => userSet.has(req))
+
+        const allRegexOk = rxAnswers.every((rx) => usedAnswers.some((raw) => rx.test(raw)))
+
+        const ok = allStrOk && allRegexOk
+
         setStatus(ok ? 'correct' : 'incorrect')
 
         if (ok && renderState) {
-            onSolved?.({ state: renderState, answer: raw })
+            const joined = trimmed.join(', ')
+            onSolved?.({ state: renderState, answer: joined })
         }
-    }, [answer, puzzle, normalize, renderState, onSolved])
+    }, [answers, puzzle, normalize, renderState, onSolved])
+
 
     const onKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -666,11 +702,12 @@ export default function ObjectInspectOverlay({
                             right: 0,
                             bottom: 0,
                             padding: '16px 20px',
-                            background: (puzzleSolved || status === 'correct')
-                                ? 'rgba(0,128,0,0.22)'
-                                : status === 'incorrect'
-                                    ? 'rgba(128,0,0,0.25)'
-                                    : 'rgba(0,0,0,0.55)',
+                            background:
+                                puzzleSolved || status === 'correct'
+                                    ? 'rgba(0,128,0,0.22)'
+                                    : status === 'incorrect'
+                                        ? 'rgba(128,0,0,0.25)'
+                                        : 'rgba(0,0,0,0.55)',
                             borderTop: '1px solid rgba(255,255,255,0.1)',
                             display: 'flex',
                             gap: 10,
@@ -678,7 +715,7 @@ export default function ObjectInspectOverlay({
                             backdropFilter: 'blur(2px)',
                         }}
                     >
-                        <div style={{ color: '#ddd', fontSize: 20, whiteSpace: 'nowrap' }}>
+                        <div style={{ color: '#ddd', fontSize: 16, whiteSpace: 'nowrap' }}>
                             {puzzle.prompt ?? 'Type your answer:'}
                         </div>
 
@@ -688,57 +725,120 @@ export default function ObjectInspectOverlay({
                                     style={{
                                         flex: 1,
                                         color: '#fff',
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         padding: '8px 10px',
                                         background: 'rgba(255,255,255,0.06)',
                                         border: '1px solid rgba(255,255,255,0.12)',
                                         borderRadius: 8,
                                     }}
                                 >
-                                    <strong>Solved answer:</strong> {puzzleSolvedAnswer || '(empty)'}
+                                    <strong>Solved answer:</strong>{' '}
+                                    {puzzleSolvedAnswer || '(empty)'}
                                 </div>
-                                <div style={{ minWidth: 90, textAlign: 'right', color: '#00d323', fontSize: 20 }}>
+                                <div
+                                    style={{
+                                        minWidth: 90,
+                                        textAlign: 'right',
+                                        color: '#00d323',
+                                        fontSize: 16,
+                                    }}
+                                >
                                     {puzzle.feedback?.correct ?? 'Correct!'}
                                 </div>
                             </>
                         ) : (
                             <>
-                                <input
-                                    ref={inputRef}
-                                    value={answer}
-                                    onChange={(e) => { setAnswer(e.target.value); setStatus('idle') }}
-                                    onKeyDown={onKeyDown}
-                                    placeholder="Your answer..."
-                                    style={{
-                                        flex: 1,
-                                        background: 'rgba(255,255,255,0.06)',
-                                        border: '1px solid rgba(255,255,255,0.12)',
-                                        color: '#fff',
-                                        padding: '8px 10px',
-                                        borderRadius: 8,
-                                        outline: 'none',
-                                        fontSize: 18,
-                                    }}
-                                />
-                                <button
-                                    onClick={submitAnswer}
-                                    disabled={!answer.trim()}
-                                    style={{
-                                        background: !answer.trim() ? 'rgba(255,255,255,0.12)' : '#fff',
-                                        color: !answer.trim() ? 'rgba(255,255,255,0.55)' : '#111',
-                                        border: 'none',
-                                        borderRadius: 8,
-                                        padding: '8px 12px',
-                                        cursor: !answer.trim() ? 'not-allowed' : 'pointer',
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    Confirm
-                                </button>
-                                <div style={{ minWidth: 90, textAlign: 'right', color: '#fff', fontSize: 18 }}>
-                                    {status === 'correct' && (puzzle.feedback?.correct ?? 'Correct!')}
-                                    {status === 'incorrect' && (puzzle.feedback?.incorrect ?? 'Try again')}
-                                </div>
+                                {(() => {
+                                    const slotsRaw = puzzle.multipleAnswers ?? 1
+                                    const slots = Math.min(Math.max(slotsRaw, 1), 4)
+
+                                    const trimmed = answers.map((a) => a.trim())
+                                    const allFilled =
+                                        slots === 1
+                                            ? !!trimmed[0]
+                                            : trimmed.slice(0, slots).every((v) => v.length > 0)
+
+                                    return (
+                                        <>
+                                            <div
+                                                style={{
+                                                    flex: 1,
+                                                    display: 'flex',
+                                                    gap: 8,
+                                                }}
+                                            >
+                                                {Array.from({ length: slots }).map((_, idx) => (
+                                                    <input
+                                                        key={idx}
+                                                        ref={(el) => {
+                                                            inputRefs.current[idx] = el
+                                                        }}
+                                                        value={answers[idx] ?? ''}
+                                                        onChange={(e) => {
+                                                            const next = [...answers]
+                                                            next[idx] = e.target.value
+                                                            setAnswers(next)
+                                                            setStatus('idle')
+                                                        }}
+                                                        onKeyDown={onKeyDown}
+                                                        placeholder={
+                                                            slots === 1
+                                                                ? 'Your answer...'
+                                                                : `Answer ${idx + 1}...`
+                                                        }
+                                                        style={{
+                                                            flex: 1,
+                                                            background: 'rgba(255,255,255,0.06)',
+                                                            border: '1px solid rgba(255,255,255,0.12)',
+                                                            color: '#fff',
+                                                            padding: '8px 10px',
+                                                            borderRadius: 8,
+                                                            outline: 'none',
+                                                            fontSize: 16,
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+
+                                            <button
+                                                onClick={submitAnswer}
+                                                disabled={!allFilled}
+                                                style={{
+                                                    background: !allFilled
+                                                        ? 'rgba(255,255,255,0.12)'
+                                                        : '#fff',
+                                                    color: !allFilled
+                                                        ? 'rgba(255,255,255,0.55)'
+                                                        : '#111',
+                                                    border: 'none',
+                                                    borderRadius: 8,
+                                                    padding: '8px 12px',
+                                                    cursor: !allFilled
+                                                        ? 'not-allowed'
+                                                        : 'pointer',
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                Confirm
+                                            </button>
+
+                                            <div
+                                                style={{
+                                                    minWidth: 90,
+                                                    textAlign: 'right',
+                                                    color: '#fff',
+                                                    fontSize: 16,
+                                                }}
+                                            >
+                                                {status === 'correct' &&
+                                                    (puzzle.feedback?.correct ?? 'Correct!')}
+                                                {status === 'incorrect' &&
+                                                    (puzzle.feedback?.incorrect ??
+                                                        'Try again')}
+                                            </div>
+                                        </>
+                                    )
+                                })()}
                             </>
                         )}
                     </div>

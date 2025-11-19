@@ -56,6 +56,14 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                     ? [0, Math.PI, 0]
                     : [0, 0, 0]
 
+                const isGroupProjects = cfg.id === PZ.GroupProjects
+                const textureUrl = isGroupProjects
+                    ? status?.solved
+                        ? '/textures/puzzle_unblurredcompanies.jpg'
+                        : '/textures/puzzle_blurredcompanies.jpg'
+                    : cfg.view.textureUrl
+
+
                 return (
                     <PuzzleNode
                         key={cfg.id}
@@ -72,7 +80,7 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                                 height: cfg.view.height,
                                 border: cfg.view.border,
                             },
-                            textureUrl: cfg.view.textureUrl,
+                            textureUrl,
                             textureFit: cfg.view.textureFit,
                             pixelSize: cfg.view.pixelSize,
                             inspectDistance: cfg.view.inspectDistance,
@@ -89,6 +97,7 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 )
             })}
 
+            {/* Evidence */}
             <FramedPlane
                 width={0.22}
                 height={0.14}
@@ -106,6 +115,48 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 receiveShadow
                 textureMagnifierOnly
             />
+
+            <group userData={{movable: true, anchorKey: 'groupProjectSanquin'}}>
+                <FramedPlane
+                    width={0.17}
+                    height={0.24}
+                    position={ANCHOR.groupProjectSanquin.position}
+                    rotation={ANCHOR.groupProjectSanquin.rotation}
+                    textureUrl="/textures/evidence_BloodDonationApplication.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.3}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                />
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'groupProjectEclipse'}}>
+                <FramedPlane
+                    width={0.15}
+                    height={0.20}
+                    position={ANCHOR.groupProjectEclipse.position}
+                    rotation={ANCHOR.groupProjectEclipse.rotation}
+                    textureUrl="/textures/evidence_MarketingCalenderApplication.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.3}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                />
+            </group>
 
             <group onContextMenu={rcFocus(ANCHOR.mug)}>
                 <Mug

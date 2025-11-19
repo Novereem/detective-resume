@@ -7,12 +7,12 @@ export const asPuzzleId = <T extends string>(s: T) => s as unknown as PuzzleId
 export const asFileId   = <T extends string>(s: T) => s as unknown as SecretFileId
 
 export const PZ = {
-    House: asPuzzleId("puzzle-house"),
     PhotoClue: asPuzzleId("puzzle-photo-clue"),
-    MugInitials: asPuzzleId("puzzle-mug-initials"),
 
     HboIct: asPuzzleId("puzzle-hbo-ict"),
     Semester: asPuzzleId("puzzle-semester"),
+    GroupProjects: asPuzzleId("puzzle-group-projects"),
+    MugInitials: asPuzzleId("puzzle-mug-initials"),
 } as const
 
 export const FileId = {
@@ -89,63 +89,46 @@ export type CardboardBoxesState = Record<string, CardboardBoxEntry>
 
 export const initialSnapshot: GameSnapshot = {
     files: [
-        { id: FileId.Ransom, pos: [-0.6, 0.7, 2.4], rot: [0, Math.PI/4, 0], message: "Case File: Ransom Note", persistAfterOpen: false },
-        { id: FileId.Badge,  pos: [ 0.4, 0.7, 2.1], rot: [0, -Math.PI/8, 0], message: "Case File: Missing Badge", persistAfterOpen: true },
-        { id: FileId.PhotoClue, pos: ANCHOR.deskTopSpawn2.position, rot: ANCHOR.deskTopSpawn2.rotation,
+        { id: FileId.Ransom, pos: [-0.6, -0.7, 2.4], rot: [0, Math.PI/4, 0], message: "Case File: Ransom Note", persistAfterOpen: false },
+        { id: FileId.Badge,  pos: [ 0.76, -0.7, 2.1], rot: [0, -Math.PI/8, 0], message: "Case File: Missing Badge", persistAfterOpen: true },
+        { id: FileId.PhotoClue, pos: ANCHOR.mugshotSecretFile.position, rot: ANCHOR.mugshotSecretFile.rotation,
             message: "Photo Clue — new puzzle available.", persistAfterOpen: false, unlocksPuzzleId: PZ.PhotoClue },
     ],
     drawer_files: [
-        { id: FileId.InDrawer, drawerKey: "leftTop", message: "Drawer File — new puzzle available.",
-            persistAfterOpen: false, unlocksPuzzleId: PZ.House, poofOnOpen: true },
+        {
+            id: FileId.InDrawer,
+            drawerKey: "leftTop",
+            message: "Case File: Group Projects | new puzzle available.",
+            persistAfterOpen: false,
+            unlocksPuzzleId: PZ.GroupProjects,
+            poofOnOpen: true,
+        },
     ],
     poofs: [],
     drawers: { leftTop: { fileAlive: true } },
 
     puzzlesConfig: {
-        [PZ.House]: {
-            id: PZ.House,
-            solvedFromInspectId: "frame-code-desk",
-            deskAnchorKey: "deskTopSpawn",
-            wallAnchorKey: "houseFrame",
-            view: {
-                kind: "framed",
-                width: 0.17, height: 0.20, border: 0.01,
-                textureUrl: "/textures/house_szn1.jpg",
-                textureFit: "stretch",
-                rotateY180WhenPinned: true,
-                pixelSize: 1,
-                inspectDistance: 0.45,
-                inspect: {
-                    type: "text",
-                    id: "frame-code-desk",
-                    prompt: "What is the name of this popular medical drama from the 2000s?",
-                    answers: ["house", /house\s*md/i],
-                    normalize: "trim-lower",
-                    feedback: { correct: "Nice find!", incorrect: "Not quite—look closer." },
-                }
-            }
-        },
         [PZ.PhotoClue]: {
             id: PZ.PhotoClue,
             solvedFromInspectId: "photo-red-circle",
-            deskAnchorKey: "deskTopSpawn",
+            deskAnchorKey: "mugshotSpawn",
             wallAnchorKey: "photoClueFrame",
             connectsTo: [PZ.HboIct],
             view: {
                 kind: "framed",
-                width: 0.20, height: 0.20, border: 0.012,
-                textureUrl: "/textures/testimage.jpg",
+                width: 0.20, height: 0.30, border: 0.010,
+                textureUrl: "/textures/puzzle_profilephoto.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
-                pixelSize: 2.5,
+                pixelSize: 0.5,
                 inspectDistance: 0.45,
                 inspect: {
                     type: "text",
                     id: "photo-red-circle",
-                    prompt: "Who is the person circled in red?",
-                    answers: ["john doe", /john\s+doe/i],
+                    prompt: "What's the full name of this person?",
+                    answers: ["Noah Overeem", /noah\s+overeem/i],
                     normalize: "trim-lower",
-                    feedback: { correct: "Good eye.", incorrect: "Look again at the red circle." },
+                    feedback: { correct: "That's it!", incorrect: "It should be here somewhere..." },
                 }
             }
         },
@@ -214,6 +197,39 @@ export const initialSnapshot: GameSnapshot = {
             },
         },
 
+        [PZ.GroupProjects]: {
+            id: PZ.GroupProjects,
+            solvedFromInspectId: "puzzle-group-projects",
+            deskAnchorKey: "deskTopSpawn",
+            wallAnchorKey: "groupProjectsFrame",
+            view: {
+                kind: "framed",
+                width: 0.40,
+                height: 0.15,
+                border: 0.01,
+                textureUrl: "/textures/puzzle_blurredcompanies.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                pixelSize: 1,
+                inspectDistance: 0.45,
+                inspect: {
+                    type: "text",
+                    id: "puzzle-group-projects",
+                    prompt: "Name the two major group projects I worked on recently.",
+                    answers: [
+                        "sanquin",
+                        "eclipse",
+                    ],
+                    multipleAnswers: 2,
+                    normalize: "trim-lower",
+                    feedback: {
+                        correct: "Right. Sanquin and Eclipse.",
+                        incorrect: "Check the project evidence again.",
+                    },
+                },
+            },
+        },
+
         [PZ.MugInitials]: {
             id: PZ.MugInitials,
             solvedFromInspectId: "mug-initials",
@@ -221,10 +237,10 @@ export const initialSnapshot: GameSnapshot = {
             wallAnchorKey: "mugFrame",
             view: {
                 kind: "framed",
-                width: 0.2,
-                height: 0.2,
+                width: 0.15,
+                height: 0.15,
                 border: 0.012,
-                textureUrl: "/textures/testimage.jpg",
+                textureUrl: "/textures/puzzle_mugcomplete.jpg",
                 textureFit: "stretch",
                 rotateY180WhenPinned: true,
                 pixelSize: 3,
@@ -232,8 +248,12 @@ export const initialSnapshot: GameSnapshot = {
                 inspect: {
                     type: "text",
                     id: "mug-initials",
-                    prompt: "What is this weird object supposed to be",
-                    answers: ["a mug", "mug", "what?"],
+                    prompt: "W-_t _r_ --e in_t_als o- t-_s -ug",
+                    answers: [
+                        "N",
+                        "V",
+                    ],
+                    multipleAnswers: 2,
                     normalize: "trim-lower",
                     feedback: {
                         correct: "Correct!",
@@ -246,11 +266,12 @@ export const initialSnapshot: GameSnapshot = {
     },
 
     puzzleStatus: {
-        [PZ.House]:     { available: false, pinned: false },
-        [PZ.PhotoClue]: { available: false, pinned: false },
-        [PZ.HboIct]: { available: true, pinned: false },
-        [PZ.Semester]: { available: true, pinned: false },
-        [PZ.MugInitials]: { available: true, pinned: false },
+        [PZ.PhotoClue]:     { available: false, pinned: false },
+
+        [PZ.HboIct]:        { available: true, pinned: false },
+        [PZ.Semester]:      { available: true, pinned: false },
+        [PZ.GroupProjects]: { available: false, pinned: false },
+        [PZ.MugInitials]:   { available: true, pinned: false },
     },
 
     cardboardBoxes: {},
