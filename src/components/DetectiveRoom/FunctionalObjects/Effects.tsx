@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import RedStringsEffect from '@/components/RedStringsEffect'
+import RedStringsEffect from '@/app/Puzzles/RedStringsEffect'
 import { PoofEffect } from '@/components/Effects/PoofEffect'
 import type { Vec3 } from '@/components/Types/room'
 

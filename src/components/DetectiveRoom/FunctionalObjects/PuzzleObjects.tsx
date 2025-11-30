@@ -3,7 +3,7 @@
 import React from 'react'
 import { ANCHOR } from '@/components/Game/anchors'
 import { useGameState } from '@/components/Game/state'
-import { PuzzleNode } from '@/components/PuzzleNode'
+import { PuzzleNode } from '@/app/Puzzles/PuzzleNode'
 import { SecretFile } from '@/components/Models/Functional/SecretFile'
 import { Mug } from '@/components/Models/Decoration/Mug'
 import { secretFileMaterials, mugMaterials } from '@/components/Materials/detectiveRoomMats'

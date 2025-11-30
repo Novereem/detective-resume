@@ -2,10 +2,10 @@
 import { Canvas, useThree } from '@react-three/fiber'
 import React from 'react'
 import * as THREE from 'three'
-import ObjectInspectOverlay from '@/components/ObjectInspectOverlay'
+import ObjectInspectOverlay from '@/app/Puzzles/ObjectInspectOverlay'
 import { PixelateNearestFX } from '@/components/CameraEffects/PixelateNearestFX'
 
-import { useNotifications } from '@/components/Notifications'
+import { useNotifications } from '@/components/UI/Notifications'
 import {
     CameraPoseBridge,
     DevFlyMove,

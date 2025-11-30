@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic'
 import React from 'react'
 import { useTextureLoading } from '@/components/Textures/useTextureLoading'
-import { NotificationsProvider, NotificationsViewport } from '@/components/Notifications'
+import { NotificationsProvider, NotificationsViewport } from '@/components/UI/Notifications'
 import { ControlsHint } from '@/components/UI/ControlsHint'
 import EscapeMenu from '@/components/UI/EscapeMenu'
 import { SettingsProvider, useSettings } from '@/components/Settings/SettingsProvider'
