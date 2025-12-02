@@ -2,9 +2,7 @@
 import React from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
-import type {FocusOpts, MoveRequest, V3Like, Vec3} from '@/components/Types/room'
-import {ANCHOR} from "@/components/Game/anchors";
-import {useMagnifierState} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
+import { ANCHOR } from "@/components/Game/anchors"
 
 type DevObjectMoveProps = {
     enabled?: boolean
@@ -12,303 +10,15 @@ type DevObjectMoveProps = {
     snap?: number | null
 }
 
-const MAG_LENS_LOCAL = new THREE.Vector3(0.72, 0, 4.276)
-
-export function FreeLookControls({
-                                     enabled = true,
-                                     lookSensitivity = 0.0022,
-                                     orientDamping = 10,
-                                     qGoalRef,
-                                 }: {
-    enabled?: boolean
-    lookSensitivity?: number
-    orientDamping?: number
-    qGoalRef: React.RefObject<THREE.Quaternion>
-}) {
-    const { camera, gl } = useThree()
-    const dragging = React.useRef(false)
-    const yaw = React.useRef(0)
-    const pitch = React.useRef(0)
-    const euler = React.useRef(new THREE.Euler(0, 0, 0, 'YXZ'))
-
-    React.useEffect(() => {
-        qGoalRef.current.copy(camera.quaternion)
-        const e = new THREE.Euler().setFromQuaternion(qGoalRef.current, 'YXZ')
-        pitch.current = e.x
-        yaw.current = e.y
-        gl.domElement.style.cursor = 'grab'
-        return () => { gl.domElement.style.cursor = '' }
-    }, [])
-
-    React.useEffect(() => {
-        dragging.current = false
-        gl.domElement.style.cursor = enabled ? 'grab' : ''
-    }, [enabled, gl.domElement])
-
-    React.useEffect(() => {
-        const el = gl.domElement
-        const onDown = (ev: MouseEvent) => {
-            if (!enabled || ev.button !== 0) return
-            dragging.current = true
-            el.style.cursor = 'grabbing'
-            const e = new THREE.Euler().setFromQuaternion(qGoalRef.current, 'YXZ')
-            pitch.current = e.x
-            yaw.current = e.y
-        }
-        const onMove = (ev: MouseEvent) => {
-            if (!enabled || !dragging.current) return
-            yaw.current  -= ev.movementX * lookSensitivity
-            pitch.current -= ev.movementY * lookSensitivity
-            const max = Math.PI / 2 - 0.05
-            const min = -max
-            pitch.current = Math.min(max, Math.max(min, pitch.current))
-            euler.current.set(pitch.current, yaw.current, 0)
-            qGoalRef.current.setFromEuler(euler.current)
-        }
-        const onUp = () => {
-            dragging.current = false
-            el.style.cursor = enabled ? 'grab' : ''
-        }
-
-        el.addEventListener('mousedown', onDown)
-        window.addEventListener('mousemove', onMove)
-        window.addEventListener('mouseup', onUp)
-        return () => {
-            el.removeEventListener('mousedown', onDown)
-            window.removeEventListener('mousemove', onMove)
-            window.removeEventListener('mouseup', onUp)
-        }
-    }, [enabled, lookSensitivity, gl])
-
-    useFrame((_, dt) => {
-        const t = 1 - Math.exp(-orientDamping * dt)
-        camera.quaternion.slerp(qGoalRef.current, t)
-    })
-
-    return null
-}
-
-export function PlayerMover({
-                                move,
-                                onArrive,
-                                qGoalRef,
-                                moveDamping = 4,
-                            }: {
-    move: MoveRequest | null
-    onArrive?: () => void
-    qGoalRef: React.RefObject<THREE.Quaternion>
-    moveDamping?: number
-}) {
-    const { camera } = useThree()
-
-    const camGoal = React.useRef(new THREE.Vector3())
-    const active = React.useRef(false)
-
-    React.useEffect(() => {
-        if (!move) return
-
-        const cam = new THREE.Vector3().fromArray(move.camera)
-        const tgt = new THREE.Vector3().fromArray(move.lookAt)
-
-        camGoal.current.copy(cam)
-
-        const m = new THREE.Matrix4().lookAt(cam, tgt, new THREE.Vector3(0, 1, 0))
-        qGoalRef.current.setFromRotationMatrix(m)
-
-        active.current = true
-    }, [move, qGoalRef])
-
-    useFrame((_, dt) => {
-        if (!active.current) return
-
-        const λ = moveDamping
-
-        camera.position.x = THREE.MathUtils.damp(camera.position.x, camGoal.current.x, λ, dt)
-        camera.position.y = THREE.MathUtils.damp(camera.position.y, camGoal.current.y, λ, dt)
-        camera.position.z = THREE.MathUtils.damp(camera.position.z, camGoal.current.z, λ, dt)
-
-        const posOk = camera.position.distanceTo(camGoal.current) < 0.02
-        const dot = THREE.MathUtils.clamp(camera.quaternion.dot(qGoalRef.current), -1, 1)
-        const ang = 2 * Math.acos(Math.abs(dot))
-        const oriOk = ang < THREE.MathUtils.degToRad(1.0)
-
-        if (posOk && oriOk) {
-            active.current = false
-            onArrive?.()
-        }
-    })
-
-    return null
-}
-
-
-type ZoomMode = 'fov' | 'dolly'
-export function MouseZoom({
-                              enabled = true,
-                              mode: modeProp = 'fov',
-                              fovMin = 50,
-                              fovMax = 100,
-                              fovSpeed = 0.04,
-                              dollySpeed = 0.002,
-                          }: {
-    enabled?: boolean
-    mode?: ZoomMode
-    fovMin?: number
-    fovMax?: number
-    fovSpeed?: number
-    dollySpeed?: number
-}) {
-    const { camera, gl } = useThree()
-    const mode = modeProp
-
-    React.useEffect(() => {
-        const el = gl.domElement
-        const onWheel = (e: WheelEvent) => {
-            if (!enabled) return
-            e.preventDefault()
-            if (mode === 'fov') {
-                const persp = camera as THREE.PerspectiveCamera
-                persp.fov = THREE.MathUtils.clamp(persp.fov + e.deltaY * fovSpeed, fovMin, fovMax)
-                persp.updateProjectionMatrix()
-            } else {
-                const dir = new THREE.Vector3()
-                camera.getWorldDirection(dir)
-                camera.position.addScaledVector(dir, e.deltaY * dollySpeed)
-            }
-        }
-        el.addEventListener('wheel', onWheel, { passive: false })
-        return () => el.removeEventListener('wheel', onWheel as any)
-    }, [enabled, mode, fovMin, fovMax, fovSpeed, dollySpeed, gl, camera])
-
-    return null
-}
-
-export function useRightClickFocus(requestMove: (req: MoveRequest) => void) {
-    const { camera } = useThree()
-
-    const toV3 = React.useCallback((v: Vec3 | THREE.Vector3) => {
-        return Array.isArray(v) ? new THREE.Vector3(v[0], v[1], v[2]) : v.clone?.() ?? new THREE.Vector3()
-    }, [])
-
-    const resolve = React.useCallback(
-        (v: V3Like | undefined, ctx: {
-            event: any
-            object?: THREE.Object3D
-            camera: THREE.PerspectiveCamera
-            target: THREE.Vector3
-            currentEye: THREE.Vector3
-        }) => {
-            if (!v) return undefined
-            if (typeof v === 'function') return toV3(v(ctx) as any)
-            return toV3(v as any)
-        },
-        [toV3]
-    )
-
-    return React.useCallback(
-        (opts: FocusOpts = {}) => {
-            const {
-                eye,
-                lookAt,
-                distance,
-                minDist = 0.8,
-                maxDist = 3.5,
-                keepHeight = true,
-                fit = true,
-                usePoint = true,
-                bounds,
-            } = opts
-
-            return (e: any) => {
-                e?.nativeEvent?.preventDefault?.()
-                e?.stopPropagation?.()
-
-                const cam = camera as THREE.PerspectiveCamera
-                const camPos = cam.position.clone()
-
-                const target = new THREE.Vector3()
-                if (usePoint && e?.point) {
-                    target.copy(e.point)
-                } else if (e?.object) {
-                    const obj: THREE.Object3D = e.object
-                    obj.updateWorldMatrix(true, true)
-                    const box = new THREE.Box3().setFromObject(obj)
-                    if (!box.isEmpty()) box.getCenter(target)
-                    else obj.getWorldPosition(target)
-                }
-
-                const currDist = camPos.distanceTo(target)
-                let d = distance ?? THREE.MathUtils.clamp(currDist, minDist, maxDist)
-
-                if (fit && e?.object) {
-                    const box = new THREE.Box3().setFromObject(e.object)
-                    const size = new THREE.Vector3()
-                    box.getSize(size)
-                    const largest = Math.max(size.x, size.y, size.z)
-                    const fovRad = THREE.MathUtils.degToRad(cam.fov)
-                    const fitDist = (largest / 2) / Math.tan(fovRad / 2)
-                    d = Math.max(d, Math.min(fitDist * 1.15, maxDist))
-                }
-
-                let dir = camPos.clone().sub(target)
-                if (dir.lengthSq() < 1e-6) cam.getWorldDirection(dir).multiplyScalar(-1)
-                else dir.normalize()
-
-                const smartEye = target.clone().addScaledVector(dir, d)
-                if (keepHeight) smartEye.y = camPos.y
-
-                const ctx = { event: e, object: e?.object, camera: cam, target, currentEye: camPos }
-                const finalEye  = resolve(eye, ctx)    ?? smartEye
-                const finalLook = resolve(lookAt, ctx) ?? target
-
-                if (bounds) {
-                    const vmin = new THREE.Vector3(...bounds.min)
-                    const vmax = new THREE.Vector3(...bounds.max)
-                    finalEye.clamp(vmin, vmax)
-                }
-
-                requestMove({
-                    camera: finalEye.toArray() as Vec3,
-                    lookAt: finalLook.toArray() as Vec3,
-                })
-            }
-        },
-        [camera, resolve, requestMove]
-    )
-}
-
-export function CameraPoseBridge({
-                                     posRef,
-                                     lookAtRef,
-                                 }: {
-    posRef: React.MutableRefObject<Vec3>
-    lookAtRef: React.MutableRefObject<Vec3>
-}) {
-    const { camera } = useThree()
-    const tmp = React.useMemo(() => ({
-        dir: new THREE.Vector3(),
-        look: new THREE.Vector3(),
-    }), [])
-
-    useFrame(() => {
-        posRef.current = [camera.position.x, camera.position.y, camera.position.z]
-        camera.getWorldDirection(tmp.dir)
-        tmp.look.copy(camera.position).add(tmp.dir)
-        lookAtRef.current = [tmp.look.x, tmp.look.y, tmp.look.z]
-    })
-    return null
-}
-
-export function requestZoomPeek(
-    setMoveReq: (req: MoveRequest) => void,
-    to: MoveRequest,
-    back: MoveRequest,
-    ms = 200
-) {
-    setMoveReq(to)
-    setTimeout(() => setMoveReq(back), ms)
-}
-
+/**
+ * Developer free-fly camera movement.
+ *
+ * - WASD for horizontal movement relative to the camera view.
+ * - Space / Shift for vertical movement.
+ * - Optional smoothing to damp velocity over time.
+ *
+ * Only active when `enabled` is true; intended for editor/debug use.
+ */
 export function DevFlyMove({
                                enabled = true,
                                speed = 2.2,
@@ -322,7 +32,7 @@ export function DevFlyMove({
 }) {
     const { camera } = useThree()
     const keys = React.useRef({
-        w:false,a:false,s:false,d:false, space:false, shift:false
+        w: false, a: false, s: false, d: false, space: false, shift: false
     })
     const vel = React.useRef(new THREE.Vector3())
 
@@ -365,8 +75,8 @@ export function DevFlyMove({
         camera.getWorldDirection(fwd)
         fwd.y = 0; fwd.normalize()
 
-        const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0,1,0)).negate().normalize()
-        const up = new THREE.Vector3(0,1,0)
+        const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).negate().normalize()
+        const up = new THREE.Vector3(0, 1, 0)
 
         const v = new THREE.Vector3()
         if (keys.current.w) v.add(fwd)
@@ -390,6 +100,17 @@ export function DevFlyMove({
     return null
 }
 
+/**
+ * Developer object move/rotate gizmo for anchor-based scene editing.
+ *
+ * - Targets objects with `userData.movable` and `userData.anchorKey`.
+ * - Click to select an object and show a gizmo with translate/rotate modes.
+ * - Drag axes (translate) or rings (rotate) to adjust the object in world space
+ *   with optional snapping.
+ * - On release, logs new anchor coordinates and copies a config line to the clipboard.
+ *
+ * Active only when `enabled` is true; reports drag state via `onBusyChange`.
+ */
 export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: DevObjectMoveProps) {
     const { scene, camera, gl } = useThree()
     const raycaster = React.useRef(new THREE.Raycaster())
@@ -401,7 +122,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
     const baseAnchorMat = React.useRef(new THREE.Matrix4())
     const selectionStartWorldMat = React.useRef(new THREE.Matrix4())
     const startWorldMat = React.useRef(new THREE.Matrix4())
-    const endWorldMat   = React.useRef(new THREE.Matrix4())
+    const endWorldMat = React.useRef(new THREE.Matrix4())
 
     const boxHelper = React.useRef<THREE.Box3Helper | null>(null)
     const gizmo = React.useRef<THREE.Group | null>(null)
@@ -410,7 +131,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
 
     const mode = React.useRef<'translate' | 'rotate'>('translate')
     const picking = React.useRef(false)
-    const dragAxis = React.useRef<'x'|'y'|'z'|null>(null)
+    const dragAxis = React.useRef<'x' | 'y' | 'z' | null>(null)
 
     const tmpPlane = React.useRef(new THREE.Plane())
     const tmpIsect = React.useRef(new THREE.Vector3())
@@ -443,7 +164,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         const r = snapPi(rad), n = Math.abs(r)
         if (n < EPS) return '0'
         if (Math.abs(n - Math.PI) < EPS) return (r < 0 ? '-' : '') + 'Math.PI'
-        if (Math.abs(n - Math.PI/2) < EPS) return (r < 0 ? '-' : '') + 'Math.PI/2'
+        if (Math.abs(n - Math.PI / 2) < EPS) return (r < 0 ? '-' : '') + 'Math.PI/2'
         return r.toFixed(3)
     }
 
@@ -461,7 +182,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
 
     const ensureBoxHelper = () => {
         if (!boxHelper.current) {
-            const b = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3(1,1,1))
+            const b = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3(1, 1, 1))
             boxHelper.current = new THREE.Box3Helper(b, 0x00ffff)
             boxHelper.current.visible = false
             scene.add(boxHelper.current)
@@ -480,23 +201,23 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         if (!gizmo.current) return
         gizmo.current.visible = !!selected.current
         if (transG.current) transG.current.visible = mode.current === 'translate'
-        if (rotG.current)   rotG.current.visible   = mode.current === 'rotate'
+        if (rotG.current) rotG.current.visible = mode.current === 'rotate'
     }
     const ensureGizmo = () => {
         if (gizmo.current) return
         const g = new THREE.Group(); g.name = '__gizmo'
-        const makeAxis = (axis: 'x'|'y'|'z', color: number) => {
+        const makeAxis = (axis: 'x' | 'y' | 'z', color: number) => {
             const grp = new THREE.Group(); grp.name = `axis-${axis}`
             const len = 0.45, r = 0.008, coneR = 0.018, coneH = 0.06
-            const rod = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len-0.06, 12), new THREE.MeshBasicMaterial({ color }))
-            rod.position.y = (len-0.06)/2
+            const rod = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len - 0.06, 12), new THREE.MeshBasicMaterial({ color }))
+            rod.position.y = (len - 0.06) / 2
             const tip = new THREE.Mesh(new THREE.ConeGeometry(coneR, coneH, 16), new THREE.MeshBasicMaterial({ color }))
-            tip.position.y = len-0.06 + coneH/2
+            tip.position.y = len - 0.06 + coneH / 2
             const col = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, len + coneH, 8), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }))
             col.position.y = (len + coneH) / 2
             col.name = `axis-col-${axis}`; (col as any).userData.axis = axis; (col as any).userData.kind = 'translate'
-            if (axis === 'x') grp.rotation.z = Math.PI/2
-            if (axis === 'z') grp.rotation.x = -Math.PI/2
+            if (axis === 'x') grp.rotation.z = Math.PI / 2
+            if (axis === 'z') grp.rotation.x = -Math.PI / 2
             grp.add(rod, tip, col)
             return grp
         }
@@ -505,14 +226,14 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         gTrans.add(makeAxis('y', 0x44ff44))
         gTrans.add(makeAxis('z', 0x4488ff))
 
-        const makeRing = (axis: 'x'|'y'|'z', color: number) => {
+        const makeRing = (axis: 'x' | 'y' | 'z', color: number) => {
             const grp = new THREE.Group(); grp.name = `ring-${axis}`
             const R = 0.32, tube = 0.008
-            const vis = new THREE.Mesh(new THREE.TorusGeometry(R, tube, 16, 64), new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.9 }))
-            const pick = new THREE.Mesh(new THREE.TorusGeometry(R, 0.06, 8, 64), new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false }))
+            const vis = new THREE.Mesh(new THREE.TorusGeometry(R, tube, 16, 64), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 }))
+            const pick = new THREE.Mesh(new THREE.TorusGeometry(R, 0.06, 8, 64), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }))
             pick.name = `ring-col-${axis}`; (pick as any).userData.axis = axis; (pick as any).userData.kind = 'rotate'
-            if (axis === 'x') grp.rotation.y = Math.PI/2
-            if (axis === 'y') grp.rotation.x = Math.PI/2
+            if (axis === 'x') grp.rotation.y = Math.PI / 2
+            if (axis === 'y') grp.rotation.x = Math.PI / 2
             grp.add(vis, pick)
             return grp
         }
@@ -552,19 +273,19 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         return hits[0]
     }
 
-    const axisUnit = (axis: 'x'|'y'|'z') =>
-        axis === 'x' ? new THREE.Vector3(1,0,0) : axis === 'y' ? new THREE.Vector3(0,1,0) : new THREE.Vector3(0,0,1)
+    const axisUnit = (axis: 'x' | 'y' | 'z') =>
+        axis === 'x' ? new THREE.Vector3(1, 0, 0) : axis === 'y' ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(0, 0, 1)
 
     const closestUToRay = (ray: THREE.Ray, p0: THREE.Vector3, a: THREE.Vector3) => {
         const ro = ray.origin, rd = ray.direction.clone().normalize()
         const A = a.clone().normalize()
         const w0 = ro.clone().sub(p0)
         const c = A.dot(rd)
-        const denom = 1 - c*c
+        const denom = 1 - c * c
         if (Math.abs(denom) < 1e-6) {
             const view = new THREE.Vector3(); camera.getWorldDirection(view)
             const n = new THREE.Vector3().crossVectors(A, view).cross(A).normalize()
-            if (n.lengthSq() < 1e-6) n.set(0,1,0).cross(A).normalize()
+            if (n.lengthSq() < 1e-6) n.set(0, 1, 0).cross(A).normalize()
             const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(n, p0)
             const hit = new THREE.Vector3()
             if (!ray.intersectPlane(plane, hit)) return 0
@@ -573,7 +294,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         return (A.dot(w0) - c * rd.dot(w0)) / denom
     }
 
-    const startTranslate = (axis: 'x'|'y'|'z') => {
+    const startTranslate = (axis: 'x' | 'y' | 'z') => {
         selected.current!.updateMatrixWorld(true)
         startWorldMat.current.copy(selected.current!.matrixWorld)
         startWorldPos.current.setFromMatrixPosition(startWorldMat.current)
@@ -596,7 +317,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         gl.domElement.style.cursor = 'grabbing'
     }
 
-    const startRotate = (axis: 'x'|'y'|'z') => {
+    const startRotate = (axis: 'x' | 'y' | 'z') => {
         selected.current!.updateMatrixWorld(true)
         startWorldMat.current.copy(selected.current!.matrixWorld)
 
@@ -690,12 +411,12 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
         setMouse(ev)
         const hit = pick(ev)
         const isTrans = !!(hit && (hit.object as any).userData?.kind === 'translate' && selected.current)
-        const isRot   = !!(hit && (hit.object as any).userData?.kind === 'rotate'    && selected.current)
-        const root    = hit ? toTopMovable(hit.object) : null
+        const isRot = !!(hit && (hit.object as any).userData?.kind === 'rotate' && selected.current)
+        const root = hit ? toTopMovable(hit.object) : null
 
         if (isTrans || isRot || root) { ev.stopImmediatePropagation?.(); ev.preventDefault?.() }
         if (isTrans) { startTranslate((hit!.object as any).userData.axis); return }
-        if (isRot)   { startRotate((hit!.object as any).userData.axis);    return }
+        if (isRot) { startRotate((hit!.object as any).userData.axis); return }
 
         const changed = root && root !== selected.current
 
@@ -708,7 +429,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
                 const basePos = new THREE.Vector3().fromArray(base.position as any)
                 const br = base.rotation ?? [0, 0, 0]
                 const baseQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(br[0], br[1], br[2], 'XYZ'))
-                baseAnchorMat.current.compose(basePos, baseQuat, new THREE.Vector3(1,1,1))
+                baseAnchorMat.current.compose(basePos, baseQuat, new THREE.Vector3(1, 1, 1))
 
                 selected.current.updateMatrixWorld(true)
                 const id = selected.current.uuid
@@ -769,7 +490,7 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
                     `rotation: [${fmtRad(e.x)}, ${fmtRad(e.y)}, ${fmtRad(e.z)}] },`
 
                 console.log('New coordinates: ' + line)
-                navigator.clipboard?.writeText(line).catch(() => {})
+                navigator.clipboard?.writeText(line).catch(() => { })
             }
         }
         dragAxis.current = null
@@ -829,235 +550,6 @@ export function DevObjectMove({ enabled = false, onBusyChange, snap = null }: De
             selectionStartById.current.clear()
         }
     }, [enabled, gl, camera, scene, setBusy])
-
-    return null
-}
-
-export function MagnifierPickupControls({ enabled = true }: { enabled?: boolean }) {
-    const { camera, scene, gl } = useThree()
-    const { setHeld, lensMaskRef } = useMagnifierState()
-
-    const magnifierRef = React.useRef<THREE.Object3D | null>(null)
-    const holdingRef = React.useRef(false)
-    const savedRef = React.useRef<{
-        parent: THREE.Object3D
-        position: THREE.Vector3
-        quaternion: THREE.Quaternion
-        scale: THREE.Vector3
-    } | null>(null)
-
-    const raycasterRef = React.useRef(new THREE.Raycaster())
-    const mouseNdc = React.useRef(new THREE.Vector2())
-    const clickStateRef = React.useRef<{ downPos: { x: number; y: number } | null; moved: boolean }>({
-        downPos: null,
-        moved: false,
-    })
-
-    const tmp = React.useMemo(
-        () => ({
-            camPos: new THREE.Vector3(),
-            forward: new THREE.Vector3(),
-            worldUp: new THREE.Vector3(0, 1, 0),
-            right: new THREE.Vector3(),
-            up: new THREE.Vector3(),
-            targetWorld: new THREE.Vector3(),
-            invParent: new THREE.Matrix4(),
-            lensDir: new THREE.Vector3(),
-        }),
-        []
-    )
-
-    const setMouseFromEvent = React.useCallback(
-        (ev: MouseEvent) => {
-            const rect = gl.domElement.getBoundingClientRect()
-            mouseNdc.current.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1
-            mouseNdc.current.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1
-        },
-        [gl]
-    )
-
-    const findMagnifier = React.useCallback(() => {
-        if (magnifierRef.current) return magnifierRef.current
-        let found: THREE.Object3D | null = null
-        scene.traverse((o) => {
-            if (found) return
-            if ((o as any).userData?.pickupId === 'magnifier') {
-                found = o
-            }
-        })
-        magnifierRef.current = found
-        return found
-    }, [scene])
-
-    React.useEffect(() => {
-        if (!enabled) return
-
-        const el = gl.domElement
-
-        const onMouseDown = (ev: MouseEvent) => {
-            if (!enabled || ev.button !== 0) return
-
-            if (holdingRef.current) {
-                clickStateRef.current.downPos = { x: ev.clientX, y: ev.clientY }
-                clickStateRef.current.moved = false
-                return
-            }
-
-            const magnifier = findMagnifier()
-            if (!magnifier) return
-
-            setMouseFromEvent(ev)
-
-            const raycaster = raycasterRef.current
-            raycaster.setFromCamera(mouseNdc.current, camera)
-            const hit = raycaster.intersectObject(magnifier, true)[0]
-            if (!hit) return
-
-            ev.preventDefault()
-            ev.stopPropagation()
-
-            const parent: THREE.Object3D = magnifier.parent ?? scene
-            const pos = magnifier.position.clone()
-            const quat = magnifier.quaternion.clone()
-            const scl = magnifier.scale.clone()
-            savedRef.current = { parent, position: pos, quaternion: quat, scale: scl }
-
-            holdingRef.current = true
-            setHeld(true)
-        }
-
-        const onMouseMove = (ev: MouseEvent) => {
-            if (!enabled) return
-            const state = clickStateRef.current
-            if (!state.downPos) return
-            const dx = ev.clientX - state.downPos.x
-            const dy = ev.clientY - state.downPos.y
-            if (dx * dx + dy * dy > 4) {
-                state.moved = true
-            }
-        }
-
-        const onMouseUp = (ev: MouseEvent) => {
-            if (!enabled || ev.button !== 0) return
-
-            const state = clickStateRef.current
-            const isClick = state.downPos && !state.moved
-            state.downPos = null
-            state.moved = false
-
-            if (!holdingRef.current || !magnifierRef.current || !savedRef.current) return
-            if (!isClick) return
-
-            setMouseFromEvent(ev)
-            const raycaster = raycasterRef.current
-            raycaster.setFromCamera(mouseNdc.current, camera)
-            const hit = raycaster.intersectObject(magnifierRef.current, true)[0]
-            if (hit) return
-
-            const obj = magnifierRef.current
-            const { parent, position, quaternion, scale } = savedRef.current
-
-            if (obj.parent !== parent) {
-                parent.add(obj)
-            }
-
-            obj.position.copy(position)
-            obj.quaternion.copy(quaternion)
-            obj.scale.copy(scale)
-
-            holdingRef.current = false
-            setHeld(false)
-            lensMaskRef.current.active = false
-        }
-
-        el.addEventListener('mousedown', onMouseDown)
-        window.addEventListener('mousemove', onMouseMove)
-        window.addEventListener('mouseup', onMouseUp)
-
-        return () => {
-            el.removeEventListener('mousedown', onMouseDown)
-            window.removeEventListener('mousemove', onMouseMove)
-            window.removeEventListener('mouseup', onMouseUp)
-        }
-    }, [camera, gl, enabled, findMagnifier, setMouseFromEvent, scene, setHeld, lensMaskRef])
-
-    React.useEffect(() => {
-        return () => {
-            setHeld(false)
-            lensMaskRef.current.active = false
-        }
-    }, [setHeld, lensMaskRef])
-
-    useFrame(() => {
-        const mask = lensMaskRef.current
-
-        if (!holdingRef.current) {
-            mask.active = false
-            return
-        }
-
-        const obj = magnifierRef.current
-        const saved = savedRef.current
-        if (!obj || !saved) {
-            mask.active = false
-            return
-        }
-
-        const {
-            camPos,
-            forward,
-            worldUp,
-            right,
-            up,
-            targetWorld,
-            invParent,
-            lensDir,
-        } = tmp
-
-        camPos.copy(camera.position)
-
-        camera.getWorldDirection(forward)
-        forward.normalize()
-
-        right.crossVectors(forward, worldUp).normalize()
-        up.crossVectors(right, forward).normalize()
-
-        const MAG_DIST = 0.875
-        const MAG_OFFSET_RIGHT = -0.713
-        const MAG_OFFSET_UP = 4.25
-
-        const MAG_Q_OFFSET = new THREE.Quaternion().setFromEuler(
-            new THREE.Euler(Math.PI + Math.PI / 2, Math.PI, Math.PI)
-        )
-
-        targetWorld
-            .copy(camPos)
-            .addScaledVector(forward, MAG_DIST)
-            .addScaledVector(right,   MAG_OFFSET_RIGHT)
-            .addScaledVector(up,      MAG_OFFSET_UP)
-
-        const parent = saved.parent
-        parent.updateMatrixWorld()
-        invParent.copy(parent.matrixWorld).invert()
-        const targetLocal = targetWorld.clone().applyMatrix4(invParent)
-
-        if (obj.parent !== parent) {
-            parent.add(obj)
-        }
-
-        obj.position.copy(targetLocal)
-        obj.quaternion.copy(camera.quaternion).multiply(MAG_Q_OFFSET)
-
-        const lensWorld = obj.localToWorld(MAG_LENS_LOCAL.clone())
-
-        lensDir.copy(lensWorld).sub(camPos).normalize()
-        const lensNdc = lensWorld.clone().project(camera)
-
-        mask.active = true
-        mask.origin = [lensNdc.x, lensNdc.y, 0]
-        mask.dir = [lensDir.x, lensDir.y, lensDir.z]
-        mask.radius = 0.47
-    })
 
     return null
 }

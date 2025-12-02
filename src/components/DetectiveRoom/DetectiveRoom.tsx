@@ -2,21 +2,10 @@
 import { Canvas, useThree } from '@react-three/fiber'
 import React from 'react'
 import * as THREE from 'three'
-import ObjectInspectOverlay from '@/app/Puzzles/ObjectInspectOverlay'
+import ObjectInspectOverlay from '@/components/Puzzles/ObjectInspectOverlay'
 import { PixelateNearestFX } from '@/components/CameraEffects/PixelateNearestFX'
 
 import { useNotifications } from '@/components/UI/Notifications'
-import {
-    CameraPoseBridge,
-    DevFlyMove,
-    DevObjectMove,
-    FreeLookControls,
-    MouseZoom,
-    PlayerMover,
-    requestZoomPeek,
-    useRightClickFocus,
-    MagnifierPickupControls,
-} from '@/components/PlayerControls'
 import type { MoveRequest, Vec3 } from '@/components/Types/room'
 import { InspectState } from '@/components/Types/inspectModels'
 import { ANCHOR } from '@/components/Game/anchors'
@@ -35,10 +24,14 @@ import { PuzzleObjects } from '@/components/DetectiveRoom/FunctionalObjects/Puzz
 import { SceneEffects } from '@/components/DetectiveRoom/FunctionalObjects/Effects'
 import {TriangleLogger} from "@/components/Debug/TriangleLogger";
 import {Preload} from "@react-three/drei";
-import {QualityLevel, QualityProvider} from "@/components/Settings/QualityContext";
+import {QualityProvider} from "@/components/Settings/QualityContext";
 import {UsableItemObjects} from "@/components/DetectiveRoom/FunctionalObjects/UsableItemObjects";
-import {MagnifierStateProvider} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
 import {MagnifierDebug} from "@/components/Debug/MagnifierDebug";
+import {MouseZoom, useRightClickFocus} from "@/components/PlayerControls/InputControls";
+import {CameraPoseBridge, FreeLookControls, PlayerMover} from "@/components/PlayerControls/CameraControls";
+import {MagnifierPickupControls} from "@/components/PlayerControls/GameplayControls";
+import {DevFlyMove, DevObjectMove} from "@/components/PlayerControls/DevControls";
+import {requestZoomPeek} from "@/components/PlayerControls/utils";
 
 function Scene({
                    openInspect,
