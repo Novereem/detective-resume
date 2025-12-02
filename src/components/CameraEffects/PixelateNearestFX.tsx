@@ -4,7 +4,21 @@ import { Effect } from 'postprocessing'
 import { Uniform, Vector2 } from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 
-/** Nearest-neighbor pixelation. `size` is block size in screen pixels. */
+/**
+ * Postprocessing Effect that applies nearest-neighbor pixelation in screen space.
+ *
+ * Responsibilities:
+ * - Allocate a small custom `Effect` with uniforms:
+ *   - `size` (block size in screen pixels),
+ *   - `resolution` (current render buffer size in pixels).
+ * - On each frame:
+ *   - update `resolution` using the R3F renderer + devicePixelRatio,
+ *   - clamp `size` to a minimum of 2 pixels (avoid degenerate behavior),
+ *   - sample the input buffer at a single representative pixel per block,
+ *     so the result is crisp even with fractional sizes.
+ *
+ * Used inside PixelateNearestFX and not exported on its own.
+ */
 function NearestPixelate({ size = 6 }: { size?: number }) {
     const { gl, size: viewport } = useThree()
 
@@ -49,6 +63,18 @@ function NearestPixelate({ size = 6 }: { size?: number }) {
     return <primitive object={effect} />
 }
 
+/**
+ * Top-level postprocessing wrapper that enables nearest-neighbor pixelation.
+ *
+ * Responsibilities:
+ * - Render an EffectComposer with the `NearestPixelate` effect when `size > 1`.
+ * - Short-circuit (return `null`) for `size <= 1` so no postprocessing is
+ *   attached to the scene.
+ *
+ * Typical usage:
+ * - Wrap your main scene in `<PixelateNearestFX size={...} />` to toggle and
+ *   tune the pixelation strength.
+ */
 export function PixelateNearestFX({ size = 6 }: { size?: number }) {
     if (size <= 1) return null
     return (

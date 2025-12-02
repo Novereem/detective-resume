@@ -9,6 +9,15 @@ export type LensMask = {
     radius: number
 }
 
+/**
+ * Runtime state for the magnifier:
+ * - `held` indicates whether the magnifier is currently equipped.
+ * - `lensMaskRef` is a mutable ref that holds the current screen-space mask
+ *   (position/direction/radius) used by MagnifierRevealMaterial.
+ *
+ * The ref indirection keeps updates cheap without forcing React re-renders
+ * for each frame.
+ */
 export type MagnifierState = {
     held: boolean
     setHeld: (v: boolean) => void
@@ -34,6 +43,18 @@ const defaultState: MagnifierState = {
     lensMaskRef: defaultLensMaskRef,
 }
 
+/**
+ * Top-level provider for magnifier state.
+ *
+ * Responsibilities:
+ * - Track whether the magnifier is held.
+ * - Maintain a mutable `lensMaskRef` that camera / raycast code can update
+ *   every frame to describe the current lens in screen space.
+ *
+ * Consumers:
+ * - `useMagnifierState()` returns this context, with a safe default that
+ *   disables the lens when no provider is present.
+ */
 export function MagnifierStateProvider({ children }: { children: React.ReactNode }) {
     const [held, setHeld] = React.useState(false)
     const [active, setActive] = React.useState(false)

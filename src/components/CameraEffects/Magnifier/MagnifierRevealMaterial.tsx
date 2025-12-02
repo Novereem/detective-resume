@@ -11,6 +11,26 @@ type Props = Omit<BaseMatProps, 'args'> & {
     debug?: boolean
 }
 
+/**
+ * MeshStandardMaterial wrapper that reveals geometry only inside a
+ * screen-space circular mask driven by the magnifier lens.
+ *
+ * Responsibilities:
+ * - Allocate and register custom shader uniforms that describe the lens:
+ *   - active flag, origin in NDC, direction, radius, max distance, debug flag.
+ * - Patch the vertex + fragment shaders via `onBeforeCompile` so that:
+ *   - per-fragment clip-space position is stored as `vClipPosition`,
+ *   - the fragment shader discards fragments outside the circular mask,
+ *   - an optional debug mode draws a colored ring instead of the base material.
+ * - On each frame:
+ *   - read the current lens mask from `useMagnifierState().lensMaskRef`,
+ *   - update the uniforms with origin/dir/radius for the current frame,
+ *   - keep the aspect-correct radius by using the active camera’s aspect.
+ *
+ * Used for:
+ * - Hidden “secret” meshes that should only be visible through the magnifier,
+ *   without affecting the rest of the scene’s shading pipeline.
+ */
 export function MagnifierRevealMaterial({
                                             maxDistance = 6,
                                             debug = false,
