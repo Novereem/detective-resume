@@ -13,6 +13,7 @@
     "@react-three/drei": "^10.5.1",
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
+    "lighthouse": "^12.8.2",
     "next": "^15.4.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

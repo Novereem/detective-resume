@@ -26,6 +26,13 @@ const emit = () => {
     listeners.forEach(l => l(s))
 }
 
+/**
+ * Subscribe to global texture loading state.
+ *
+ * - Immediately calls `cb` with the current { pending, inFlight, queued }.
+ * - Calls `cb` again whenever these counters change.
+ * - Returns an unsubscribe function.
+ */
 export function subscribeTextureLoading(
     cb: (s: LoadState) => void
 ): () => void {
@@ -43,6 +50,15 @@ const next = () => {
     q.shift()!()
 }
 
+/**
+ * Load a texture with caching and ref counting.
+ *
+ * - First call for a URL starts a load and stores a Promise in the cache.
+ * - Concurrent calls reuse the same Promise and bump a ref count.
+ * - Once loaded, later calls return the cached `THREE.Texture`.
+ *
+ * Use `releaseManagedTexture` when the texture is no longer needed.
+ */
 export function loadManagedTexture(url: string, opts: LoadOpts = {}): Promise<THREE.Texture> {
     const found = cache.get(url)
     if (found?.tex) { found.refs++; return Promise.resolve(found.tex) }
@@ -50,8 +66,8 @@ export function loadManagedTexture(url: string, opts: LoadOpts = {}): Promise<TH
 
     const merged = { ...DEFAULT, ...opts }
 
-    pending++              // NEW
-    emit()                 // NEW
+    pending++
+    emit()
 
     const p = new Promise<THREE.Texture>((resolve, reject) => {
         const start = () => {
@@ -64,7 +80,7 @@ export function loadManagedTexture(url: string, opts: LoadOpts = {}): Promise<TH
                     tex.minFilter = merged.minFilter!
                     tex.magFilter = merged.magFilter!
                     tex.generateMipmaps = merged.generateMipmaps!
-                    cache.set(url, { tex, refs: (cache.get(url)?.refs ?? 0) + 1 })
+                    cache.set(url, { tex, refs: (cache.get(url)?.refs ?? 0) })
                     resolve(tex)
                     inFlight--
                     pending--
@@ -90,17 +106,36 @@ export function loadManagedTexture(url: string, opts: LoadOpts = {}): Promise<TH
     return p
 }
 
+/**
+ * Decrease the ref count for a texture by URL.
+ *
+ * When the ref count reaches zero, disposes the texture and removes it
+ * from the cache.
+ */
 export function releaseManagedTexture(url: string) {
     const e = cache.get(url); if (!e) return
     e.refs = Math.max(0, e.refs - 1)
     if (e.refs === 0 && e.tex) { e.tex.dispose(); cache.delete(url) }
 }
 
+/**
+ * Preload a deduplicated set of texture URLs.
+ *
+ * - Filters out falsy values.
+ * - Deduplicates URLs.
+ * - Loads each texture via `loadManagedTexture`.
+ * - Resolves when all unique textures are ready.
+ */
 export function preloadTextures(urls: readonly (string | undefined)[], opts?: LoadOpts) {
     const list = Array.from(new Set(urls.filter(Boolean) as string[]))
     return Promise.all(list.map(u => loadManagedTexture(u, opts))).then(() => void 0)
 }
 
+/**
+ * Dispose all cached textures and clear the manager.
+ *
+ * Safe to call when leaving the detective room or resetting the scene.
+ */
 export function disposeAllManagedTextures() {
     for (const e of cache.values()) if (e.tex) e.tex.dispose()
     cache.clear()
