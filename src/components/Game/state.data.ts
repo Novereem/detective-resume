@@ -3,6 +3,26 @@ import type { PuzzleId, SecretFileId, DrawerKey, AnchorKey } from "@/components/
 import type { TextPuzzle } from "@/components/Types/inspectModels"
 import { Vec3 } from "@/components/Types/room"
 
+/**
+ * Core ids + snapshot for the detective-room puzzle system.
+ *
+ * High-level flow for adding a new puzzle:
+ * 1. Add a new entry to `PZ` with a stable string id
+ *    (for example: "puzzle-my-new-thing").
+ * 2. (Optional) Add a `FileId` and a new entry in `files` / `drawer_files`
+ *    with `unlocksPuzzleId` pointing to your `PZ` entry if a secret file
+ *    should unlock the puzzle.
+ * 3. Add a matching entry to `initialSnapshot.puzzlesConfig`:
+ *    - id: the PZ entry you just added
+ *    - solvedFromInspectId: the inspect model id that will report solves
+ *    - deskAnchorKey / wallAnchorKey: where the puzzle shows up in the room
+ *    - view: framed view config + the TextPuzzle (or other inspect model).
+ * 4. Add a matching entry to `initialSnapshot.puzzleStatus` to define its
+ *    starting availability / pinned state.
+ *
+ * The invariants in `state.data.test.ts` enforce that these pieces stay in
+ * sync, so extending the puzzle system is safe for future developers.
+ */
 export const asPuzzleId = <T extends string>(s: T) => s as unknown as PuzzleId
 export const asFileId   = <T extends string>(s: T) => s as unknown as SecretFileId
 

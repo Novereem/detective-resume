@@ -1,7 +1,7 @@
 import React from 'react'
-import { ThreeElements, useFrame } from '@react-three/fiber'
-import { useCursor } from '@react-three/drei'
-import { Outlined } from '@/components/Models/Generic/Outlined/Outlined'
+import {ThreeElements, useFrame} from '@react-three/fiber'
+import {useCursor} from '@react-three/drei'
+import {Outlined} from '@/components/Models/Generic/Outlined/Outlined'
 import * as THREE from 'three'
 import {Vec3} from "@/components/Types/room";
 import {InspectState, OutlinedGroupInspect} from "@/components/Types/inspectModels";
@@ -76,6 +76,16 @@ const _v = new THREE.Vector3()
 const _mat = new THREE.Matrix4()
 const _inv = new THREE.Matrix4()
 
+/**
+ * Compute a tight AABB for all relevant meshes under `partsRoot`,
+ * expressed in the local space of `localRoot`.
+ *
+ * - Traverses all visible meshes, skipping helpers/outline/hitbox geometry.
+ * - Builds a world-space Box3 per mesh and transforms it into `localRoot` space.
+ * - Returns `null` when no valid geometry is found.
+ *
+ * Used by ModelGroup to drive auto-generated interaction hitboxes.
+ */
 function computeTightLocalBox(partsRoot: THREE.Object3D, localRoot: THREE.Object3D): BoxSpec | null {
     localRoot.updateWorldMatrix(true, true)
     partsRoot.updateWorldMatrix(true, true)
@@ -116,6 +126,18 @@ function computeTightLocalBox(partsRoot: THREE.Object3D, localRoot: THREE.Object
     }
 }
 
+/**
+ * Group of outlined parts built from `PartSpec` definitions.
+ *
+ * Responsibilities:
+ * - Resolve effective color / outline / texture from part + group overrides.
+ * - Instantiate `Outlined` meshes for each part with consistent defaults.
+ * - Optionally create manual or auto-computed hitboxes for interaction.
+ * - Emit an `OutlinedGroupInspect` payload for the object-inspect system.
+ * - Integrate with the magnifier mask for magnifier-only models.
+ *
+ * This is the main entry point for building complex models without a 3D DCC tool.
+ */
 export function ModelGroup({
                                parts,
                                hitbox,
@@ -146,7 +168,7 @@ export function ModelGroup({
     const groupRef = React.useRef<THREE.Group>(null)
     const partsRef = React.useRef<THREE.Group>(null)
 
-    const { lensMaskRef, held } = useMagnifierState()
+    const {lensMaskRef, held} = useMagnifierState()
     const visibleToMagnifierRef = React.useRef(true)
     const centerLocalRef = React.useRef(new THREE.Vector3())
     const centerWorldRef = React.useRef(new THREE.Vector3())
@@ -208,7 +230,7 @@ export function ModelGroup({
     const useHitbox = !!hitbox
     const [autoBox, setAutoBox] = React.useState<BoxSpec | null>(null)
 
-    useFrame(({ clock }) => {
+    useFrame(({clock}) => {
         if ((clock.getElapsedTime() * 6) % 1 > 0.02) return
         if (!!hitbox || !partsRef.current || !groupRef.current) return
 
@@ -222,9 +244,9 @@ export function ModelGroup({
             Math.abs(prev.center[0] - next.center[0]) < eps &&
             Math.abs(prev.center[1] - next.center[1]) < eps &&
             Math.abs(prev.center[2] - next.center[2]) < eps &&
-            Math.abs(prev.size[0]   - next.size[0])   < eps &&
-            Math.abs(prev.size[1]   - next.size[1])   < eps &&
-            Math.abs(prev.size[2]   - next.size[2])   < eps
+            Math.abs(prev.size[0] - next.size[0]) < eps &&
+            Math.abs(prev.size[1] - next.size[1]) < eps &&
+            Math.abs(prev.size[2] - next.size[2]) < eps
 
         if (!same) setAutoBox(next)
     })
@@ -275,7 +297,7 @@ export function ModelGroup({
         visibleToMagnifierRef.current = d <= (mask.radius + extra)
     })
 
-    const { onPointerDown, ...restGroupProps } = groupProps as any
+    const {onPointerDown, ...restGroupProps} = groupProps as any
 
     const autoHandlers =
         !disablePointer && !useHitbox
@@ -299,9 +321,9 @@ export function ModelGroup({
             : {}
 
     const showManualProxy = useHitbox && !!hitbox && !disablePointer
-    const showManualViz   = useHitbox && !!hitbox && visualizeHitbox
+    const showManualViz = useHitbox && !!hitbox && visualizeHitbox
     const showAutoProxy = !useHitbox && !!autoBox && !disablePointer
-    const showAutoViz   = !useHitbox && !!autoBox && visualizeHitbox
+    const showAutoViz = !useHitbox && !!autoBox && visualizeHitbox
 
     return (
         <group ref={groupRef} {...restGroupProps}>
@@ -359,84 +381,84 @@ export function ModelGroup({
                     const effRough = ov?.roughness ?? p.roughness
                     const effTransparent = ov?.transparent ?? p.transparent
                     const effOpacity = ov?.opacity ?? p.opacity
-                    const effDepthWrite  = ov?.depthWrite ?? p.depthWrite
-                    const effSide        = ov?.side ?? p.side
+                    const effDepthWrite = ov?.depthWrite ?? p.depthWrite
+                    const effSide = ov?.side ?? p.side
                     const effCast = p.castShadow ?? castShadowDefault
                     const effReceive = p.receiveShadow ?? receiveShadowDefault
                     const effMagnifierOnly = p.magnifierOnly ?? magnifierOnly
                     const effDisablePointer = disablePointer || effMagnifierOnly
 
-                            return (
-                                <Outlined
-                                    key={i}
-                                    disablePointer={effDisablePointer}
-                                    hovered={!disablePointer && hovered}
-                                    geometry={p.geometry}
-                                    color={effColor}
-                                    outlineColor={effOutline}
-                                    hoverColor={p.hoverColor ?? hoverColor}
-                                    outlineScale={resolveScale(p)}
-                                    position={p.position}
-                                    rotation={p.rotation}
-                                    scale={p.scale}
-                                    textureUrl={effTex}
-                                    texturePixelated={effPix}
-                                    metalness={effMetal}
-                                    roughness={effRough}
-                                    disableOutline={disableOutline}
-                                    transparent={effTransparent}
-                                    opacity={effOpacity}
-                                    depthWrite={effDepthWrite}
-                                    side={effSide}
-                                    castShadow={effCast}
-                                    receiveShadow={effReceive}
-                                    magnifierRevealMaterial={effMagnifierOnly}
-                                />
-                            )
-                        })}
-                    </group>
+                    return (
+                        <Outlined
+                            key={i}
+                            disablePointer={effDisablePointer}
+                            hovered={!disablePointer && hovered}
+                            geometry={p.geometry}
+                            color={effColor}
+                            outlineColor={effOutline}
+                            hoverColor={p.hoverColor ?? hoverColor}
+                            outlineScale={resolveScale(p)}
+                            position={p.position}
+                            rotation={p.rotation}
+                            scale={p.scale}
+                            textureUrl={effTex}
+                            texturePixelated={effPix}
+                            metalness={effMetal}
+                            roughness={effRough}
+                            disableOutline={disableOutline}
+                            transparent={effTransparent}
+                            opacity={effOpacity}
+                            depthWrite={effDepthWrite}
+                            side={effSide}
+                            castShadow={effCast}
+                            receiveShadow={effReceive}
+                            magnifierRevealMaterial={effMagnifierOnly}
+                        />
+                    )
+                })}
+            </group>
 
-                    {showAutoProxy && (
-                        <mesh
-                            name="__auto_hitbox_interaction"
-                            userData={{ noBounds: true }}
-                            position={autoBox.center as Vec3}
-                            onPointerOver={(e: any) => {
-                                e.stopPropagation()
-                                if (magnifierOnly && !visibleToMagnifierRef.current) return
-                                setHovered(true)
-                            }}
-                            onPointerOut={(e: any) => {
-                                e.stopPropagation()
-                                setHovered(false)
-                            }}
-                            onClick={(e: any) => {
-                                e.stopPropagation()
-                                if (magnifierOnly && !visibleToMagnifierRef.current) return
-                                onInspect?.(payload)
-                            }}
-                            onPointerDown={onPointerDown}
-                        >
-                            <boxGeometry args={autoBox.size as Vec3} />
-                            <meshBasicMaterial
-                                transparent
-                                opacity={visualizeHitbox ? 0.2 : 0}
-                                depthWrite={false}
-                            />
-                        </mesh>
-                    )}
+            {showAutoProxy && (
+                <mesh
+                    name="__auto_hitbox_interaction"
+                    userData={{noBounds: true}}
+                    position={autoBox.center as Vec3}
+                    onPointerOver={(e: any) => {
+                        e.stopPropagation()
+                        if (magnifierOnly && !visibleToMagnifierRef.current) return
+                        setHovered(true)
+                    }}
+                    onPointerOut={(e: any) => {
+                        e.stopPropagation()
+                        setHovered(false)
+                    }}
+                    onClick={(e: any) => {
+                        e.stopPropagation()
+                        if (magnifierOnly && !visibleToMagnifierRef.current) return
+                        onInspect?.(payload)
+                    }}
+                    onPointerDown={onPointerDown}
+                >
+                    <boxGeometry args={autoBox.size as Vec3}/>
+                    <meshBasicMaterial
+                        transparent
+                        opacity={visualizeHitbox ? 0.2 : 0}
+                        depthWrite={false}
+                    />
+                </mesh>
+            )}
 
-                    {showAutoViz && !showAutoProxy && (
-                        <mesh
-                            name="__auto_hitbox_vis"
-                            userData={{noBounds: true}}
-                            raycast={() => null}
-                            position={autoBox.center as Vec3}
-                        >
-                            <boxGeometry args={autoBox.size as Vec3}/>
-                            <meshBasicMaterial transparent opacity={0.2} depthWrite={false}/>
-                        </mesh>
-                    )}
-                </group>
-            )
-            }
+            {showAutoViz && !showAutoProxy && (
+                <mesh
+                    name="__auto_hitbox_vis"
+                    userData={{noBounds: true}}
+                    raycast={() => null}
+                    position={autoBox.center as Vec3}
+                >
+                    <boxGeometry args={autoBox.size as Vec3}/>
+                    <meshBasicMaterial transparent opacity={0.2} depthWrite={false}/>
+                </mesh>
+            )}
+        </group>
+    )
+}

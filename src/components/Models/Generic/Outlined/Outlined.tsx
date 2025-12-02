@@ -39,6 +39,18 @@ type OutlinedProps = CommonTransform & {
     magnifierRevealMaterial?: boolean
 }
 
+/**
+ * Single outlined mesh with optional texture, inspect behavior and magnifier support.
+ *
+ * Responsibilities:
+ * - Wrap an arbitrary geometry in a mesh + outline mesh.
+ * - Track hover state to drive cursor and hover/outline styling.
+ * - Emit an `OutlinedInspect` payload via `onInspect` when clicked.
+ * - Load an optional texture through `useManagedTexture` with pixel-art friendly options.
+ * - Optionally render with `MagnifierRevealMaterial` when `magnifierRevealMaterial` is enabled.
+ *
+ * Used both directly and via `ModelGroup` for most detective-room meshes.
+ */
 export function Outlined({
                              geometry,
                              color = '#808080',

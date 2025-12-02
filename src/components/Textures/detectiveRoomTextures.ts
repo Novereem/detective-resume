@@ -40,6 +40,5 @@ export const DETECTIVE_ROOM_TEXTURES = [
     // Extra files present in /textures (preload now, safe for future use)
     '/textures/cardboard_clean.jpg',
     '/textures/house_szn1.jpg',
-    '/textures/rainbow_metal.jpg',
     '/textures/wallpaper_beigbrown.jpg',
 ] as const

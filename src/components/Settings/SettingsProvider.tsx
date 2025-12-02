@@ -16,6 +16,22 @@ export type ShadowPreset = {
     far: number
 }
 
+
+/**
+ * Central UI + graphics settings state for the detective room.
+ *
+ * Responsibilities:
+ * - Persist player-facing settings in localStorage (controls, pixelation,
+ *   mouse sensitivity, camera smoothing, shadows, model quality, extras).
+ * - Provide runtime helpers that:
+ *   - initialize values from runtime defaults when the app boots,
+ *   - reset sections (controls/video) back to safe defaults.
+ * - Expose a single `useSettings()` hook used by UI and 3D components.
+ *
+ * Notes:
+ * - All persistence is gated by `loadedRef` so nothing is written before the
+ *   initial localStorage read completes.
+ */
 type SettingsState = {
     menuOpen: boolean
     setMenuOpen: (v: boolean) => void
@@ -83,6 +99,21 @@ const MODELS_QUALITY_KEY  = 'gfx.models.quality.v1'
 const BACK_TO_DESK_BTN_KEY = 'ui.backToDesk.enabled.v1'
 const FLY_ENABLED_KEY      = 'extra.fly.enabled.v1'
 
+/**
+ * Root provider for all settings related to controls, visuals and extras.
+ *
+ * Main groups of behavior:
+ * - On mount:
+ *   - load values from localStorage (if present),
+ *   - mark `loadedRef` as true once done.
+ * - On changes:
+ *   - write updated values back to localStorage (but only after load),
+ *   - keep document scrolling in sync with menu open/close.
+ * - Expose higher-level helpers:
+ *   - initializePixelBase / initializeMouseSensitivity / initializeOrientDamping
+ *     to adopt runtime defaults once per install,
+ *   - resetVisuals / resetControlsToDefaults / resetVideoToDefaults.
+ */
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [menuOpen, setMenuOpen] = React.useState(false)
 
@@ -143,8 +174,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         const fe = localStorage.getItem(FLY_ENABLED_KEY)
         if (fe !== null) setFlyEnabled(fe === '1')
-
-        loadedRef.current = true
     }, [])
 
     React.useEffect(() => { if (loadedRef.current) localStorage.setItem(VISIBLE_KEY, controlsHintVisible ? '1' : '0') }, [controlsHintVisible])
@@ -164,6 +193,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (!hadSizeRef.current) { setPixelateSize(runtimeDefault); hadSizeRef.current = true }
     }, [])
 
+    /**
+     * Reset pixel-related settings to their hard-coded defaults and clear
+     * any stored user preferences.
+     */
     const resetVisuals = React.useCallback(() => {
         localStorage.removeItem(PX_BASE_KEY)
         localStorage.removeItem(PX_SIZE_KEY)
@@ -173,12 +206,25 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setPixelateSize(2.7)
     }, [])
 
+    /**
+     * Adopt a runtime-provided mouse sensitivity base.
+     *
+     * Behavior:
+     * - Only runs after initial load.
+     * - Only sets base/value once, so explicit user changes always win later.
+     */
     const initializeMouseSensitivity = React.useCallback((runtimeDefault: number) => {
         if (!loadedRef.current) return
         if (!hadSensBaseRef.current) { setMouseSensBase(runtimeDefault); hadSensBaseRef.current = true }
         if (!hadSensValRef.current)  { setMouseSensitivity(runtimeDefault); hadSensValRef.current  = true }
     }, [])
 
+    /**
+     * Adopt a runtime-provided orient-damping base for camera smoothing.
+     *
+     * Behavior:
+     * - Mirrors `initializeMouseSensitivity` but for orientation damping.
+     */
     const initializeOrientDamping = React.useCallback((runtimeDefault: number) => {
         if (!loadedRef.current) return
         if (!hadOrientBaseRef.current) { setOrientDampingBase(runtimeDefault); hadOrientBaseRef.current = true }
@@ -196,18 +242,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const sq = localStorage.getItem(SHADOW_QUALITY_KEY) as ShadowQuality | null
         if (se !== null) { setShadowsEnabled(se === '1') }
         if (sq === 'low' || sq === 'medium' || sq === 'high') { setShadowQuality(sq) }
-    }, [])
-
-    React.useEffect(() => { if (loadedRef.current) localStorage.setItem(SHADOWS_ENABLED_KEY, shadowsEnabled ? '1' : '0') }, [shadowsEnabled])
-    React.useEffect(() => { if (loadedRef.current) localStorage.setItem(SHADOW_QUALITY_KEY, shadowQuality) }, [shadowQuality])
-
-    const shadowPreset = SHADOW_PRESETS[shadowQuality]
-
-    React.useEffect(() => {
-        const se = localStorage.getItem(SHADOWS_ENABLED_KEY)
-        const sq = localStorage.getItem(SHADOW_QUALITY_KEY) as ShadowQuality | null
-        if (se !== null) { setShadowsEnabled(se === '1') }
-        if (sq === 'low' || sq === 'medium' || sq === 'high') { setShadowQuality(sq) }
 
         const mq = localStorage.getItem(MODELS_QUALITY_KEY) as ModelQuality | null
         if (mq === 'low' || mq === 'medium' || mq === 'high') {
@@ -216,6 +250,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }, [])
     React.useEffect(() => { if (loadedRef.current) { localStorage.setItem(MODELS_QUALITY_KEY, modelQuality) } }, [modelQuality])
 
+    const shadowPreset = SHADOW_PRESETS[shadowQuality]
+    React.useEffect(() => {
+        if (loadedRef.current) {
+            localStorage.setItem(SHADOWS_ENABLED_KEY, shadowsEnabled ? '1' : '0')
+        }
+    }, [shadowsEnabled])
+
+    React.useEffect(() => {
+        if (loadedRef.current) {
+            localStorage.setItem(SHADOW_QUALITY_KEY, shadowQuality)
+        }
+    }, [shadowQuality])
+
+    /**
+     * Reset control-related settings (hint visibility/position, sensitivity,
+     * orient damping) back to defaults using current base values.
+     */
     const resetControlsToDefaults = React.useCallback(() => {
         setControlsHintVisible(true)
         setControlsHintPosition('bottom-left')
@@ -223,6 +274,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setOrientDamping(orientDampingBase)
     }, [mouseSensBase, orientDampingBase])
 
+    /**
+     * Reset visual settings back to sensible defaults:
+     * - pixelation via `resetVisuals`,
+     * - shadows enabled at "medium",
+     * - model quality to "high".
+     */
     const resetVideoToDefaults = React.useCallback(() => {
         resetVisuals()
         setShadowsEnabled(true)
@@ -241,6 +298,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem(FLY_ENABLED_KEY, flyEnabled ? '1' : '0')
         }
     }, [flyEnabled])
+
+    React.useEffect(() => {
+        loadedRef.current = true
+    }, [])
 
     const value: SettingsState = {
         menuOpen, setMenuOpen,
@@ -269,6 +330,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
+/**
+ * Consumer hook for accessing the settings state.
+ *
+ * Throws:
+ * - If called outside of a SettingsProvider, to avoid silent undefined
+ *   behavior and make wiring mistakes obvious during development.
+ */
 export function useSettings() {
     const v = React.useContext(Ctx)
     if (!v) throw new Error('useSettings must be used within SettingsProvider')

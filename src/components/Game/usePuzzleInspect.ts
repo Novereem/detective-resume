@@ -5,6 +5,19 @@ import { useGameState } from '@/components/Game/state'
 import type { PuzzleId } from '@/components/Types/game'
 import type { InspectState } from '@/components/Types/inspectModels'
 
+/**
+ * Hook to open the inspect overlay for a specific puzzle.
+ *
+ * Responsibilities:
+ * - Look up the puzzle config and status from the global GameState.
+ * - Merge the caller's base InspectState with puzzle-specific view options
+ *   (pixelSize, inspectDistance, framed inspect model).
+ * - Attach puzzle metadata (type, puzzleId, solved, solvedAnswer) so the
+ *   overlay UI can render the correct state.
+ *
+ * Used by puzzle entry points that want a single, consistent way to open
+ * the overlay without duplicating wiring logic.
+ */
 export function usePuzzleInspect(
     puzzleId: PuzzleId,
     openInspect: (s: InspectState) => void

@@ -48,6 +48,18 @@ type FramedPlaneProps = CommonTransform & {
     textureMagnifierOnly?: boolean
 }
 
+/**
+ * Textured framed plane (poster / screen) with optional frame and inspect behavior.
+ *
+ * Responsibilities:
+ * - Render a flat plane with configurable border, frame color and metalness/roughness.
+ * - Load and apply a texture via `useManagedTexture` with configurable fit and sampling.
+ * - Emit a `FramedInspect` payload via `onInspect` when interacted with.
+ * - Optionally limit visibility / interaction to the magnifier (`textureMagnifierOnly`).
+ * - Provide a dev-pickable hitbox for editor-style object selection.
+ *
+ * Used for paintings, posters, monitors and other flat textured surfaces.
+ */
 export function FramedPlane({
                                 width = 1,
                                 height = 1,
