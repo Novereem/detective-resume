@@ -21,11 +21,20 @@ const q: Array<() => void> = []
 
 let pending = 0
 const listeners = new Set<(s: LoadState) => void>()
-const emit = () => {
-    const s = { pending, inFlight, queued: q.length }
-    listeners.forEach(l => l(s))
+
+declare global {
+    interface Window {
+        __TT_TEXTURE_LOADING__?: LoadState
+    }
 }
 
+const emit = () => {
+    const s: LoadState = { pending, inFlight, queued: q.length }
+    if (typeof window !== 'undefined') {
+        window.__TT_TEXTURE_LOADING__ = s
+    }
+    listeners.forEach(l => l(s))
+}
 /**
  * Subscribe to global texture loading state.
  *

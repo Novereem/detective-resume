@@ -136,6 +136,18 @@ export default function DetectiveRoomClient() {
                             <p>Loading detective room…</p>
                         </div>
                     )}
+
+                    {booted && (
+                        <div
+                            data-testid="detective-ready"
+                            style={{
+                                position: 'fixed',
+                                inset: 0,
+                                pointerEvents: 'none',
+                                opacity: 0,
+                            }}
+                        />
+                    )}
                     <OverlayedRoom />
                 </MagnifierStateProvider>
             </SettingsProvider>

@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, {useEffect} from 'react'
 
 type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 type ShadowQuality = 'low' | 'medium' | 'high'
@@ -341,4 +341,47 @@ export function useSettings() {
     const v = React.useContext(Ctx)
     if (!v) throw new Error('useSettings must be used within SettingsProvider')
     return v
+}
+
+/**
+ * Internal bridge for automated performance tests.
+ *
+ * Exposes a small API on `window.__TT_DETECTIVE_TUNE__` so Playwright can
+ * switch between quality presets (e.g. default vs low) without going through
+ * the in-game UI. Not intended for player use.
+ */
+export function PerfTestBridge() {
+    const {
+        setModelQuality,
+        setShadowQuality,
+        setShadowsEnabled,
+        setPixelateSize,
+    } = useSettings()
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+            ;(window as any).__TT_DETECTIVE_TUNE__ = {
+            setQuality: (level: 'low' | 'medium' | 'high') => {
+                setModelQuality(level)
+
+                if (level === 'low') {
+                    // Low preset: no shadows, lowest model quality
+                    setShadowsEnabled(false)
+                    setShadowQuality('low')
+                } else if (level === 'medium') {
+                    setShadowsEnabled(true)
+                    setShadowQuality('medium')
+                } else {
+                    setShadowsEnabled(true)
+                    setShadowQuality('high')
+                }
+            },
+            enablePerfMode: () => {
+                setPixelateSize(0)
+            },
+        }
+    }, [setModelQuality, setShadowQuality, setShadowsEnabled, setPixelateSize])
+
+    return null
 }

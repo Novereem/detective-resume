@@ -1,0 +1,43 @@
+name: Detective Resume CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test -- --runInBand
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright perf tests
+        run: npm run ci:playwright
+        env:
+          DETECTIVE_BASE_URL: http://localhost:3000
+
+      - name: Run Lighthouse CI
+        run: npm run lhci
+        env:
+          DETECTIVE_BASE_URL: http://localhost:3000

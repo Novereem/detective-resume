@@ -40,4 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.swc
+# Lighthouse / perf artifacts
+.lighthouseci/
+lhci-report/
+.last-run.json
+
+# Build / caches
+.swc/

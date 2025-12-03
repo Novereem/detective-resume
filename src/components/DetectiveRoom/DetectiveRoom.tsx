@@ -11,7 +11,7 @@ import { InspectState } from '@/components/Types/inspectModels'
 import { ANCHOR } from '@/components/Game/anchors'
 import { useGameActions, useGameState } from '@/components/Game/state'
 import { DrawerFileSpawn, PositionedSecretFile } from '@/components/Game/state.data'
-import { useSettings } from '@/components/Settings/SettingsProvider'
+import {PerfTestBridge, useSettings} from '@/components/Settings/SettingsProvider'
 import { BindersAndBooksCluster } from '@/components/DetectiveRoom/Clusters/BindersAndBooks'
 import { BigFurnitureCluster } from '@/components/DetectiveRoom/Clusters/BigFurniture'
 import { LightsCluster } from '@/components/DetectiveRoom/Clusters/Lights'
@@ -32,6 +32,7 @@ import {CameraPoseBridge, FreeLookControls, PlayerMover} from "@/components/Play
 import {MagnifierPickupControls} from "@/components/PlayerControls/GameplayControls";
 import {DevFlyMove, DevObjectMove} from "@/components/PlayerControls/DevControls";
 import {requestZoomPeek} from "@/components/PlayerControls/utils";
+import {usePerfMetrics} from "../../../tests/Perf/usePerfMetrics";
 
 function Scene({
                    openInspect,
@@ -52,6 +53,8 @@ function Scene({
 }) {
     const { scene } = useThree()
     const rcFocus = useRightClickFocus(requestMove)
+
+    usePerfMetrics()
 
     scene.background = new THREE.Color('#3c3c3c')
     const isDev = true;
@@ -182,6 +185,7 @@ export default function DetectiveRoom() {
                             onPoofDone={removePoof}
                             drawers={drawers}
                         />
+                        <PerfTestBridge />
                     </QualityProvider>
                     <PlayerMover move={moveReq} onArrive={() => setMoveReq(null)} qGoalRef={qGoalRef} />
                     <MouseZoom enabled={moveReq === null} mode="fov" />
