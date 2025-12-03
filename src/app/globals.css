@@ -1,5 +1,29 @@
+@import "tailwindcss";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html, body { margin: 0; height: 100%; }
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+@keyframes pulseWaves {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(0, -12px, 0) scale(1.04);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+.animate-pulseWaves {
+    animation: pulseWaves 24s ease-in-out infinite;
+}
