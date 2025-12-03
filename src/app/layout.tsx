@@ -1,5 +1,6 @@
 import './globals.css'
 import {Metadata} from "next";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
     title: 'My Portfolio',
@@ -13,6 +14,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+        <Analytics/>
             <body className="antialiased">
                 {children}
             </body>

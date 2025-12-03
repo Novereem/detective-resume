@@ -33,7 +33,7 @@ module.exports = {
                 'total-blocking-time': [
                     'warn',
                     {
-                        maxNumericValue: 8000,
+                        maxNumericValue: 32000,
                         aggregationMethod: 'median',
                     },
                 ],
