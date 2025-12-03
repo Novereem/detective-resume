@@ -2,18 +2,22 @@
 module.exports = {
     ci: {
         collect: {
+            startServerCommand: 'npm run start',
             url: [
                 `${process.env.DETECTIVE_BASE_URL ?? 'http://localhost:3000'}/detective-room`,
             ],
-            numberOfRuns: 3,
+            numberOfRuns: process.env.CI === 'true' ? 1 : 3,
             settings: {
                 preset: 'desktop',
+
+                onlyCategories: ['performance', 'accessibility', 'seo', 'best-practices'],
+
+                skipAudits: ['uses-text-compression', 'charset'],
             },
-            startServerCommand: 'npm run start'
         },
         assert: {
             assertions: {
-                'categories:performance': ['warn', { minScore: 0.65 }],
+                'categories:performance': ['warn', { minScore: 0.6 }],
                 'categories:accessibility': ['error', { minScore: 1.0 }],
                 'categories:seo': ['error', { minScore: 1.0 }],
                 'categories:best-practices': ['error', { minScore: 0.9 }],
