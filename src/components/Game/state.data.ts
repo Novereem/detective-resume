@@ -172,10 +172,11 @@ export const initialSnapshot: GameSnapshot = {
                 inspect: {
                     type: "text",
                     id: "puzzle-hbo-ict",
-                    prompt: "What is my current education?",
+                    prompt: "What is my current major?",
                     answers: [
                         "hbo ict",
                         "hbo-ict",
+                        "ict",
                         /hbo\s*-?\s*ict/i,
                     ],
                     normalize: "trim-lower",
@@ -242,6 +243,7 @@ export const initialSnapshot: GameSnapshot = {
                     ],
                     multipleAnswers: 2,
                     normalize: "trim-lower",
+                    roomEvidenceHint: true,
                     feedback: {
                         correct: "Right. Sanquin and Eclipse.",
                         incorrect: "Check the project evidence again.",

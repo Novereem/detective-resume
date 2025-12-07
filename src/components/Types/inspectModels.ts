@@ -14,6 +14,7 @@ export type TextPuzzle = {
         incorrect?: string
     }
     multipleAnswers?: number
+    roomEvidenceHint?: boolean
 }
 
 export type OutlinedInspect = {

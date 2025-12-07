@@ -44,7 +44,7 @@ function OverlayedRoom() {
     return (
         <>
             <DetectiveRoom />
-            <NotificationsViewport position="top-left" />
+            <NotificationsViewport position="top-center" />
             {controlsHintVisible && <ControlsHint position={controlsHintPosition} scale={1.3} />}
             <MagnifierHint held={held} position="bottom-right" scale={1.25} />
             <BackToDeskButton scale={1.5}/>

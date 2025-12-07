@@ -13,8 +13,4 @@ export type NotificationsCtx = {
     clear: () => void
 }
 
-export type ToastPosition =
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right'
+export type ToastPosition = 'top-left' | 'top-right' | 'top-center' | 'bottom-left' | 'bottom-right' | 'bottom-center';

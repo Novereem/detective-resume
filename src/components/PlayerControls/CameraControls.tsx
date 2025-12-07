@@ -58,8 +58,8 @@ export function FreeLookControls({
         }
         const onMove = (ev: MouseEvent) => {
             if (!enabled || !dragging.current || !qGoalRef.current) return
-            yaw.current -= ev.movementX * lookSensitivity
-            pitch.current -= ev.movementY * lookSensitivity
+            yaw.current += ev.movementX * lookSensitivity
+            pitch.current += ev.movementY * lookSensitivity
             const max = Math.PI / 2 - 0.05
             const min = -max
             pitch.current = Math.min(max, Math.max(min, pitch.current))

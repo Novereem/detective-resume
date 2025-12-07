@@ -3,13 +3,18 @@ import React from 'react'
 import { useSettings } from '@/components/Settings/SettingsProvider'
 
 const EV_MOVE_BACK_TO_DESK = 'tt:moveBackToDesk'
+const EV_CLOSE_INSPECT = 'tt:closeInspect'
 
-export default function BackToDeskButton({ scale = 1.25}: { scale?: number}) {
-    const { moveBackToDeskEnabled } = useSettings()
+export default function BackToDeskButton({ scale = 1.25 }: { scale?: number }) {
+    const { moveBackToDeskEnabled, isInspecting } = useSettings()
 
     const onClick = React.useCallback(() => {
-        window.dispatchEvent(new CustomEvent(EV_MOVE_BACK_TO_DESK))
-    }, [])
+        if (isInspecting) {
+            window.dispatchEvent(new Event(EV_CLOSE_INSPECT))
+        } else {
+            window.dispatchEvent(new CustomEvent(EV_MOVE_BACK_TO_DESK))
+        }
+    }, [isInspecting])
 
     if (!moveBackToDeskEnabled) return null
 
@@ -19,7 +24,7 @@ export default function BackToDeskButton({ scale = 1.25}: { scale?: number}) {
                 transform: `scale(${scale}) translateX(-50%)`,
                 position: 'fixed',
                 left: `${(scale * 1.25) + 50}%`,
-                bottom: 12*scale,
+                bottom: 12 * scale,
                 zIndex: 70
             }}
         >
@@ -33,10 +38,10 @@ export default function BackToDeskButton({ scale = 1.25}: { scale?: number}) {
                     fontSize: 13,
                     cursor: 'pointer',
                     borderRadius: 10,
-                    backdropFilter: 'blur(4px)'
+                    backdropFilter: 'blur(4px)',
                 }}
             >
-                Move back to desk
+                {isInspecting ? 'Close inspection screen' : 'Move back to desk'}
             </button>
         </div>
     )

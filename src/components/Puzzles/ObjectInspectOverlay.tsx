@@ -238,6 +238,7 @@ function HoverButton({
     )
 }
 
+
 export default function ObjectInspectOverlay({
                                                  open,
                                                  state,
@@ -308,6 +309,14 @@ export default function ObjectInspectOverlay({
         const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
+    }, [open, onClose])
+
+    const EV_CLOSE_INSPECT = 'tt:closeInspect'
+    React.useEffect(() => {
+        if (!open) return
+        const handler = () => onClose()
+        window.addEventListener(EV_CLOSE_INSPECT, handler as EventListener)
+        return () => window.removeEventListener(EV_CLOSE_INSPECT, handler as EventListener)
     }, [open, onClose])
 
     const puzzle = renderState?.puzzle?.type === 'text' ? renderState.puzzle : undefined
@@ -526,7 +535,7 @@ export default function ObjectInspectOverlay({
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     width: 'min(55vw)',
-                    height: 'min(65vh)',
+                    height: 'min(75vh)',
                     borderRadius: 16,
                     overflow: 'hidden',
                     boxShadow: '0 12px 48px rgba(0,0,0,0.45)',
@@ -541,336 +550,402 @@ export default function ObjectInspectOverlay({
                     backfaceVisibility: 'hidden',
 
                     position: 'relative',
+
+                    display: 'flex',
+                    flexDirection: 'column',
                 }}
             >
-                <Canvas
-                    camera={{position: [0, 0, 3.2], fov: 50}}
-                    dpr={[1, 1]}
-                    frameloop="demand"
-                    gl={{antialias: false, powerPreference: 'low-power'}}
-                    style={{imageRendering: 'pixelated'}}
-                    onCreated={({gl, invalidate}) => {
-                        invalidateRef.current = invalidate
-                        canvasElRef.current = gl.domElement as HTMLCanvasElement
-
-                        const onLost = (e: Event) => e.preventDefault()
-                        const onRestored = () => {
-                            invalidateRef.current?.()
-                            requestAnimationFrame(recomputeCenter)
-                        }
-                        canvasElRef.current.addEventListener('webglcontextlost', onLost, false)
-                        canvasElRef.current.addEventListener('webglcontextrestored', onRestored, false)
-
-                        return () => {
-                            canvasElRef.current?.removeEventListener('webglcontextlost', onLost, false)
-                            canvasElRef.current?.removeEventListener('webglcontextrestored', onRestored, false)
-                        }
+                <div
+                    style={{
+                        position: 'relative',
+                        flex: 1,
+                        minHeight: 0, // important so the canvas can shrink within the flex container
                     }}
                 >
-                    <ambientLight intensity={lightConfig.ambient} />
-                    <directionalLight
-                        position={[2, 5, 7]}
-                        intensity={lightConfig.mainDir}
-                    />
-                    {lightConfig.fillDir > 0 && (
-                        <directionalLight
-                            position={[-3, -4, -2]}
-                            intensity={lightConfig.fillDir}
-                        />
-                    )}
+                    <Canvas
+                        camera={{position: [0, 0, 3.2], fov: 50}}
+                        dpr={[1, 1]}
+                        frameloop="demand"
+                        gl={{antialias: false, powerPreference: 'low-power'}}
+                        style={{imageRendering: 'pixelated'}}
+                        onCreated={({gl, invalidate}) => {
+                            invalidateRef.current = invalidate
+                            canvasElRef.current = gl.domElement as HTMLCanvasElement
 
-                    <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
-                        <group ref={contentRef} position={offset}>
-                            {isInspectingMugFromFrame ? (
-                                <group rotation={[0, Math.PI, 0]}>
-                                    <group rotation={[0, Math.PI, 0]}>
-                                        <Mug
-                                            position={[0, 0, 0]}
-                                            rotation={[0, 0, 0]}
-                                            color="#f3f3f3"
-                                            outlineThickness={0.008}
-                                            inspectDistance={0.5}
-                                            inspectPixelSize={3}
-                                            onInspect={() => {}}
-                                            disablePointer={true}
+                            const onLost = (e: Event) => e.preventDefault()
+                            const onRestored = () => {
+                                invalidateRef.current?.()
+                                requestAnimationFrame(recomputeCenter)
+                            }
+                            canvasElRef.current.addEventListener('webglcontextlost', onLost, false)
+                            canvasElRef.current.addEventListener('webglcontextrestored', onRestored, false)
 
-                                            materialsById={mugMaterials}
-                                        />
-                                    </group>
-                                </group>
-                            ) : isInspectingCardboardBox ? (
-                                <CardboardBoxPreview
-                                    targetLift={boxOpenAmt}
-                                    size={[0.28, 0.14, 0.28]}
-                                    lidLip={0.028}
-                                    lidWallT={0.003}
-                                    lidClearance={0.002}
-                                />
-                            ) : isInspectingSecretFile ? (
-                                <SecretFilePreview targetAngle={secretTarget}/>
-                            ) : (
-                                <>
-                                    {renderState?.kind === 'outlined' && (
-                                        <Outlined
-                                            geometry={(renderState as any).geometry}
-                                            color={(renderState as any).color ?? '#808080'}
-                                            outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
-                                            outlineScale={(renderState as any).outlineScale ?? 1.035}
-                                            canInteract={false}
-                                            disableOutline={(renderState as any).inspectDisableOutline}
-                                        />
-                                    )}
-
-                                    {renderState?.kind === 'outlinedGroup' && (
-                                        <>
-                                            {(renderState as any).parts.map((p: any, i: number) => (
-                                                <Outlined
-                                                    key={i}
-                                                    geometry={p.geometry}
-                                                    color={p.color ?? '#808080'}
-                                                    outlineColor={p.outlineColor ?? '#ffffff'}
-                                                    outlineScale={p.outlineScale ?? 1.035}
-                                                    canInteract={false}
-                                                    position={p.position}
-                                                    rotation={p.rotation}
-                                                    scale={p.scale}
-                                                    textureUrl={p.textureUrl}
-                                                    texturePixelated={p.texturePixelated}
-                                                    metalness={p.metalness}
-                                                    roughness={p.roughness}
-                                                    transparent={p.transparent}
-                                                    opacity={p.opacity}
-                                                    depthWrite={p.depthWrite}
-                                                    side={p.side}
-                                                    disablePointer
-                                                    disableOutline={(renderState as any).inspectDisableOutline}
-                                                />
-                                            ))}
-                                        </>
-                                    )}
-
-                                    {renderState &&
-                                        renderState.kind !== 'outlined' &&
-                                        renderState.kind !== 'outlinedGroup' && (
-                                            <FramedPlane
-                                                width={(renderState as any).width}
-                                                height={(renderState as any).height}
-                                                color={(renderState as any).color ?? '#333'}
-                                                borderColor={(renderState as any).borderColor ?? '#fff'}
-                                                border={(renderState as any).border ?? 0.05}
-                                                doubleSide={(renderState as any).doubleSide ?? true}
-                                                canInteract={false}
-                                                textureUrl={(renderState as any).textureUrl}
-                                                textureFit={(renderState as any).textureFit}
-                                                texturePixelated={(renderState as any).texturePixelated}
-                                                textureZ={(renderState as any).textureZ}
-                                                frameDepthBias={false}
-                                            />
-                                        )}
-                                </>
-                            )}
-                        </group>
-                    </group>
-
-                    <RecenterOnce
-                        contentRef={contentRef}
-                        setOffset={(o) => setOffset(o)}
-                        invalidate={() => invalidateRef.current?.()}
-                        resetToken={renderState}
-                    />
-
-                    <ResetControlsOnChange
-                        resetToken={renderState}
-                        controlsRef={controlsRef}
-                        invalidate={() => invalidateRef.current?.()}
-                        camPos={[0, 0, effectiveCamDist]}
-                    />
-
-                    <OrbitControls
-                        ref={controlsRef}
-                        enablePan={false}
-                        onChange={() => invalidateRef.current?.()}
-                    />
-                    {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize}/> : null}
-                </Canvas>
-
-                {puzzle && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            padding: '16px 20px',
-                            background:
-                                puzzleSolved || status === 'correct'
-                                    ? 'rgba(0,128,0,0.22)'
-                                    : status === 'incorrect'
-                                        ? 'rgba(128,0,0,0.25)'
-                                        : 'rgba(0,0,0,0.55)',
-                            borderTop: '1px solid rgba(255,255,255,0.1)',
-                            display: 'flex',
-                            gap: 10,
-                            alignItems: 'center',
-                            backdropFilter: 'blur(2px)',
+                            return () => {
+                                canvasElRef.current?.removeEventListener('webglcontextlost', onLost, false)
+                                canvasElRef.current?.removeEventListener('webglcontextrestored', onRestored, false)
+                            }
                         }}
                     >
-                        <div style={{ color: '#ddd', fontSize: 16, whiteSpace: 'nowrap' }}>
-                            {puzzle.prompt ?? 'Type your answer:'}
-                        </div>
+                        <ambientLight intensity={lightConfig.ambient}/>
+                        <directionalLight
+                            position={[2, 5, 7]}
+                            intensity={lightConfig.mainDir}
+                        />
+                        {lightConfig.fillDir > 0 && (
+                            <directionalLight
+                                position={[-3, -4, -2]}
+                                intensity={lightConfig.fillDir}
+                            />
+                        )}
 
-                        {puzzleSolved ? (
-                            <>
+                        <group rotation={renderState?.initialRotation ?? [0, 0, 0]}>
+                            <group ref={contentRef} position={offset}>
+                                {isInspectingMugFromFrame ? (
+                                    <group rotation={[0, Math.PI, 0]}>
+                                        <group rotation={[0, Math.PI, 0]}>
+                                            <Mug
+                                                position={[0, 0, 0]}
+                                                rotation={[0, 0, 0]}
+                                                color="#f3f3f3"
+                                                outlineThickness={0.008}
+                                                inspectDistance={0.5}
+                                                inspectPixelSize={3}
+                                                onInspect={() => {
+                                                }}
+                                                disablePointer={true}
+
+                                                materialsById={mugMaterials}
+                                            />
+                                        </group>
+                                    </group>
+                                ) : isInspectingCardboardBox ? (
+                                    <CardboardBoxPreview
+                                        targetLift={boxOpenAmt}
+                                        size={[0.28, 0.14, 0.28]}
+                                        lidLip={0.028}
+                                        lidWallT={0.003}
+                                        lidClearance={0.002}
+                                    />
+                                ) : isInspectingSecretFile ? (
+                                    <SecretFilePreview targetAngle={secretTarget}/>
+                                ) : (
+                                    <>
+                                        {renderState?.kind === 'outlined' && (
+                                            <Outlined
+                                                geometry={(renderState as any).geometry}
+                                                color={(renderState as any).color ?? '#808080'}
+                                                outlineColor={(renderState as any).outlineColor ?? '#ffffff'}
+                                                outlineScale={(renderState as any).outlineScale ?? 1.035}
+                                                canInteract={false}
+                                                disableOutline={(renderState as any).inspectDisableOutline}
+                                            />
+                                        )}
+
+                                        {renderState?.kind === 'outlinedGroup' && (
+                                            <>
+                                                {(renderState as any).parts.map((p: any, i: number) => (
+                                                    <Outlined
+                                                        key={i}
+                                                        geometry={p.geometry}
+                                                        color={p.color ?? '#808080'}
+                                                        outlineColor={p.outlineColor ?? '#ffffff'}
+                                                        outlineScale={p.outlineScale ?? 1.035}
+                                                        canInteract={false}
+                                                        position={p.position}
+                                                        rotation={p.rotation}
+                                                        scale={p.scale}
+                                                        textureUrl={p.textureUrl}
+                                                        texturePixelated={p.texturePixelated}
+                                                        metalness={p.metalness}
+                                                        roughness={p.roughness}
+                                                        transparent={p.transparent}
+                                                        opacity={p.opacity}
+                                                        depthWrite={p.depthWrite}
+                                                        side={p.side}
+                                                        disablePointer
+                                                        disableOutline={(renderState as any).inspectDisableOutline}
+                                                    />
+                                                ))}
+                                            </>
+                                        )}
+
+                                        {renderState &&
+                                            renderState.kind !== 'outlined' &&
+                                            renderState.kind !== 'outlinedGroup' && (
+                                                <FramedPlane
+                                                    width={(renderState as any).width}
+                                                    height={(renderState as any).height}
+                                                    color={(renderState as any).color ?? '#333'}
+                                                    borderColor={(renderState as any).borderColor ?? '#fff'}
+                                                    border={(renderState as any).border ?? 0.05}
+                                                    doubleSide={(renderState as any).doubleSide ?? true}
+                                                    canInteract={false}
+                                                    textureUrl={(renderState as any).textureUrl}
+                                                    textureFit={(renderState as any).textureFit}
+                                                    texturePixelated={(renderState as any).texturePixelated}
+                                                    textureZ={(renderState as any).textureZ}
+                                                    frameDepthBias={false}
+                                                />
+                                            )}
+                                    </>
+                                )}
+                            </group>
+                        </group>
+
+                        <RecenterOnce
+                            contentRef={contentRef}
+                            setOffset={(o) => setOffset(o)}
+                            invalidate={() => invalidateRef.current?.()}
+                            resetToken={renderState}
+                        />
+
+                        <ResetControlsOnChange
+                            resetToken={renderState}
+                            controlsRef={controlsRef}
+                            invalidate={() => invalidateRef.current?.()}
+                            camPos={[0, 0, effectiveCamDist]}
+                        />
+
+                        <OrbitControls
+                            ref={controlsRef}
+                            enablePan={true}
+                            mouseButtons={{
+                                LEFT: THREE.MOUSE.ROTATE,
+                                RIGHT: THREE.MOUSE.PAN,
+                            }}
+                            onChange={() => invalidateRef.current?.()}
+                        />
+                        {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize}/> : null}
+                    </Canvas>
+
+                    {puzzle && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                padding: '16px 20px',
+                                background:
+                                    puzzleSolved || status === 'correct'
+                                        ? 'rgba(0,128,0,0.22)'
+                                        : status === 'incorrect'
+                                            ? 'rgba(128,0,0,0.25)'
+                                            : 'rgba(0,0,0,0.55)',
+                                borderTop: '1px solid rgba(255,255,255,0.1)',
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 10,
+                                alignItems: 'flex-start',
+                                backdropFilter: 'blur(2px)',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    flexBasis: '100%',
+                                    marginBottom: 4,
+                                    display: 'flex',
+                                    alignItems: 'baseline',
+                                    gap: 12,
+                                }}
+                            >
                                 <div
                                     style={{
                                         flex: 1,
-                                        color: '#fff',
+                                        color: '#ddd',
                                         fontSize: 16,
-                                        padding: '8px 10px',
-                                        background: 'rgba(255,255,255,0.06)',
-                                        border: '1px solid rgba(255,255,255,0.12)',
-                                        borderRadius: 8,
+                                        whiteSpace: 'normal',
                                     }}
                                 >
-                                    <strong>Solved answer:</strong>{' '}
-                                    {puzzleSolvedAnswer || '(empty)'}
+                                    {puzzle.prompt ?? 'Type your answer:'}
                                 </div>
-                                <div
-                                    style={{
-                                        minWidth: 90,
-                                        textAlign: 'right',
-                                        color: '#00d323',
-                                        fontSize: 16,
-                                    }}
-                                >
-                                    {puzzle.feedback?.correct ?? 'Correct!'}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                {(() => {
-                                    const slotsRaw = puzzle.multipleAnswers ?? 1
-                                    const slots = Math.min(Math.max(slotsRaw, 1), 4)
 
-                                    const trimmed = answers.map((a) => a.trim())
-                                    const allFilled =
-                                        slots === 1
-                                            ? !!trimmed[0]
-                                            : trimmed.slice(0, slots).every((v) => v.length > 0)
+                                {puzzle.roomEvidenceHint && !puzzleSolved && (
+                                    <div
+                                        style={{
+                                            fontSize: 13,
+                                            color: 'rgba(255,255,255,0.65)',
+                                            fontStyle: 'italic',
+                                            whiteSpace: 'nowrap',
+                                            textAlign: 'right',
+                                        }}
+                                    >
+                                        Evidence can be found somewhere inside the room
+                                    </div>
+                                )}
+                            </div>
 
-                                    return (
-                                        <>
+                            {puzzleSolved ? (
+                                <>
+                                    <div
+                                        style={{
+                                            flexBasis: '100%',
+                                            display: 'flex',
+                                            flexWrap: 'wrap',
+                                            gap: 8,
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                color: '#fff',
+                                                fontSize: 16,
+                                                padding: '8px 10px',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid rgba(255,255,255,0.12)',
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            <strong>Solved answer:</strong>{' '}
+                                            {puzzleSolvedAnswer || '(empty)'}
+                                        </div>
+                                        <div
+                                            style={{
+                                                minWidth: 90,
+                                                textAlign: 'right',
+                                                color: '#00d323',
+                                                fontSize: 16,
+                                            }}
+                                        >
+                                            {puzzle.feedback?.correct ?? 'Correct!'}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {(() => {
+                                        const slotsRaw = puzzle.multipleAnswers ?? 1
+                                        const slots = Math.min(Math.max(slotsRaw, 1), 4)
+
+                                        const trimmed = answers.map((a) => a.trim())
+                                        const allFilled =
+                                            slots === 1
+                                                ? !!trimmed[0]
+                                                : trimmed.slice(0, slots).every((v) => v.length > 0)
+
+                                        return (
                                             <div
                                                 style={{
-                                                    flex: 1,
+                                                    flexBasis: '100%',               // new row under the prompt
                                                     display: 'flex',
+                                                    flexWrap: 'wrap',
                                                     gap: 8,
+                                                    alignItems: 'center',
                                                 }}
                                             >
-                                                {Array.from({ length: slots }).map((_, idx) => (
-                                                    <input
-                                                        key={idx}
-                                                        ref={(el) => {
-                                                            inputRefs.current[idx] = el
-                                                        }}
-                                                        value={answers[idx] ?? ''}
-                                                        onChange={(e) => {
-                                                            const next = [...answers]
-                                                            next[idx] = e.target.value
-                                                            setAnswers(next)
-                                                            setStatus('idle')
-                                                        }}
-                                                        onKeyDown={onKeyDown}
-                                                        placeholder={
-                                                            slots === 1
-                                                                ? 'Your answer...'
-                                                                : `Answer ${idx + 1}...`
-                                                        }
+                                                <div
+                                                    style={{
+                                                        flex: 1,
+                                                        minWidth: 0,                 // allow shrinking on small widths
+                                                        display: 'flex',
+                                                        gap: 8,
+                                                    }}
+                                                >
+                                                    {Array.from({length: slots}).map((_, idx) => (
+                                                        <input
+                                                            key={idx}
+                                                            ref={(el) => {
+                                                                inputRefs.current[idx] = el
+                                                            }}
+                                                            value={answers[idx] ?? ''}
+                                                            onChange={(e) => {
+                                                                const next = [...answers]
+                                                                next[idx] = e.target.value
+                                                                setAnswers(next)
+                                                                setStatus('idle')
+                                                            }}
+                                                            onKeyDown={onKeyDown}
+                                                            placeholder={
+                                                                slots === 1
+                                                                    ? 'Your answer...'
+                                                                    : `Answer ${idx + 1}...`
+                                                            }
+                                                            style={{
+                                                                flex: 1,
+                                                                background: 'rgba(255,255,255,0.06)',
+                                                                border: '1px solid rgba(255,255,255,0.12)',
+                                                                color: '#fff',
+                                                                padding: '8px 10px',
+                                                                borderRadius: 8,
+                                                                outline: 'none',
+                                                                fontSize: 16,
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                <button
+                                                    onClick={submitAnswer}
+                                                    disabled={!allFilled}
+                                                    style={{
+                                                        background: !allFilled
+                                                            ? 'rgba(255,255,255,0.12)'
+                                                            : '#fff',
+                                                        color: !allFilled
+                                                            ? 'rgba(255,255,255,0.55)'
+                                                            : '#111',
+                                                        border: 'none',
+                                                        borderRadius: 8,
+                                                        padding: '8px 12px',
+                                                        cursor: !allFilled ? 'not-allowed' : 'pointer',
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
+                                                    Confirm
+                                                </button>
+
+                                                {status !== 'idle' && (
+                                                    <div
                                                         style={{
-                                                            flex: 1,
-                                                            background: 'rgba(255,255,255,0.06)',
-                                                            border: '1px solid rgba(255,255,255,0.12)',
+                                                            minWidth: 90,
+                                                            textAlign: 'right',
                                                             color: '#fff',
-                                                            padding: '8px 10px',
-                                                            borderRadius: 8,
-                                                            outline: 'none',
                                                             fontSize: 16,
                                                         }}
-                                                    />
-                                                ))}
+                                                    >
+                                                        {status === 'correct' &&
+                                                            (puzzle.feedback?.correct ?? 'Correct!')}
+                                                        {status === 'incorrect' &&
+                                                            (puzzle.feedback?.incorrect ?? 'Try again')}
+                                                    </div>
+                                                )}
                                             </div>
+                                        )
+                                    })()}
+                                </>
+                            )}
+                        </div>
+                    )}
 
-                                            <button
-                                                onClick={submitAnswer}
-                                                disabled={!allFilled}
-                                                style={{
-                                                    background: !allFilled
-                                                        ? 'rgba(255,255,255,0.12)'
-                                                        : '#fff',
-                                                    color: !allFilled
-                                                        ? 'rgba(255,255,255,0.55)'
-                                                        : '#111',
-                                                    border: 'none',
-                                                    borderRadius: 8,
-                                                    padding: '8px 12px',
-                                                    cursor: !allFilled
-                                                        ? 'not-allowed'
-                                                        : 'pointer',
-                                                    fontWeight: 600,
-                                                }}
-                                            >
-                                                Confirm
-                                            </button>
+                    {isInspectingSecretFile && (
+                        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                            <HoverButton
+                                onClick={() => {
+                                    const opening = secretTarget === 0
+                                    setSecretTarget(opening ? Math.PI : 0)
+                                    if (renderState && onAction) {
+                                        onAction(opening ? 'secret-open' : 'secret-close', renderState)
+                                    }
+                                }}
+                                opening={secretTarget === 0}
+                            />
+                        </div>
+                    )}
 
-                                            <div
-                                                style={{
-                                                    minWidth: 90,
-                                                    textAlign: 'right',
-                                                    color: '#fff',
-                                                    fontSize: 16,
-                                                }}
-                                            >
-                                                {status === 'correct' &&
-                                                    (puzzle.feedback?.correct ?? 'Correct!')}
-                                                {status === 'incorrect' &&
-                                                    (puzzle.feedback?.incorrect ??
-                                                        'Try again')}
-                                            </div>
-                                        </>
-                                    )
-                                })()}
-                            </>
-                        )}
-                    </div>
-                )}
-
-                {isInspectingSecretFile && (
-                    <div style={{ position: 'absolute', top: 20, right: 20 }}>
-                        <HoverButton
-                            onClick={() => {
-                                const opening = secretTarget === 0
-                                setSecretTarget(opening ? Math.PI : 0)
-                                if (renderState && onAction) {
-                                    onAction(opening ? 'secret-open' : 'secret-close', renderState)
-                                }
-                            }}
-                            opening={secretTarget === 0}
-                        />
-                    </div>
-                )}
-
-                {isInspectingCardboardBox && (
-                    <div style={{ position: 'absolute', top: 20, right: 20 }}>
-                        <HoverButton
-                            onClick={() => {
-                                setBoxOpenAmt(1)
-                                onAction?.('box-open', renderState!)
-                            }}
-                            opening={boxOpenAmt === 0}
-                        />
-                    </div>
-                )}
-
+                    {isInspectingCardboardBox && (
+                        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                            <HoverButton
+                                onClick={() => {
+                                    setBoxOpenAmt(1)
+                                    onAction?.('box-open', renderState!)
+                                }}
+                                opening={boxOpenAmt === 0}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

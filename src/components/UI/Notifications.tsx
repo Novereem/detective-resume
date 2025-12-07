@@ -62,10 +62,18 @@ export function NotificationsViewport({
 
     const pos: React.CSSProperties = { position: 'fixed', zIndex: 3000 }
     const gap = 8
+
     if (position.includes('top')) pos.top = 12
     if (position.includes('bottom')) pos.bottom = 12
-    if (position.includes('left')) pos.left = 12
-    if (position.includes('right')) pos.right = 12
+
+    if (position.includes('center')) {
+        pos.left = '50%'
+        pos.transform = 'translateX(-50%)'
+    } else if (position.includes('right')) {
+        pos.right = 12
+    } else {
+        pos.left = 12
+    }
 
     return (
         <div
@@ -73,7 +81,7 @@ export function NotificationsViewport({
                 ...pos,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
+                alignItems: position.includes('center') ? 'center' : 'flex-start',
                 gap,
                 pointerEvents: 'none',
             }}

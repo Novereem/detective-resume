@@ -3,6 +3,7 @@ import React from 'react'
 import { useGameState } from '@/components/Game/state'
 import type { PuzzleId } from '@/components/Types/game'
 import type { PuzzleConfig } from '@/components/Game/state.data'
+import {useSettings} from "@/components/Settings/SettingsProvider";
 
 type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
@@ -20,6 +21,13 @@ export function CaseProgressHud({
     position?: Corner
     scale?: number
 }) {
+    const { menuOpen, setMenuOpen, isInspecting } = useSettings()
+
+    const toggleMenu = React.useCallback(() => {
+        if (isInspecting) return
+        setMenuOpen(!menuOpen)
+    }, [menuOpen, setMenuOpen, isInspecting])
+
     const { puzzlesConfig, puzzleStatus } = useGameState()
 
     const entries = React.useMemo(
@@ -60,10 +68,9 @@ export function CaseProgressHud({
             style={{
                 position: 'fixed',
                 zIndex: 110,
-                pointerEvents: 'none',
+                pointerEvents: 'auto',
                 ...cornerStyle[position],
             }}
-            aria-hidden
         >
             <div
                 style={{
@@ -88,7 +95,37 @@ export function CaseProgressHud({
                         maxWidth: 220,
                     }}
                 >
-                    <div style={{ fontWeight: 700 }}>Case progress</div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                        }}
+                    >
+                        <div style={{fontWeight: 700}}>Case progress</div>
+
+                        <button
+                            type="button"
+                            onClick={toggleMenu}
+                            aria-label="Toggle game menu"
+                            title="Open/close game menu (Esc)"
+                            style={{
+                                padding: '0 8px',
+                                minWidth: 32,
+                                height: 22,
+                                borderRadius: 8,
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                background: 'rgba(255,255,255,0.08)',
+                                color: 'white',
+                                fontSize: 11,
+                                lineHeight: 1,
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Esc
+                        </button>
+                    </div>
 
                     <div
                         style={{
@@ -111,10 +148,10 @@ export function CaseProgressHud({
                         />
                     </div>
 
-                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                    <div style={{fontSize: 12, opacity: 0.9}}>
                         {solved} / {total} puzzles solved
                     </div>
-                    <div style={{ fontSize: 11, opacity: 0.8 }}>
+                    <div style={{fontSize: 11, opacity: 0.8}}>
                         {available} discovered · {pinned} pinned
                         {allSolved ? ' · Case closed!' : ''}
                     </div>
