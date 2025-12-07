@@ -1,0 +1,166 @@
+{
+  "Resume": {
+    "nav": {
+      "top": "Top",
+      "about": "About",
+      "skills": "Skills",
+      "projects": "Projects",
+      "experience": "Experience",
+      "education": "Education",
+      "contact": "Contact",
+      "backToHomeLong": "Back to home",
+      "backToHomeShort": "Home"
+    },
+    "hero": {
+      "badge": "Open to internships · graduating in 2026",
+      "subtitle": "Software Engineer & UI/UX Designer.",
+      "description": "I design and build digital products end-to-end: from user flows and prototypes to tested, deployed code. I enjoy combining strong engineering practices with clear, memorable user experiences.",
+      "downloadCv": "Download CV (PDF)",
+      "contactCta": "Contact me",
+      "emailLabel": "noovereem@gmail.com"
+    },
+    "about": {
+      "heading": "About",
+      "body1": "I'm a curious software engineer who likes turning complex problems into simple, usable experiences. I work across the stack, where I care most about how people actually interact with the product, and quality maintainable software.",
+      "body2": "I've led multiple big group projects with real stakeholders as the main bridge between design, development and stakeholders needs, and I enjoy making sure everyone knows what we're building and why.",
+      "body3": "Currently studying HBO ICT & Software Engineering at Fontys University (graduating in 2026).",
+      "cardName": "Noah Overeem",
+      "cardRole": "Software engineer · UI/UX Designer",
+      "portraitAlt": "Portrait of Noah Overeem",
+      "snapshotLabel": "Snapshot",
+      "snapshotText": "Web & backend development, game-inspired experiences, UX-driven thinking.",
+      "focusLabel": "Focus areas",
+      "focusBullet1": "Interactive portfolios and storytelling experiences",
+      "focusBullet2": "Practical web tools (calendars, dashboards, soundboards)",
+      "focusBullet3": "Gamification and engagement mechanics"
+    },
+    "skills": {
+      "heading": "Skills",
+      "technicalHeading": "Technical",
+      "collabHeading": "Collaboration, leadership, software & UX",
+      "collabBullet1": "1.5 years of experience as a project lead on group projects with real stakeholders such as Sanquin and LunarFlow.",
+      "collabBullet2": "Comfortable translating stakeholder needs into concrete tasks.",
+      "collabBullet3": "Planning using SCRUM methods with user stories, sprints and clear scope trade-offs.",
+      "collabBullet4": "Facilitating discussions between design and development teammates.",
+      "collabBullet5": "Creating wireframes, user flows and interactive prototypes before building.",
+      "collabBullet6": "Acted as a holistic troubleshooter, resolving functional business issues while simultaneously navigating complex team dynamics and individual concerns with discretion and empathy."
+    },
+    "experience": {
+      "heading": "Experience",
+      "aldiTitle": "Store employee · Aldi",
+      "aldiPeriod": "2023 – Nov 2025",
+      "aldiSubtitle": "Retail · part-time",
+      "aldiBullet1": "Customer service, checkout and stocking in a hectic, understaffed and busy retail environment.",
+      "aldiBullet2": "Working efficiently under time pressure and helping colleagues where needed, and working alongside team leaders to manage and plan tasks.",
+      "aldiBullet3": "Building resilience and clear communication with a wide range of customers.",
+      "sahTitle": "IT support specialist · Studentaanhuis",
+      "sahPeriod": "2021 – 2023",
+      "sahSubtitle": "On-site & remote IT support",
+      "sahBullet1": "Helped customers with hardware, software and network issues at home.",
+      "sahBullet2": "Explained technical problems and solutions in clear, non-technical language.",
+      "sahBullet3": "Managed appointments independently and took responsibility for outcomes.",
+      "earlierExperience": "Earlier retail experience at Albert Heijn and Blokker (2019–2020) building customer contact and teamwork skills."
+    },
+    "education": {
+      "heading": "Education",
+      "fontysTitle": "HBO ICT & Software Engineering",
+      "fontysPeriod": "2020 – expected 2026",
+      "fontysSubtitle": "Fontys University of Applied Sciences, Eindhoven",
+      "fontysBullet1": "Specialised in software engineering with a strong UX and design focus.",
+      "fontysBullet2": "Built projects ranging from backend-heavy APIs to interactive web experiences and gamified concepts.",
+      "havoTitle": "Havo – NT + Technasium",
+      "havoPeriod": "2014 – 2019",
+      "havoSubtitle": "Johannes Fontanus College, Barneveld",
+      "havoBullet1": "Science & technology track with extra project-based, technical courses."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body1": "Interested in working together, offering a graduation internship or chatting about any of these projects? The fastest way to reach me is by email.",
+      "body2": "I'm especially interested in roles around junior software engineer, full-stack developer or UX-minded engineer, while growing as a project lead and adaptable communicator.",
+      "emailCta": "Email Noah",
+      "linkedinLabel": "LinkedIn",
+      "githubLabel": "GitHub"
+    },
+    "projects": {
+      "sectionTitle": "Featured projects",
+      "sectionSubtitle": "A mix of solo builds and team projects I led.",
+      "sectionMeta": "Info parity: the same projects appear in the detective room path.",
+      "viewDetailsCta": "View project details",
+      "close": "Close",
+      "items": {
+        "detective-resume": {
+          "title": "Detective Resume",
+          "role": "Solo developer & UX designer",
+          "tagline": "Interactive 3D resume website for recruiters and engineers.",
+          "bullets": [
+            "Designed a dual-path UX with a fast Quick CV and an optional immersive 3D detective room game.",
+            "Implemented a low-poly detective room with custom engine, custom model renderer, and performance controls.",
+            "Defined and tested measurable acceptance rules around recruiter speed, findability and performance."
+          ],
+          "actions": {
+            "explore": "Explore detective room",
+            "github": "View GitHub"
+          },
+          "detailBody": [
+            "The Detective Resume is an experimental 3D portfolio that lets recruiters either experience a fast CV path or explore a detective room with interactive puzzles.",
+            "The concept started with the question: How different are a recruiter and a detective really? So in this experience the recruiter is put the shoes of a detective.",
+            "The engine uses React Three Fiber as a base layer, adding in a custom modeling renderer, custom shaders and built in performance settings for the highest performance, even on slower office laptops.",
+            "The concept was driven by clearly defined acceptance criteria around speed, findability of key information and technical stability."
+          ]
+        },
+        "tabletop-tunes-2": {
+          "title": "TableTopTunes 2",
+          "role": "Solo full-stack developer",
+          "tagline": "Soundboard web app for tabletop RPGs and D&D sessions.",
+          "bullets": [
+            "Redesigned the architecture with a .NET 8 API and MySQL without an ORM for faster iteration.",
+            "Implemented authentication, scene management and file handling with a high-coverage backend test suite.",
+            "Dockerized the backend and focused on non-functional requirements such as hosting, scaling and failure handling."
+          ],
+          "actions": {
+            "github": "View GitHub"
+          },
+          "detailBody": [
+            "TableTopTunes 2 is a reboot of my earlier soundboard version for tabletop role-play, this time with a cleaner API-first architecture.",
+            "The concept started out from using already available tabletop role-play sound programs, which were priced highly on a monthly basis.",
+            "This application allows the user to manage a custom soundboard with multiple scenes by uploading their own audio with fast speeds and high security.",
+            "The backend is a .NET 8 Web API with explicit SQL instead of an ORM, making it easier to iterate on the domain model during development.",
+            "Focus areas include logging, explicit but flexible error handling, clear SOC, and robust testing before deployment using Docker."
+          ]
+        },
+        "lunarflow": {
+          "title": "LunarFlow – Eclipse marketing calendar",
+          "role": "UX designer & team lead",
+          "tagline": "Planning tool concept for Eclipse Foundation’s marketing team.",
+          "bullets": [
+            "Led UX design for a planning tool that connects marketing campaigns with 400+ open-source projects.",
+            "Mapped stakeholder workflows and pains around multi-tool planning (Slack, GitLab, spreadsheets).",
+            "Designed list, weekly and monthly calendar views with improved filtering, hierarchy and readability."
+          ],
+          "detailBody": [
+            "LunarFlow explores how Eclipse Foundation’s marketing team could plan campaigns across many open-source projects in one place.",
+            "With over 400 open-source projects to market, spreadsheets and Slack didn't allow for clear communication with those projects and their teams.",
+            "I led interviews and dug into their work flow to understand how work was currently spread over Slack, GitLab and spreadsheets, and which information people were missing.",
+            "The concept applies Material Design 3, with a focus on hierarchy, filtering and clarity in dense calendar views."
+          ]
+        },
+        "sanquin": {
+          "title": "Sanquin blood donation app",
+          "role": "Frontend lead & team lead",
+          "tagline": "Gamified concept to motivate blood donors to donate more often.",
+          "bullets": [
+            "Led the group project and coordinated requirements with stakeholders around donor journeys and gamification.",
+            "Implemented key React Native screens and reusable components for donor type flows, community and rewards.",
+            "Focused on aligning UI flows with stakeholder feedback while keeping the codebase maintainable and demo-ready."
+          ],
+          "detailBody": [
+            "This group project for Sanquin focused on making blood donation feel more engaging and less abstract through ethical gamification and social encouragement.",
+            "The concept balances point systems, badges and community aspects like making appointments with friends with the seriousness of blood donation and the different donor motivations.",
+            "I acted as team lead and frontend lead, working together with designer teammates to create highly flexible UI components using React Native.",
+            "These highly flexible UI components allowed for quick and easy adjustments with ever changing designs, allowing for quick iterations"
+          ]
+        }
+      }
+    }
+  }
+}

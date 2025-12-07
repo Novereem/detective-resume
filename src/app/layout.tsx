@@ -1,12 +1,13 @@
-import './globals.css'
-import {Metadata} from "next";
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import "./globals.css";
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
-    title: 'My Portfolio',
-    description: 'Welcome to my interactive portfolio',
-}
+    title: "Detective Resume | Noah Overeem",
+    description:
+        "Choose between a quick CV overview or an immersive detective-room experience of Noah Overeem's resume.",
+};
 
 export default function RootLayout({
                                        children,
@@ -15,8 +16,8 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <Analytics/>
             <body className="antialiased">
+                <Analytics />
                 {children}
                 <SpeedInsights />
             </body>

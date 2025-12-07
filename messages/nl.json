@@ -1,0 +1,166 @@
+{
+  "Resume": {
+    "nav": {
+      "top": "Bovenaan",
+      "about": "Over mij",
+      "skills": "Vaardigheden",
+      "projects": "Projecten",
+      "experience": "Werkervaring",
+      "education": "Opleiding",
+      "contact": "Contact",
+      "backToHomeLong": "Terug naar home",
+      "backToHomeShort": "Home"
+    },
+    "hero": {
+      "badge": "Open voor (afstudeer)stage · afstuderen in 2026",
+      "subtitle": "Software Engineer & UI/UX Designer.",
+      "description": "Ik ontwerp en bouw digitale producten van A tot Z: van user flows en prototypes tot geteste, uitgerolde code. Ik combineer graag sterke engineering-praktijken met duidelijke, memorabele gebruikerservaringen.",
+      "downloadCv": "Download cv (PDF)",
+      "contactCta": "Neem contact op",
+      "emailLabel": "noovereem@gmail.com"
+    },
+    "about": {
+      "heading": "Over mij",
+      "body1": "Ik ben een nieuwsgierige software engineer die graag complexe problemen vertaalt naar eenvoudige, bruikbare experiences. Ik werk over de hele stack, maar ik geef het meest om hoe mensen daadwerkelijk met het product omgaan en om kwalitatieve, onderhoudbare software.",
+      "body2": "Ik heb meerdere grote groepsprojecten geleid met echte stakeholders, waarbij ik fungeerde als de brug tussen design, development en de behoeften van de opdrachtgever. Ik vind het belangrijk dat iedereen weet wat we bouwen en waarom.",
+      "body3": "Momenteel studeer ik HBO-ICT & Software Engineering aan Fontys Hogeschool (afstuderen in 2026).",
+      "cardName": "Noah Overeem",
+      "cardRole": "Software engineer · UI/UX Designer",
+      "portraitAlt": "Portret van Noah Overeem",
+      "snapshotLabel": "Snapshot",
+      "snapshotText": "Web & backend development, game-geïnspireerde experiences, UX-gedreven denken.",
+      "focusLabel": "Focusgebieden",
+      "focusBullet1": "Interactieve portfolio’s en verhalende experiences",
+      "focusBullet2": "Praktische webtools (kalenders, dashboards, soundboards)",
+      "focusBullet3": "Gamification en engagementmechanieken"
+    },
+    "skills": {
+      "heading": "Vaardigheden",
+      "technicalHeading": "Technisch",
+      "collabHeading": "Samenwerking, leiderschap, software & UX",
+      "collabBullet1": "1,5 jaar ervaring als project lead op groepsprojecten met echte stakeholders zoals Sanquin en LunarFlow.",
+      "collabBullet2": "Comfortabel in het vertalen van stakeholderbehoeften naar concrete taken.",
+      "collabBullet3": "Planning met SCRUM-methoden, user stories, sprints en duidelijke keuzes in scope.",
+      "collabBullet4": "Gesprekken faciliteren tussen design- en developmentteamgenoten.",
+      "collabBullet5": "Maken van wireframes, user flows en interactieve prototypes voordat er gebouwd wordt.",
+      "collabBullet6": "Opgetreden als allround troubleshooter: zowel functionele businessproblemen oplossen als omgaan met complexe teamdynamiek en individuele zorgen, met discretie en empathie."
+    },
+    "experience": {
+      "heading": "Werkervaring",
+      "aldiTitle": "Winkelmedewerker · Aldi",
+      "aldiPeriod": "2023 – nov 2025",
+      "aldiSubtitle": "Retail · bijbaan",
+      "aldiBullet1": "Klantcontact, kassa en vakkenvullen in een drukke, vaak onderbezette supermarkt.",
+      "aldiBullet2": "Efficiënt werken onder tijdsdruk, collega’s helpen waar nodig en samen met teamleiders taken plannen.",
+      "aldiBullet3": "Weerbaarheid opgebouwd en duidelijk leren communiceren met een brede groep klanten.",
+      "sahTitle": "IT-supportspecialist · Studentaanhuis",
+      "sahPeriod": "2021 – 2023",
+      "sahSubtitle": "On-site & remote IT-support",
+      "sahBullet1": "Klanten geholpen met hardware-, software- en netwerkproblemen aan huis.",
+      "sahBullet2": "Technische problemen en oplossingen in duidelijke, niet-technische taal uitgelegd.",
+      "sahBullet3": "Afspraken zelfstandig gepland en de verantwoordelijkheid genomen voor het eindresultaat.",
+      "earlierExperience": "Eerdere retailervaring bij Albert Heijn en Blokker (2019–2020), met focus op klantcontact en samenwerken in een team."
+    },
+    "education": {
+      "heading": "Opleiding",
+      "fontysTitle": "HBO ICT & Software Engineering",
+      "fontysPeriod": "2020 – verwacht 2026",
+      "fontysSubtitle": "Fontys Hogeschool ICT, Eindhoven",
+      "fontysBullet1": "Gespecialiseerd in software engineering met een sterke focus op UX en design.",
+      "fontysBullet2": "Projecten gebouwd variërend van backend-gedreven API’s tot interactieve webexperiences en gamified concepten.",
+      "havoTitle": "Havo – Natuur & Techniek + Technasium",
+      "havoPeriod": "2014 – 2019",
+      "havoSubtitle": "Johannes Fontanus College, Barneveld",
+      "havoBullet1": "Profiel Natuur & Techniek met extra projectonderwijs binnen het Technasium."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body1": "Interesse om samen te werken, een afstudeerstage aan te bieden of te sparren over een van deze projecten? De snelste manier om mij te bereiken is via e-mail.",
+      "body2": "Ik ben vooral geïnteresseerd in rollen als junior software engineer, full-stack developer of UX-minded engineer, terwijl ik verder groei als project lead en flexibele communicator.",
+      "emailCta": "Mail Noah",
+      "linkedinLabel": "LinkedIn",
+      "githubLabel": "GitHub"
+    },
+    "projects": {
+      "sectionTitle": "Uitgelichte projecten",
+      "sectionSubtitle": "Een mix van solo-projecten en groepsprojecten waarin ik de lead had.",
+      "sectionMeta": "Inhoud is gelijk: dezelfde projecten staan ook in het detective-pad.",
+      "viewDetailsCta": "Bekijk projectdetails",
+      "close": "Sluiten",
+      "items": {
+        "detective-resume": {
+          "title": "Detective Resume",
+          "role": "Solo developer & UX designer",
+          "tagline": "Interactieve 3D-cv-website voor recruiters en engineers.",
+          "bullets": [
+            "Een dual-path UX ontworpen met een snelle Quick CV en een optionele, meer immersieve 3D-detectivekamer.",
+            "Een low-poly detectivekamer geïmplementeerd met een eigen engine, custom model renderer en performance-instellingen.",
+            "Meetbare acceptatiecriteria gedefinieerd en getest rond snelheid voor recruiters, vindbaarheid en performance."
+          ],
+          "actions": {
+            "explore": "Verken detectivekamer",
+            "github": "Bekijk GitHub"
+          },
+          "detailBody": [
+            "Detective Resume is een experimentele 3D-portfolio waarin recruiters kunnen kiezen tussen een snelle cv-route of een detectivekamer met interactieve puzzels.",
+            "Het concept begon met de vraag: hoe verschillend zijn een recruiter en een detective eigenlijk? In deze experience kruipt de recruiter in de huid van de detective.",
+            "De engine gebruikt React Three Fiber als basis, met daarbovenop een custom modeling renderer, eigen shaders en ingebouwde performance-settings voor goede performance, zelfs op tragere kantoor-laptops.",
+            "Het concept is gestuurd door duidelijke acceptatiecriteria rond snelheid, vindbaarheid van belangrijke informatie en technische stabiliteit."
+          ]
+        },
+        "tabletop-tunes-2": {
+          "title": "TableTopTunes 2",
+          "role": "Solo full-stack developer",
+          "tagline": "Soundboard web app voor tabletop RPG- en D&D-sessies.",
+          "bullets": [
+            "De architectuur opnieuw ontworpen met een .NET 8 API en MySQL zonder ORM voor snellere iteratie.",
+            "Authenticatie, scene management en file handling geïmplementeerd met een backend met hoge testdekking.",
+            "De backend gedockerized en gefocust op non-functional requirements zoals hosting, schaalbaarheid en foutafhandeling."
+          ],
+          "actions": {
+            "github": "Bekijk GitHub"
+          },
+          "detailBody": [
+            "TableTopTunes 2 is een reboot van mijn eerdere soundboardversie voor tabletop role-play, dit keer met een schonere, API-first architectuur.",
+            "Het idee ontstond vanuit bestaande tabletop-soundtools die vaak duur waren in maandelijkse abonnementen.",
+            "De applicatie laat gebruikers hun eigen soundboard met meerdere scenes beheren door eigen audio te uploaden, met hoge snelheid en goede security.",
+            "De backend is een .NET 8 Web API met expliciete SQL in plaats van een ORM, zodat het domeinmodel makkelijker is aan te passen tijdens development.",
+            "Focuspunten zijn onder andere logging, expliciete maar flexibele error handling, duidelijke separation of concerns en robuuste tests vóór deployment met Docker."
+          ]
+        },
+        "lunarflow": {
+          "title": "LunarFlow – Eclipse marketingkalender",
+          "role": "UX designer & team lead",
+          "tagline": "Planningstool-concept voor het marketingteam van de Eclipse Foundation.",
+          "bullets": [
+            "UX ontworpen voor een planningstool die marketingcampagnes koppelt aan meer dan 400 open-sourceprojecten.",
+            "Stakeholder-workflows en pijnpunten in kaart gebracht rondom plannen over meerdere tools (Slack, GitLab, spreadsheets).",
+            "List-, week- en maandweergaven ontworpen met betere filtering, hiërarchie en leesbaarheid."
+          ],
+          "detailBody": [
+            "LunarFlow onderzoekt hoe het marketingteam van de Eclipse Foundation campagnes over veel verschillende open-sourceprojecten in één omgeving kan plannen.",
+            "Met meer dan 400 open-sourceprojecten boden spreadsheets en Slack te weinig structuur voor duidelijke communicatie met die projecten en teams.",
+            "Ik heb interviews gehouden en hun workflow uitgeplozen om te begrijpen hoe werk nu verdeeld is over Slack, GitLab en spreadsheets en welke informatie mensen missen.",
+            "Het concept past Material Design 3 toe, met focus op hiërarchie, filtering en duidelijkheid in drukke kalenderweergaven."
+          ]
+        },
+        "sanquin": {
+          "title": "Sanquin blood donation app",
+          "role": "Frontend lead & team lead",
+          "tagline": "Gamified concept om bloeddonoren te motiveren vaker te doneren.",
+          "bullets": [
+            "Groepsproject geleid en requirements afgestemd met stakeholders rondom donor journeys en gamification.",
+            "Belangrijke React Native-schermen en herbruikbare components gebouwd voor donorflows, community en beloningen.",
+            "Gefocust op UX-flows die aansluiten op stakeholderfeedback, terwijl de codebase onderhoudbaar en demo-klaar bleef."
+          ],
+          "detailBody": [
+            "Dit groepsproject voor Sanquin richtte zich op het leuker en tastbaarder maken van bloeddonatie via ethische gamification en sociale motivatie.",
+            "Het concept zoekt balans tussen puntensystemen, badges en community-features (zoals samen met vrienden een afspraak maken) en de serieuze kant van bloeddonatie en verschillende donormotivaties.",
+            "Ik was zowel team lead als frontend lead en werkte nauw samen met designers om flexibele UI-components in React Native te bouwen.",
+            "Die flexibele components maakten snelle aanpassingen mogelijk bij veranderende designs en zorgden voor snelle iteraties."
+          ]
+        }
+      }
+    }
+  }
+}
