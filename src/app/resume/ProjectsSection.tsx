@@ -5,33 +5,15 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import AnimatedSection from "@/app/resume/AnimatedSection";
-
-type Project = {
-    id: string;
-    title: string;
-    role: string;
-    period?: string;
-    tagline: string;
-    tech: string[];
-    bullets: string[];
-    primaryLink: {
-        label: string;
-        href: string;
-    };
-    secondaryLinks?: {
-        label: string;
-        href: string;
-    }[];
-    detailCtaLabel?: string;
-    detailImage: string;
-    detailBody: string[];
-};
+import type { Project } from "@/app/resume/projects-data";
 
 interface ProjectsSectionProps {
     projects: Project[];
 }
 
 type OverlayState = "hidden" | "entering" | "visible" | "exiting";
+
+const isExternalHref = (href: string) => href.startsWith("http");
 
 export default function ProjectsSection({ projects }: ProjectsSectionProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -155,7 +137,8 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                         <ul className="mt-3 space-y-1 text-sm text-zinc-300">
                             {project.bullets.map((bullet) => (
                                 <li key={bullet} className="flex gap-2">
-                                    <span className="mt-[5px] inline-block h-1 w-1 flex-none rounded-full bg-gradient-to-r from-sky-400 to-fuchsia-400" />
+                                    <span
+                                        className="mt-[5px] inline-block h-1 w-1 flex-none rounded-full bg-gradient-to-r from-sky-400 to-fuchsia-400"/>
                                     <span>{bullet}</span>
                                 </li>
                             ))}
@@ -173,52 +156,28 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                         </div>
 
                         <div className="mt-auto pt-4 flex flex-wrap items-center gap-3 text-sm font-semibold">
-                            {(() => {
-                                const isDetailsPrimary =
-                                    project.id === "lunarflow" || project.id === "sanquin";
-                                const detailsLabel = project.detailCtaLabel ?? "View details";
+                            <button
+                                type="button"
+                                onClick={() => openOverlay(project.id)}
+                                className="rounded-full bg-zinc-50 px-4 py-2 text-black transition hover:bg-white hover:shadow-md active:scale-[0.98]"
+                            >
+                                View project details
+                            </button>
 
-                                if (isDetailsPrimary) {
-                                    return (
-                                        <button
-                                            type="button"
-                                            onClick={() => openOverlay(project.id)}
-                                            className="rounded-full bg-zinc-50 px-4 py-2 text-black transition hover:bg-white hover:shadow-md active:scale-[0.98]"
-                                        >
-                                            {detailsLabel}
-                                        </button>
-                                    );
-                                }
-
+                            {project.actions?.map((action) => {
+                                const isExternal = isExternalHref(action.href);
                                 return (
-                                    <>
-                                        <Link
-                                            href={project.primaryLink.href}
-                                            className="rounded-full bg-zinc-50 px-4 py-2 text-black transition hover:bg-white hover:shadow-md active:scale-[0.98]"
-                                        >
-                                            {project.primaryLink.label}
-                                        </Link>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => openOverlay(project.id)}
-                                            className="text-xs font-normal text-zinc-400 underline-offset-4 transition hover:text-zinc-100 hover:underline"
-                                        >
-                                            {detailsLabel}
-                                        </button>
-
-                                        {project.secondaryLinks?.map((link) => (
-                                            <Link
-                                                key={link.label}
-                                                href={link.href}
-                                                className="text-xs font-normal text-zinc-400 underline-offset-4 transition hover:text-zinc-100 hover:underline"
-                                            >
-                                                {link.label}
-                                            </Link>
-                                        ))}
-                                    </>
+                                    <Link
+                                        key={action.label}
+                                        href={action.href}
+                                        target={isExternal ? "_blank" : undefined}
+                                        rel={isExternal ? "noreferrer" : undefined}
+                                        className="text-xs font-normal text-zinc-400 underline-offset-4 transition hover:text-zinc-100 hover:underline"
+                                    >
+                                        {action.label}
+                                    </Link>
                                 );
-                            })()}
+                            })}
                         </div>
                     </article>
                 ))}
@@ -243,7 +202,8 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                             </button>
 
                             <div className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.2fr)] md:items-start">
-                                <div className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900 md:mb-0">
+                                <div
+                                    className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900 md:mb-0">
                                     <Image
                                         src={activeProject.detailImage}
                                         alt={activeProject.title}
@@ -292,23 +252,24 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                                         ))}
                                     </div>
 
-                                    <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-                                        <Link
-                                            href={activeProject.primaryLink.href}
-                                            className="rounded-full bg-zinc-50 px-4 py-2 text-black transition hover:bg-white hover:shadow-md active:scale-[0.98]"
-                                        >
-                                            {activeProject.primaryLink.label}
-                                        </Link>
-                                        {activeProject.secondaryLinks?.map((link) => (
-                                            <Link
-                                                key={link.label}
-                                                href={link.href}
-                                                className="text-zinc-300 underline-offset-4 transition hover:text-zinc-100 hover:underline"
-                                            >
-                                                {link.label}
-                                            </Link>
-                                        ))}
-                                    </div>
+                                    {activeProject.actions && activeProject.actions.length > 0 && (
+                                        <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                                            {activeProject.actions.map((action) => {
+                                                const isExternal = isExternalHref(action.href);
+                                                return (
+                                                    <Link
+                                                        key={action.label}
+                                                        href={action.href}
+                                                        target={isExternal ? "_blank" : undefined}
+                                                        rel={isExternal ? "noreferrer" : undefined}
+                                                        className="text-zinc-300 underline-offset-4 transition hover:text-zinc-100 hover:underline"
+                                                    >
+                                                        {action.label}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

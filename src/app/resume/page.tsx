@@ -5,144 +5,14 @@ import SectionNav from "@/app/resume/SectionNav";
 import AnimatedSection from "@/app/resume/AnimatedSection";
 import BackgroundFX from "@/app/resume/BackgroundFX";
 import ProjectsSection from "@/app/resume/ProjectsSection";
+import { featuredProjects } from "@/app/resume/projects-data";
+import EmailLink from "@/app/resume/EmailLink";
 
 export const metadata: Metadata = {
     title: "Resume | Noah Overeem",
     description:
         "Quick CV for Noah Overeem – software engineer with a UX mindset, specialising in web, backend and gamified experiences.",
 };
-
-type Project = {
-    id: string;
-    title: string;
-    role: string;
-    period?: string;
-    tagline: string;
-    tech: string[];
-    bullets: string[];
-    primaryLink: {
-        label: string;
-        href: string;
-    };
-    secondaryLinks?: {
-        label: string;
-        href: string;
-    }[];
-    detailCtaLabel?: string;
-    detailImage: string;
-    detailBody: string[];
-};
-
-const featuredProjects: Project[] = [
-    {
-        id: "detective-resume",
-        title: "Detective Resume",
-        role: "Solo developer & UX designer",
-        period: "2024 – 2025",
-        tagline: "Interactive 3D resume website for recruiters and engineers.",
-        tech: ["Next.js", "TypeScript", "React Three Fiber", "Three.js"],
-        bullets: [
-            "Designed a dual-path UX with a fast Quick CV and an optional immersive 3D detective room game.",
-            "Implemented a low-poly detective room with custom models, outlines and performance controls.",
-            "Defined and tested measurable acceptance rules around recruiter speed, findability and performance.",
-        ],
-        primaryLink: {
-            label: "Explore detective room",
-            href: "/detective-room",
-        },
-        secondaryLinks: [
-            {
-                label: "View GitHub",
-                href: "https://github.com/Novereem/detective-resume",
-            },
-        ],
-        detailCtaLabel: "View project details",
-        detailImage: "/resume-images/projects/detective-resume.jpg",
-        detailBody: [
-            "The Detective Resume is an experimental 3D portfolio that lets recruiters either skim a fast CV path or explore a detective room with interactive puzzles.",
-            "Each scene and object is built with React Three Fiber and custom shaders, while still keeping performance good enough for mid-range laptops.",
-            "The concept was driven by clearly defined acceptance criteria around speed, findability of key information and technical stability.",
-        ],
-    },
-    {
-        id: "tabletop-tunes-2",
-        title: "TableTopTunes 2",
-        role: "Solo full-stack developer",
-        period: "2025 – present",
-        tagline: "Soundboard web app for tabletop RPGs and D&D sessions.",
-        tech: [".NET 8 Web API", "TypeScript", "React / (new frontend)", "MySQL", "Docker"],
-        bullets: [
-            "Redesigned the architecture with a .NET 8 API and MySQL without an ORM for faster iteration.",
-            "Implemented authentication, scene management and file handling with a high-coverage backend test suite.",
-            "Dockerized the backend and focused on non-functional requirements such as hosting, scaling and failure handling.",
-        ],
-        primaryLink: {
-            label: "View code",
-            href: "https://github.com/Novereem/table-top-tunes2",
-        },
-        secondaryLinks: [
-            {
-                label: "",
-                href: "#",
-            },
-        ],
-        detailCtaLabel: "View project details",
-        detailImage: "/resume-images/projects/tabletop-tunes-2.jpg",
-        detailBody: [
-            "TableTopTunes 2 is a reboot of my earlier soundboard for tabletop role-play, this time with a cleaner API-first architecture.",
-            "The backend is a .NET 8 Web API with explicit SQL instead of an ORM, making it easier to iterate on the domain model during development.",
-            "Focus areas include logging, error handling, deployment with Docker and thinking about how this would eventually be hosted on a small server.",
-        ],
-    },
-    {
-        id: "lunarflow",
-        title: "LunarFlow – Eclipse marketing calendar",
-        role: "UX designer & team lead",
-        period: "2025",
-        tagline: "Planning tool concept for Eclipse Foundation’s marketing team.",
-        tech: ["Figma", "Material Design 3", "Design systems"],
-        bullets: [
-            "Led UX design for a planning tool that connects marketing campaigns with 400+ open-source projects.",
-            "Mapped stakeholder workflows and pains around multi-tool planning (Slack, GitLab, spreadsheets).",
-            "Designed list, weekly and monthly calendar views with improved filtering, hierarchy and readability.",
-        ],
-        primaryLink: {
-            label: "View design case",
-            href: "#",
-        },
-        detailCtaLabel: "View design case",
-        detailImage: "/resume-images/projects/lunarflow.jpg",
-        detailBody: [
-            "LunarFlow explores how Eclipse Foundation’s marketing team could plan campaigns across many open-source projects in one place.",
-            "I led workshops and interviews to understand how work was currently spread over Slack, GitLab and spreadsheets, and which information people were missing.",
-            "The concept applies Material Design 3, with a focus on hierarchy, filtering and clarity in dense calendar views.",
-        ],
-    },
-    {
-        id: "sanquin",
-        title: "Sanquin blood donation app",
-        role: "Frontend lead & team lead",
-        period: "2024",
-        tagline: "Gamified concept to motivate blood donors to donate more often.",
-        tech: ["React Native", "Figma", "Component-driven UI"],
-        bullets: [
-            "Led the group project and coordinated requirements with stakeholders around donor journeys and gamification.",
-            "Implemented key React Native screens and reusable components for donor type flows, community and rewards.",
-            "Focused on aligning UI flows with stakeholder feedback while keeping the codebase maintainable and demo-ready.",
-        ],
-        primaryLink: {
-            label: "View project summary",
-            href: "#",
-        },
-        detailCtaLabel: "View project summary",
-        detailImage: "/resume-images/projects/sanquin.jpg",
-        detailBody: [
-            "This group project for Sanquin focused on making blood donation feel more engaging and less abstract through gamification.",
-            "I acted as team lead and frontend lead, translating stakeholder input into concrete flows and React Native screens.",
-            "The concept balances point systems, badges and community aspects with the seriousness of blood donation and the different donor motivations.",
-        ],
-    },
-];
 
 const navSections: { id: string; label: string }[] = [
     { id: "top", label: "Top" },
@@ -177,7 +47,7 @@ export default function ResumePage() {
                 <HeroSection/>
                 <SnapshotSection/>
                 <SkillsSection/>
-                <ProjectsSection projects={featuredProjects}/>
+                <ProjectsSection projects={featuredProjects} />
                 <ExperienceSection/>
                 <EducationSection/>
                 <ContactSection/>
@@ -218,6 +88,8 @@ function HeroSection() {
                 <div className="flex flex-wrap items-center gap-4">
                     <Link
                         href="/noah-overeem-cv.pdf"
+                        target="_blank"
+                        rel="noreferrer"
                         className="rounded-full bg-zinc-50 px-6 py-3 text-base font-semibold text-black shadow-sm transition hover:bg-white hover:shadow-lg active:scale-[0.98]"
                     >
                         Download CV (PDF)
@@ -229,15 +101,14 @@ function HeroSection() {
                         Contact me
                     </Link>
                     <div className="flex flex-wrap gap-4 text-sm text-zinc-400 sm:text-base">
-                        <Link
-                            href="mailto:noovereem@gmail.com"
-                            className="transition hover:text-zinc-100"
-                        >
+                        <EmailLink className="transition hover:text-zinc-100">
                             noovereem@gmail.com
-                        </Link>
+                        </EmailLink>
                         <span className="hidden text-zinc-500 sm:inline">·</span>
                         <Link
                             href="https://www.linkedin.com/in/noah-overeem-2028231b5"
+                            target="_blank"
+                            rel="noreferrer"
                             className="transition hover:text-zinc-100"
                         >
                             LinkedIn
@@ -245,6 +116,8 @@ function HeroSection() {
                         <span className="hidden text-zinc-500 sm:inline">·</span>
                         <Link
                             href="https://www.github.com/Novereem/"
+                            target="_blank"
+                            rel="noreferrer"
                             className="transition hover:text-zinc-100"
                         >
                             GitHub
@@ -274,7 +147,8 @@ function SnapshotSection() {
                         actually interact with the product, and quality maintainable software.
                     </p>
                     <p className="text-base text-zinc-200 sm:text-lg">
-                        I&apos;ve led multiple big group projects with real stakeholders as the main bridge between design, development
+                        I&apos;ve led multiple big group projects with real stakeholders as the main bridge between
+                        design, development
                         and stakeholders needs, and I enjoy making sure everyone knows what we&apos;re building
                         and why.
                     </p>
@@ -287,7 +161,8 @@ function SnapshotSection() {
                     </p>
                 </div>
 
-                <div className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200 sm:text-base">
+                <div
+                    className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-200 sm:text-base">
                     {/* Portrait + name */}
                     <div className="flex items-center gap-4">
                         <div className="relative h-20 w-20 overflow-hidden rounded-full border border-white/20 bg-black/40">
@@ -379,14 +254,12 @@ function SkillsSection() {
                         Collaboration, leadership, software &amp; UX
                     </h3>
                     <ul className="mt-4 space-y-2 ml-5 text-base text-zinc-200 list-disc">
-                        <li>Experienced group project lead on Sanquin and LunarFlow.</li>
-                        <li>
-                            Comfortable translating stakeholder needs into concrete flows, screens and
-                            tasks.
-                        </li>
-                        <li>Planning work with user stories, sprints and clear scope trade-offs.</li>
+                        <li>1.5 years of experience as a project lead on group projects with real stakeholders such as Sanquin and LunarFlow.</li>
+                        <li>Comfortable translating stakeholder needs into concrete tasks.</li>
+                        <li>Planning using SCRUM methods with user stories, sprints and clear scope trade-offs.</li>
                         <li>Facilitating discussions between design and development teammates.</li>
                         <li>Creating wireframes, user flows and interactive prototypes before building.</li>
+                        <li>Acted as a holistic troubleshooter, resolving functional business issues while simultaneously navigating complex team dynamics and individual concerns with discretion and empathy.</li>
                     </ul>
                 </div>
             </div>
@@ -415,8 +288,8 @@ function ExperienceSection() {
                     </div>
                     <p className="mt-1 text-sm text-zinc-400">Retail · part-time</p>
                     <ul className="mt-2 ml-5 list-disc space-y-1.5 text-base text-zinc-200">
-                        <li>Customer service, checkout and stocking in a hectic and busy retail environment.</li>
-                        <li>Working efficiently under time pressure and helping colleagues where needed.</li>
+                        <li>Customer service, checkout and stocking in a hectic, understaffed and busy retail environment.</li>
+                        <li>Working efficiently under time pressure and helping colleagues where needed, and working alongside team leaders to manage and plan tasks.</li>
                         <li>Building resilience and clear communication with a wide range of customers.</li>
                     </ul>
                 </div>
@@ -511,26 +384,26 @@ function ContactSection() {
                     </p>
                     <p>
                         I&apos;m especially interested in roles around junior software engineer,
-                        full-stack developer or UX-minded engineer.
+                        full-stack developer or UX-minded engineer, while growing as a project lead and adaptable communicator.
                     </p>
                 </div>
 
-                {/* Buttons row, same idea as in HeroSection */}
                 <div className="flex flex-wrap items-center gap-3">
-                    <Link
-                        href="mailto:noovereem@gmail.com"
-                        className="rounded-full bg-zinc-50 px-6 py-3 text-base font-semibold text-black shadow-sm transition hover:bg-white hover:shadow-lg active:scale-[0.98]"
-                    >
+                    <EmailLink className="rounded-full bg-zinc-50 px-6 py-3 text-base font-semibold text-black shadow-sm transition hover:bg-white hover:shadow-lg active:scale-[0.98]">
                         Email Noah
-                    </Link>
+                    </EmailLink>
                     <Link
                         href="https://www.linkedin.com/in/noah-overeem-2028231b5"
+                        target="_blank"
+                        rel="noreferrer"
                         className="rounded-full border border-white/20 bg-white/5 px-6 py-3 text-base font-semibold text-zinc-100 shadow-sm transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98]"
                     >
                         LinkedIn
                     </Link>
                     <Link
                         href="https://www.github.com/Novereem/"
+                        target="_blank"
+                        rel="noreferrer"
                         className="rounded-full border border-white/20 bg-white/5 px-6 py-3 text-base font-semibold text-zinc-100 shadow-sm transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98]"
                     >
                         GitHub
