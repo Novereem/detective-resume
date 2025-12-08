@@ -20,10 +20,10 @@ export function MagnifierDebug() {
 
         if (key !== lastKeyRef.current) {
             lastKeyRef.current = key
-            console.log('[MagnifierDebug]', {
-                held,
-                mask: { ...mask },
-            })
+            // console.log('[MagnifierDebug]', {
+            //     held,
+            //     mask: { ...mask },
+            // })
         }
     })
 

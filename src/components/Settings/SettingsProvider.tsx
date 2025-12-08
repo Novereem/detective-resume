@@ -272,6 +272,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setControlsHintPosition('bottom-left')
         setMouseSensitivity(mouseSensBase)
         setOrientDamping(orientDampingBase)
+        setMoveBackToDeskEnabled(true);
     }, [mouseSensBase, orientDampingBase])
 
     /**

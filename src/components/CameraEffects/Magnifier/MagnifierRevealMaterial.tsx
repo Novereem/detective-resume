@@ -73,14 +73,14 @@ export function MagnifierRevealMaterial({
         shader.uniforms.uAspect.value = persp.aspect || 1
 
         if (!loggedOnceRef.current) {
-            console.log('[MagnifierRevealMaterial] first update (screen mask)', {
-                active: mask.active,
-                origin: mask.origin,
-                dir: mask.dir,
-                radius: mask.radius,
-                debug,
-                aspect: shader.uniforms.uAspect.value,
-            })
+            // console.log('[MagnifierRevealMaterial] first update (screen mask)', {
+            //     active: mask.active,
+            //     origin: mask.origin,
+            //     dir: mask.dir,
+            //     radius: mask.radius,
+            //     debug,
+            //     aspect: shader.uniforms.uAspect.value,
+            // })
             loggedOnceRef.current = true
         }
     })
@@ -90,10 +90,10 @@ export function MagnifierRevealMaterial({
             ref={materialRef}
             {...rest}
             onBeforeCompile={(shader: any) => {
-                console.log(
-                    '[MagnifierRevealMaterial] onBeforeCompile, fragmentShader head:',
-                    shader.fragmentShader.slice(0, 200)
-                )
+                // console.log(
+                //     '[MagnifierRevealMaterial] onBeforeCompile, fragmentShader head:',
+                //     shader.fragmentShader.slice(0, 200)
+                // )
 
                 shader.uniforms.uMaskActive = uniforms.uMaskActive
                 shader.uniforms.uMaskOrigin = uniforms.uMaskOrigin
@@ -130,7 +130,7 @@ export function MagnifierRevealMaterial({
                 ` + shader.fragmentShader
 
                 if (shader.fragmentShader.includes('void main() {')) {
-                    console.log('[MagnifierRevealMaterial] patching main() for screen-space circle + debug (aspect-correct)')
+                    // console.log('[MagnifierRevealMaterial] patching main() for screen-space circle + debug (aspect-correct)')
                     shader.fragmentShader = shader.fragmentShader.replace(
                         'void main() {',
                         `
