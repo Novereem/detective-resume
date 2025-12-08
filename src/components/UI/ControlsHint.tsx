@@ -22,7 +22,7 @@ export function ControlsHint({
 }) {
     const { controlsHintVisible, setControlsHintVisible } = useSettings()
     const [showToast, setShowToast] = React.useState(false)
-    const [toastKey, setToastKey] = React.useState(0) // restart animation each time
+    const [toastKey, setToastKey] = React.useState(0)
 
     const hide = React.useCallback(() => {
         setControlsHintVisible(false)
@@ -31,7 +31,7 @@ export function ControlsHint({
     }, [setControlsHintVisible])
 
     React.useEffect(() => {
-        if (controlsHintVisible) setShowToast(false) // if re-enabled via menu, remove toast
+        if (controlsHintVisible) setShowToast(false)
     }, [controlsHintVisible])
 
     if (!controlsHintVisible && !showToast) return null
@@ -50,7 +50,6 @@ export function ControlsHint({
         </div>
     )
 
-    // Toast branch (fade-out only)
     if (!controlsHintVisible && showToast) {
         return (
             <div style={{ position: 'fixed', zIndex: 120, pointerEvents: 'none', ...cornerStyle[position] }} aria-live="polite">
@@ -93,7 +92,6 @@ export function ControlsHint({
         )
     }
 
-    // Main hint panel (unchanged)
     return (
         <div
             style={{ position: 'fixed', zIndex: 120, pointerEvents: 'none', ...cornerStyle[position] }}
@@ -141,10 +139,10 @@ export function ControlsHint({
                         ×
                     </button>
 
-                    <Row icon={<MouseIcon button="left" size={22} />}  label="Inspect"          hint="Left click" />
+                    <Row icon={<MouseIcon button="left" size={22} />}  label="Inspect" hint="Left click" />
                     <Row icon={<MouseIcon button="right" size={22} />} label="Move to object"   hint="Right click" />
-                    <Row icon={<DragIcon size={22} />}                 label="Orbit camera"     hint="Hold left click + move" />
-                    <Row icon={<KbdEscIcon size={22} />}               label="Menu"             hint="Press Esc" />
+                    <Row icon={<HoldLeftMouseIcon size={22} />} label="Orbit camera" hint="Hold left click + mooooooove" />
+                    <Row icon={<KbdEscIcon size={22} />} label="Menu" hint="Press Esc" />
                 </div>
             </Scaled>
         </div>
@@ -174,13 +172,18 @@ function MouseIcon({ button, size = 22 }: { button: 'left' | 'right'; size?: num
     )
 }
 
-function DragIcon({ size = 22 }: { size?: number }) {
+function HoldLeftMouseIcon({ size = 22 }: { size?: number }) {
     return (
-        <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="drag to orbit">
-            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <svg width={size} height={size} viewBox="0 0 24 24" aria-label="Hold left click">
+            <rect x="6" y="3" width="12" height="18" rx="6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <line x1={12} y1={3} x2={12} y2={10.5} stroke="currentColor" strokeWidth="1.6" />
+            <rect x="6.75" y="4.5" width="4.5" height="6" rx="2" fill="currentColor" opacity="0.9" />
+            <g transform="translate(0,-5.2)" stroke="currentColor" strokeLinecap="round" fill="none">
+                <path d="M4.2 8.8 C5.5 6.7 7.7 5.4 9.8 5.2" strokeWidth="1.4" />
+                <path d="M3.0 10.2 C4.9 7.0 8.3 5.0 10.7 4.7" strokeWidth="1.4" opacity="0.7" />
+            </g>
         </svg>
-    )
+    );
 }
 
 function KbdEscIcon({ size = 22 }: { size?: number }) {

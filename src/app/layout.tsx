@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     title: "Detective Resume | Noah Overeem",
     description:
         "Choose between a quick CV overview or an immersive detective-room experience of Noah Overeem's resume.",
+    icons: {
+        icon: '/favicon-round.png',
+    }
 };
 
 export default function RootLayout({
