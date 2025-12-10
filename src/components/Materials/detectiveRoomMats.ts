@@ -8,10 +8,10 @@ export const deskMaterials: Record<string, PartMaterialOverride> = {
 export const mugMaterials: Record<string, PartMaterialOverride> = {
     body:   { textureUrl: '/textures/ceramic_white.jpg', roughness: 0.6, metalness: 0.0 },
     handle: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0.6, metalness: 0.0 },
-    wallOuter: { color: '#ffffff',roughness: 0, metalness: 0.0 },
-    wallInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
-    bottomInner: { textureUrl: '/textures/ceramic_white.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
-    bottom: { textureUrl: '/textures/puzzle_scratchedinitials.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    wallOuter: { textureUrl: '/textures/mug_side.jpg' ,roughness: 0, metalness: 0.0 },
+    wallInner: { textureUrl: '/textures/mug_inside.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    bottomInner: { textureUrl: '/textures/mug_bottom_inner.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
+    bottom: { textureUrl: '/textures/mug_bottom.jpg', color: '#ffffff',roughness: 0, metalness: 0.0 },
 }
 
 export const corkBoardMaterials: Record<string, PartMaterialOverride> = {

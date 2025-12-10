@@ -6,6 +6,7 @@ import { ANCHOR } from "@/components/Game/anchors"
 import { useGameState } from "@/components/Game/state"
 import type { PuzzleId } from "@/components/Types/game"
 import type { PuzzleConfig } from "@/components/Game/state.data"
+import { PZ } from "@/components/Game/state.data"
 
 const ROPE_TEX_URL = "/textures/basket_weave.jpg"
 
@@ -31,6 +32,7 @@ export default function RedStringsEffect({
     const maxAniso = gl.capabilities.getMaxAnisotropy()
 
     const [ropeBaseMap, setRopeBaseMap] = React.useState<THREE.Texture | undefined>(undefined)
+
     React.useEffect(() => {
         if (typeof window === "undefined") return
         let mounted = true
@@ -45,7 +47,9 @@ export default function RedStringsEffect({
             undefined,
             () => mounted && setRopeBaseMap(undefined)
         )
-        return () => { mounted = false }
+        return () => {
+            mounted = false
+        }
     }, [])
 
     const localPinOffset = React.useCallback((cfg: PuzzleConfig) => {
@@ -54,15 +58,18 @@ export default function RedStringsEffect({
         return new THREE.Vector3(0, h / 2 + b * 0.5, 0.015)
     }, [])
 
-    const worldPinPos = React.useCallback((cfg: PuzzleConfig) => {
-        const anchor = ANCHOR[cfg.wallAnchorKey]
-        const baseRot = (anchor.rotation ?? [0, 0, 0]) as [number, number, number]
-        const yFlip   = cfg.view.rotateY180WhenPinned ? Math.PI : 0
-        const rot = new THREE.Euler(baseRot[0], baseRot[1] + yFlip, baseRot[2], "XYZ")
-        const pos = new THREE.Vector3(...(anchor.position as [number, number, number]))
-        const off = localPinOffset(cfg).applyEuler(rot)
-        return pos.add(off)
-    }, [localPinOffset])
+    const worldPinPos = React.useCallback(
+        (cfg: PuzzleConfig) => {
+            const anchor = ANCHOR[cfg.wallAnchorKey]
+            const baseRot = (anchor.rotation ?? [0, 0, 0]) as [number, number, number]
+            const yFlip = cfg.view.rotateY180WhenPinned ? Math.PI : 0
+            const rot = new THREE.Euler(baseRot[0], baseRot[1] + yFlip, baseRot[2], "XYZ")
+            const pos = new THREE.Vector3(...(anchor.position as [number, number, number]))
+            const off = localPinOffset(cfg).applyEuler(rot)
+            return pos.add(off)
+        },
+        [localPinOffset]
+    )
 
     type Edge = [PuzzleId, PuzzleId]
     const edges = React.useMemo(() => {
@@ -71,14 +78,74 @@ export default function RedStringsEffect({
         for (const cfg of Object.values(puzzlesConfig)) {
             const a: PuzzleId = cfg.id
             if (!puzzleStatus[a]?.pinned) continue
-            for (const b of (cfg.connectsTo ?? [])) {
+            for (const b of cfg.connectsTo ?? []) {
                 if (!puzzleStatus[b]?.pinned) continue
                 const key = a < b ? `${a}|${b}` : `${b}|${a}`
-                if (!seen.has(key)) { seen.add(key); e.push(a < b ? [a, b] as Edge : [b, a] as Edge) }
+                if (!seen.has(key)) {
+                    seen.add(key)
+                    e.push(a < b ? ([a, b] as Edge) : ([b, a] as Edge))
+                }
             }
         }
         return e
     }, [puzzlesConfig, puzzleStatus])
+
+    const makeRope = React.useCallback(
+        (p1: THREE.Vector3, p2: THREE.Vector3, key: string) => {
+            const len = p2.distanceTo(p1)
+            const sag = Math.min(0.02, len * 0.12)
+
+            const mid = p1.clone().add(p2).multiplyScalar(0.5)
+            const ctrl = mid.clone().add(new THREE.Vector3(0, -sag, 0))
+            const curve = new THREE.QuadraticBezierCurve3(p1, ctrl, p2)
+
+            const tubularSegments = Math.max(12, Math.floor(len * 80))
+            const radialSegments = 12
+
+            const edgeMap = ropeBaseMap ? ropeBaseMap.clone() : undefined
+            if (edgeMap) {
+                edgeMap.wrapS = edgeMap.wrapT = THREE.RepeatWrapping
+
+                const uRepeat = Math.max(0.25, (len / baseUnit) * zoom)
+                edgeMap.repeat.set(uRepeat, vRepeat)
+
+                edgeMap.anisotropy = Math.min(8, maxAniso)
+                edgeMap.generateMipmaps = true
+                edgeMap.minFilter = THREE.LinearMipmapLinearFilter
+                edgeMap.magFilter = THREE.LinearFilter
+                edgeMap.needsUpdate = true
+            }
+
+            return (
+                <mesh key={key}>
+                    <tubeGeometry args={[curve, tubularSegments, radius, radialSegments, false]} />
+                    <RopeMaterial
+                        map={edgeMap}
+                        color={"#d61326"}
+                        contrast={contrast}
+                        brightness={brightness}
+                    />
+                </mesh>
+            )
+        },
+        [ropeBaseMap, baseUnit, zoom, vRepeat, maxAniso, radius, contrast, brightness]
+    )
+
+    const extraEdge = React.useMemo(() => {
+        const status = puzzleStatus[PZ.PhotoClue]
+        const cfg = puzzlesConfig[PZ.PhotoClue]
+        if (!status?.pinned || !cfg) return null
+
+        const anchor = ANCHOR.mapFramePin
+        const baseRot = (anchor.rotation ?? [0, 0, 0]) as [number, number, number]
+        const rot = new THREE.Euler(baseRot[0], baseRot[1], baseRot[2], "XYZ")
+
+        const start = new THREE.Vector3(...(anchor.position as [number, number, number]))
+        start.add(new THREE.Vector3(0, 0, 0).applyEuler(rot))
+
+        const end = worldPinPos(cfg)
+        return { p1: start, p2: end }
+    }, [puzzlesConfig, puzzleStatus, worldPinPos])
 
     return (
         <group>
@@ -87,43 +154,9 @@ export default function RedStringsEffect({
                 const B = puzzlesConfig[b]
                 const p1 = worldPinPos(A)
                 const p2 = worldPinPos(B)
-
-                const len = p2.distanceTo(p1)
-                const sag = Math.min(0.02, len * 0.12)
-
-                const mid = p1.clone().add(p2).multiplyScalar(0.5)
-                const ctrl = mid.clone().add(new THREE.Vector3(0, -sag, 0))
-                const curve = new THREE.QuadraticBezierCurve3(p1, ctrl, p2)
-
-                const tubularSegments = Math.max(12, Math.floor(len * 80))
-                const radialSegments = 12
-
-                const edgeMap = ropeBaseMap ? ropeBaseMap.clone() : undefined
-                if (edgeMap) {
-                    edgeMap.wrapS = edgeMap.wrapT = THREE.RepeatWrapping
-
-                    const uRepeat = Math.max(0.25, (len / baseUnit) * zoom)
-                    edgeMap.repeat.set(uRepeat, vRepeat)
-
-                    edgeMap.anisotropy = Math.min(8, maxAniso)
-                    edgeMap.generateMipmaps = true
-                    edgeMap.minFilter = THREE.LinearMipmapLinearFilter
-                    edgeMap.magFilter = THREE.LinearFilter
-                    edgeMap.needsUpdate = true
-                }
-
-                return (
-                    <mesh key={`${a}->${b}`}>
-                        <tubeGeometry args={[curve, tubularSegments, radius, radialSegments, false]} />
-                        <RopeMaterial
-                            map={edgeMap}
-                            color={"#d61326"}
-                            contrast={contrast}
-                            brightness={brightness}
-                        />
-                    </mesh>
-                )
+                return makeRope(p1, p2, `${a}->${b}`)
             })}
+            {extraEdge && makeRope(extraEdge.p1, extraEdge.p2, "mapFramePin->photo-clue")}
         </group>
     )
 }
@@ -139,7 +172,7 @@ function RopeMaterial({
     contrast?: number
     brightness?: number
 }) {
-    const matRef = React.useRef<THREE.MeshStandardMaterial>(null)
+    const matRef = React.useRef<THREE.MeshStandardMaterial | null>(null)
 
     React.useEffect(() => {
         const mat = matRef.current
@@ -150,14 +183,14 @@ function RopeMaterial({
             shader.uniforms.uBrightness = { value: brightness }
 
             shader.fragmentShader = shader.fragmentShader.replace(
-                '#include <common>',
+                "#include <common>",
                 `#include <common>
 uniform float uContrast;
 uniform float uBrightness;`
             )
 
             shader.fragmentShader = shader.fragmentShader.replace(
-                '#include <map_fragment>',
+                "#include <map_fragment>",
                 `
         #ifdef USE_MAP
           vec4 texelColor = texture2D( map, vMapUv );
@@ -165,18 +198,9 @@ uniform float uBrightness;`
           texelColor.rgb = (texelColor.rgb - 0.5) * uContrast + 0.5 + uBrightness;
           diffuseColor *= texelColor;
         #endif
-        `
+      `
             )
 
-            ;(mat as any).userData.shader = shader
-        }
-
-        mat.needsUpdate = true
-    }, [])
-
-    React.useEffect(() => {
-        const shader = (matRef.current as any)?.userData?.shader
-        if (shader) {
             shader.uniforms.uContrast.value = contrast
             shader.uniforms.uBrightness.value = brightness
         }

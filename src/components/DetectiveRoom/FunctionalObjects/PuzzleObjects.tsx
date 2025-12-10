@@ -93,21 +93,24 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                         openInspect={openInspect}
                         rcFocus={rcFocus}
                         rotationOffsetWhenPinned={rotationOffsetWhenPinned}
+                        magnifierOnly={!!cfg.magnifierOnly && !status?.solved}
                     />
                 )
             })}
 
             {/* Evidence */}
             <FramedPlane
-                width={0.22}
-                height={0.14}
-                position={[-0.169, 0.795, 4.408]}
+                width={0.2}
+                height={0.1}
+                position={[-0.299, 0.787, 4.108]}
                 rotation={[-Math.PI / 2, 0, 0]}
-                textureUrl="/textures/paper_collages_whites.jpg"
+                textureUrl="/textures/coffee_paper.jpg"
                 textureFit="stretch"
-                border={0.005}
+                border={0}
                 color="#222222"
                 onInspect={openInspect}
+                inspectDistance={0.25}
+                inspectOverrides={{pixelSize: 0}}
                 canInteract
                 lit
                 roughness={0.9}
@@ -115,6 +118,30 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 receiveShadow
                 textureMagnifierOnly
             />
+
+            <group
+                onContextMenu={rcFocus(ANCHOR.initialProfileFrame)}
+                userData={{movable: true, anchorKey: 'initialProfileFrame'}}
+            >
+                <FramedPlane
+                    width={0.2}
+                    height={0.27}
+                    position={ANCHOR.initialProfileFrame.position}
+                    rotation={ANCHOR.initialProfileFrame.rotation}
+                    textureUrl="/textures/initial_profile.jpg"
+                    textureFit="stretch"
+                    border={0}
+                    color="#bbbbbb"
+                    canInteract={false}
+                    lit
+                    onInspect={openInspect}
+                    inspectDistance={0.4}
+                    inspectOverrides={{pixelSize: 0}}
+                    roughness={10}
+                    metalness={0}
+                    receiveShadow
+                />
+            </group>
 
             <group userData={{movable: true, anchorKey: 'groupProjectSanquin'}}>
                 <FramedPlane
@@ -158,16 +185,112 @@ export function PuzzleObjects({ rcFocus, openInspect, files }: PuzzleObjectsProp
                 />
             </group>
 
-            <group onContextMenu={rcFocus(ANCHOR.mug)}>
-                <Mug
-                    position={[-0.169, 0.895, 4.408]}
-                    rotation={[0, Math.PI / 6, 0]}
-                    color="#fff"
-                    disableOutline={false}
-                    castShadow={false}
-                    materialsById={mugMaterials}
-                    magnifierOnly
-                    onInspect={openMugInspect}
+            <group userData={{movable: true, anchorKey: 'previousJobSAH'}}>
+                <FramedPlane
+                    width={0.15}
+                    height={0.08}
+                    position={ANCHOR.previousJobSAH.position}
+                    rotation={ANCHOR.previousJobSAH.rotation}
+                    textureUrl="/textures/studentaanhuis.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.2}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                />
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'previousJobAldi'}}>
+                <FramedPlane
+                    width={0.20}
+                    height={0.11}
+                    position={ANCHOR.previousJobAldi.position}
+                    rotation={ANCHOR.previousJobAldi.rotation}
+                    textureUrl="/textures/aldi.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.2}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                />
+            </group>
+
+            {/* Magnifier Puzzle */}
+            <group userData={{movable: true, anchorKey: 'jfcFrame'}}>
+                <FramedPlane
+                    width={0.30}
+                    height={0.21}
+                    position={ANCHOR.jfcFrame.position}
+                    rotation={ANCHOR.jfcFrame.rotation}
+                    textureUrl="/textures/jfc.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.4}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                    textureMagnifierOnly={true}
+                />
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'tableTopTunes2Frame'}}>
+                <FramedPlane
+                    width={0.40}
+                    height={0.21}
+                    position={ANCHOR.tableTopTunes2Frame.position}
+                    rotation={ANCHOR.tableTopTunes2Frame.rotation}
+                    textureUrl="/textures/tabletoptunes2.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.36}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                    textureMagnifierOnly={true}
+                />
+            </group>
+
+            <group userData={{movable: true, anchorKey: 'notableActivityFrame'}}>
+                <FramedPlane
+                    width={0.20}
+                    height={0.31}
+                    position={ANCHOR.notableActivityFrame.position}
+                    rotation={ANCHOR.notableActivityFrame.rotation}
+                    textureUrl="/textures/notable_activity.jpg"
+                    textureFit="stretch"
+                    border={0.005}
+                    color="#222222"
+                    onInspect={openInspect}
+                    inspectDistance={0.46}
+                    inspectOverrides={{pixelSize: 0}}
+                    canInteract
+                    lit
+                    roughness={1}
+                    metalness={0}
+                    receiveShadow
+                    textureMagnifierOnly={true}
                 />
             </group>
 

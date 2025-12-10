@@ -34,6 +34,7 @@ type Props = {
     rotationOffsetWhenPinned?: Vec3
     solved?: boolean
     solvedAnswer?: string
+    magnifierOnly?: boolean
 }
 
 export function PuzzleNode({
@@ -46,6 +47,7 @@ export function PuzzleNode({
                                rotationOffsetWhenPinned = [0, 0, 0] as Vec3,
                                solved,
                                solvedAnswer,
+                               magnifierOnly,
                            }: Props) {
     if (!available && !pinned) return null
 
@@ -102,6 +104,7 @@ export function PuzzleNode({
                     roughness={1}
                     metalness={0}
                     receiveShadow
+                    textureMagnifierOnly={magnifierOnly}
                 />
             )}
 

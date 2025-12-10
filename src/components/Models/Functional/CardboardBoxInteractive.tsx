@@ -95,6 +95,7 @@ export function CardboardBoxInteractive({
                 initialRotation={initialRotation}
                 disableOutline={disableAllOutline}
                 inspectDisableOutline={disableInspect}
+                disablePointer={opened}
                 onInspect={opened ? undefined : (p) =>
                     onInspect?.({
                         ...p,

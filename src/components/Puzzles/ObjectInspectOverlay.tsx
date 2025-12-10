@@ -1,5 +1,5 @@
 import React from 'react'
-import {Canvas, useFrame, useThree} from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import * as THREE from 'three'
@@ -104,11 +104,13 @@ function RecenterOnce({
                           setOffset,
                           invalidate,
                           resetToken,
+                          centerYOffset = 0,
                       }: {
     contentRef: React.RefObject<THREE.Group<THREE.Object3DEventMap> | null>
     setOffset: (o: [number, number, number]) => void
     invalidate: () => void
     resetToken: unknown
+    centerYOffset?: number
 }) {
     const done = React.useRef(false)
     React.useEffect(() => { done.current = false }, [resetToken])
@@ -140,7 +142,8 @@ function RecenterOnce({
         if (!box) return
         const center = new THREE.Vector3()
         box.getCenter(center)
-        setOffset([0, -center.y, 0])
+        setOffset([0, -center.y + centerYOffset, 0])
+
         done.current = true
         invalidate()
     })
@@ -262,6 +265,21 @@ export default function ObjectInspectOverlay({
 
     const { setIsInspecting } = useSettings()
 
+    const puzzle = renderState?.puzzle?.type === 'text' ? renderState.puzzle : undefined
+    const puzzleMeta = (renderState as any)?.metadata ?? {}
+    const puzzleSolved = !!puzzleMeta?.solved
+    const puzzleSolvedAnswer = (puzzleMeta?.solvedAnswer ?? '') as string
+
+    const [answers, setAnswers] = React.useState<string[]>([''])
+    const [status, setStatus] = React.useState<'idle' | 'correct' | 'incorrect'>('idle')
+    const inputRefs = React.useRef<Array<HTMLInputElement | null>>([])
+    const cardRef = React.useRef<HTMLDivElement | null>(null)
+
+    const isPuzzleInspect = !!puzzle
+    const puzzleYOffset = isPuzzleInspect ? 0.01 : 0
+
+    const [inspectControlsHintSeen, setInspectControlsHintSeen] = React.useState(false)
+
     React.useEffect(() => {
         setIsInspecting(open)
         return () => setIsInspecting(false)
@@ -285,7 +303,7 @@ export default function ObjectInspectOverlay({
         const box = new THREE.Box3().setFromObject(contentRef.current)
         const center = new THREE.Vector3()
         box.getCenter(center)
-        setOffset([0, -center.y, 0])
+        setOffset([0, -center.y + puzzleYOffset, 0])
         invalidateRef.current?.()
     }, [])
 
@@ -318,16 +336,6 @@ export default function ObjectInspectOverlay({
         window.addEventListener(EV_CLOSE_INSPECT, handler as EventListener)
         return () => window.removeEventListener(EV_CLOSE_INSPECT, handler as EventListener)
     }, [open, onClose])
-
-    const puzzle = renderState?.puzzle?.type === 'text' ? renderState.puzzle : undefined
-    const puzzleMeta = (renderState as any)?.metadata ?? {}
-    const puzzleSolved = !!puzzleMeta?.solved
-    const puzzleSolvedAnswer = (puzzleMeta?.solvedAnswer ?? '') as string
-
-    const [answers, setAnswers] = React.useState<string[]>([''])
-    const [status, setStatus] = React.useState<'idle' | 'correct' | 'incorrect'>('idle')
-    const inputRefs = React.useRef<Array<HTMLInputElement | null>>([])
-    const cardRef = React.useRef<HTMLDivElement | null>(null)
 
     React.useEffect(() => {
         if (!open) return
@@ -415,7 +423,6 @@ export default function ObjectInspectOverlay({
             return
         }
 
-        // multiple answer mode: require that every configured string answer appears
         const normRequired = strAnswers.map((a) => normalize(a))
         const normUser = trimmed.map((a) => normalize(a))
         const userSet = new Set(normUser.filter((v) => v.length > 0))
@@ -505,6 +512,42 @@ export default function ObjectInspectOverlay({
         [isInspectingMugFromFrame]
     )
 
+    React.useEffect(() => {
+        if (typeof window === 'undefined') return
+        try {
+            const stored = window.localStorage.getItem('ttt_inspectControlsHintSeen')
+            if (stored === '1') {
+                setInspectControlsHintSeen(true)
+            }
+        } catch {
+            // ignore
+        }
+    }, [])
+
+    const markInspectControlsHintSeen = React.useCallback(() => {
+        setInspectControlsHintSeen((prev) => {
+            if (prev) return prev
+            if (typeof window !== 'undefined') {
+                try {
+                    window.localStorage.setItem('ttt_inspectControlsHintSeen', '1')
+                } catch {
+                    // ignore
+                }
+            }
+            return true
+        })
+    }, [])
+
+    const handleCanvasPointerDown: React.PointerEventHandler<HTMLDivElement> =
+        React.useCallback(
+            (e) => {
+                if (e.button === 0 || e.button === 2) {
+                    markInspectControlsHintSeen()
+                }
+            },
+            [markInspectControlsHintSeen]
+        )
+
     return (
         <div
             style={{
@@ -559,7 +602,7 @@ export default function ObjectInspectOverlay({
                     style={{
                         position: 'relative',
                         flex: 1,
-                        minHeight: 0, // important so the canvas can shrink within the flex container
+                        minHeight: 0,
                     }}
                 >
                     <Canvas
@@ -568,6 +611,7 @@ export default function ObjectInspectOverlay({
                         frameloop="demand"
                         gl={{antialias: false, powerPreference: 'low-power'}}
                         style={{imageRendering: 'pixelated'}}
+                        onPointerDown={handleCanvasPointerDown}
                         onCreated={({gl, invalidate}) => {
                             invalidateRef.current = invalidate
                             canvasElRef.current = gl.domElement as HTMLCanvasElement
@@ -697,6 +741,7 @@ export default function ObjectInspectOverlay({
                             setOffset={(o) => setOffset(o)}
                             invalidate={() => invalidateRef.current?.()}
                             resetToken={renderState}
+                            centerYOffset={puzzleYOffset}
                         />
 
                         <ResetControlsOnChange
@@ -717,6 +762,30 @@ export default function ObjectInspectOverlay({
                         />
                         {effectivePixelSize > 1 ? <PixelateNearestFX size={effectivePixelSize}/> : null}
                     </Canvas>
+
+                    {!inspectControlsHintSeen && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: 4,
+                                left: 4,
+                                padding: '6px 10px',
+                                borderRadius: 999,
+                                color: '#858585',
+                                fontSize: 12,
+                                lineHeight: 1.4,
+                                pointerEvents: 'none',
+                                maxWidth: '60%',
+                                WebkitBackdropFilter: 'blur(2px)',
+                                fontStyle: 'italic',
+                            }}
+                        >
+                            <div>
+                                Left click and drag to rotate the {isPuzzleInspect ? 'puzzle' : 'evidence'}.
+                            </div>
+                            <div>Right click and drag to move it around.</div>
+                        </div>
+                    )}
 
                     {puzzle && (
                         <div
@@ -828,7 +897,7 @@ export default function ObjectInspectOverlay({
                                         return (
                                             <div
                                                 style={{
-                                                    flexBasis: '100%',               // new row under the prompt
+                                                    flexBasis: '100%',
                                                     display: 'flex',
                                                     flexWrap: 'wrap',
                                                     gap: 8,
@@ -838,7 +907,7 @@ export default function ObjectInspectOverlay({
                                                 <div
                                                     style={{
                                                         flex: 1,
-                                                        minWidth: 0,                 // allow shrinking on small widths
+                                                        minWidth: 0,
                                                         display: 'flex',
                                                         gap: 8,
                                                     }}
@@ -920,7 +989,7 @@ export default function ObjectInspectOverlay({
                     )}
 
                     {isInspectingSecretFile && (
-                        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                        <div style={{position: 'absolute', top: 20, right: 20}}>
                             <HoverButton
                                 onClick={() => {
                                     const opening = secretTarget === 0
@@ -935,7 +1004,7 @@ export default function ObjectInspectOverlay({
                     )}
 
                     {isInspectingCardboardBox && (
-                        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                        <div style={{position: 'absolute', top: 20, right: 20}}>
                             <HoverButton
                                 onClick={() => {
                                     setBoxOpenAmt(1)

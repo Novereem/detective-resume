@@ -28,11 +28,12 @@ export const asFileId   = <T extends string>(s: T) => s as unknown as SecretFile
 
 export const PZ = {
     PhotoClue: asPuzzleId("puzzle-photo-clue"),
-
     HboIct: asPuzzleId("puzzle-hbo-ict"),
     Semester: asPuzzleId("puzzle-semester"),
     GroupProjects: asPuzzleId("puzzle-group-projects"),
+    WorkExperience: asPuzzleId("puzzle-work-experience"),
     MugInitials: asPuzzleId("puzzle-mug-initials"),
+    GraduationDate: asPuzzleId("puzzle-graduation-date"),
 } as const
 
 export const FileId = {
@@ -81,6 +82,7 @@ export type PuzzleConfig = {
     view: FramedViewConfig
     connectsTo?: PuzzleId[]
     deskFramed?: boolean
+    magnifierOnly?: boolean
 }
 
 export type PuzzleStatus = {
@@ -223,6 +225,7 @@ export const initialSnapshot: GameSnapshot = {
             solvedFromInspectId: "puzzle-group-projects",
             deskAnchorKey: "deskTopSpawn",
             wallAnchorKey: "groupProjectsFrame",
+            connectsTo: [PZ.WorkExperience],
             view: {
                 kind: "framed",
                 width: 0.40,
@@ -236,7 +239,7 @@ export const initialSnapshot: GameSnapshot = {
                 inspect: {
                     type: "text",
                     id: "puzzle-group-projects",
-                    prompt: "Name the two major group projects I worked on recently.",
+                    prompt: "Name the two organisations behind the major group projects I worked on recently.",
                     answers: [
                         "sanquin",
                         "eclipse",
@@ -252,11 +255,83 @@ export const initialSnapshot: GameSnapshot = {
             },
         },
 
+        [PZ.WorkExperience]: {
+            id: PZ.WorkExperience,
+            solvedFromInspectId: "puzzle-work-experience",
+            deskAnchorKey: "workExperienceSpawn",
+            wallAnchorKey: "workExperienceFrame",
+            connectsTo: [PZ.PhotoClue],
+            view: {
+                kind: "framed",
+                width: 0.30,
+                height: 0.2,
+                border: 0.01,
+                textureUrl: "/textures/puzzle_work_experience.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                pixelSize: 1,
+                inspectDistance: 0.45,
+                inspect: {
+                    type: "text",
+                    id: "puzzle-work-experience",
+                    prompt: "Which two companies are missing at positions 2 and 4 in this work experience timeline?",
+                    answers: [
+                        "aldi",
+                        /Student\s*-?\s*Aan\s*-?\s*Huis/i,
+                    ],
+                    multipleAnswers: 2,
+                    normalize: "trim-lower",
+                    roomEvidenceHint: true,
+                    feedback: {
+                        correct: "Correct!",
+                        incorrect: "The evidence should be around here somewhere...",
+                    },
+                },
+            },
+        },
+
+        [PZ.GraduationDate]: {
+            id: PZ.GraduationDate,
+            solvedFromInspectId: "puzzle-graduation-date",
+            deskAnchorKey: "fontysFrameUnsolved",
+            wallAnchorKey: "fontysFrameSolved",
+            magnifierOnly: true,
+            connectsTo: [PZ.PhotoClue, PZ.HboIct],
+            view: {
+                kind: "framed",
+                width: 0.30,
+                height: 0.2,
+                border: 0.01,
+                textureUrl: "/textures/fontys.jpg",
+                textureFit: "stretch",
+                rotateY180WhenPinned: true,
+                pixelSize: 1,
+                inspectDistance: 0.45,
+                inspect: {
+                    type: "text",
+                    id: "puzzle-graduation-date",
+                    prompt: "Which date is my expected graduation date? [yyyy-mm-dd]",
+                    answers: [
+                        "2026",
+                        /^(0?7|july|juli)$/i,
+                        "10",
+                    ],
+                    multipleAnswers: 3,
+                    normalize: "trim-lower",
+                    feedback: {
+                        correct: "Correct!",
+                        incorrect: "The evidence should be around here somewhere...",
+                    },
+                },
+            },
+        },
+
         [PZ.MugInitials]: {
             id: PZ.MugInitials,
             solvedFromInspectId: "mug-initials",
             deskAnchorKey: "mug",
             wallAnchorKey: "mugFrame",
+            connectsTo: [PZ.WorkExperience],
             view: {
                 kind: "framed",
                 width: 0.15,
@@ -270,10 +345,10 @@ export const initialSnapshot: GameSnapshot = {
                 inspect: {
                     type: "text",
                     id: "mug-initials",
-                    prompt: "W-_t _r_ --e in_t_als o- t-_s -ug",
+                    prompt: "Which two programming languages am I well-versed in?",
                     answers: [
-                        "N",
-                        "V",
+                        "c#",
+                        /type\s*-?\s*script/i,
                     ],
                     multipleAnswers: 2,
                     normalize: "trim-lower",
@@ -289,11 +364,20 @@ export const initialSnapshot: GameSnapshot = {
 
     puzzleStatus: {
         [PZ.PhotoClue]:     { available: false, pinned: false },
-
         [PZ.HboIct]:        { available: true, pinned: false },
         [PZ.Semester]:      { available: true, pinned: false },
         [PZ.GroupProjects]: { available: false, pinned: false },
+        [PZ.WorkExperience]: { available: true, pinned: false },
         [PZ.MugInitials]:   { available: true, pinned: false },
+        [PZ.GraduationDate]:   { available: true, pinned: false },
+
+        // [PZ.PhotoClue]:     { available: false, pinned: true },
+        // [PZ.HboIct]:        { available: true, pinned: true },
+        // [PZ.Semester]:      { available: true, pinned: true },
+        // [PZ.GroupProjects]: { available: false, pinned: true },
+        // [PZ.WorkExperience]: { available: true, pinned: true },
+        // [PZ.MugInitials]:   { available: true, pinned: true },
+        // [PZ.GraduationDate]:   { available: true, pinned: true },
     },
 
     cardboardBoxes: {},

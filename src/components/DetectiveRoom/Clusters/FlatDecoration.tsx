@@ -8,28 +8,6 @@ type RcFocus = (anchor: (typeof ANCHOR)[keyof typeof ANCHOR]) => (e: React.Mouse
 export function FlatDecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
     return (
         <>
-            <mesh
-                onContextMenu={rcFocus(ANCHOR.mapFrame)}
-                position={ANCHOR.mapFrame.position}
-                rotation={ANCHOR.mapFrame.rotation}
-                raycast={() => null}
-                userData={{ movable: true, anchorKey: 'mapFrame' }}
-            >
-                <FramedPlane
-                    width={0.4}
-                    height={0.2}
-                    textureUrl="/textures/scherpenzeel.jpg"
-                    textureFit="stretch"
-                    border={0}
-                    color="#bbbbbb"
-                    canInteract={false}
-                    lit
-                    roughness={10}
-                    metalness={0}
-                    receiveShadow
-                />
-            </mesh>
-
             <group userData={{ movable: true, anchorKey: 'mapFramePin' }}>
                 <Pin
                     position={ANCHOR.mapFramePin.position}

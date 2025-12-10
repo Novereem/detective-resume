@@ -1,5 +1,4 @@
 export const DETECTIVE_ROOM_TEXTURES = [
-    // From detectiveRoomMats.ts
     '/textures/vintage_clear_plywood.jpg',
     '/textures/clear_metal.jpg',
     '/textures/ceramic_white.jpg',
@@ -24,9 +23,22 @@ export const DETECTIVE_ROOM_TEXTURES = [
     '/textures/globe_earth.jpg',
     '/textures/top_secret.jpg',
     '/textures/testimage.jpg',
+    '/textures/mug_side.jpg',
+    '/textures/mug_inside.jpg',
+    '/textures/mug_bottom_inner.jpg',
+    '/textures/mug_bottom.jpg',
+    '/textures/aldi.jpg',
+    '/textures/coffee_paper.jpg',
+    '/textures/fontys.jpg',
+    '/textures/initial_profile.jpg',
+    '/textures/jfc.jpg',
+    '/textures/notable_activity.jpg',
+    '/textures/puzzle_work_experience.jpg',
+    '/textures/studentaanhuis.jpg,',
+    '/textures/tabletoptunes2.jpg',
 
     // From FlatDecorationCluster
-    '/textures/scherpenzeel.jpg',
+    '/textures/the_place.jpg',
     '/textures/calender2025.jpg',
     '/textures/newspapers.jpg',
 

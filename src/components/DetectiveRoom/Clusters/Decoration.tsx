@@ -46,6 +46,7 @@ export function DecorationCluster({ rcFocus }: { rcFocus: RcFocus }) {
                     lidClearance={0.002}
                     disableOutline
                     inspectDisableOutline
+                    disablePointer
                 />
             </group>
 

@@ -14,6 +14,7 @@ export type AnchorKey =
 
     // Evidence
     | "groupProjectSanquin" | "groupProjectEclipse"
+    | "previousJobSAH" | "previousJobAldi"
 
     // Puzzles & Puzzle Wall Frames
     | "deskTopSpawn"
@@ -22,7 +23,13 @@ export type AnchorKey =
     | "hboIct" | "hboIctFrame"
     | "semester7" | "semester7Frame"
     | "groupProjectsFrame" // DeskTopSpawn
+    | "workExperienceFrame" | "workExperienceSpawn"
     | "mug"
+
+    // Magnifier Puzzle
+    | "corkBoardMagnifier"
+    | "jfcFrame" | "tableTopTunes2Frame" | "notableActivityFrame"
+    | "fontysFrameUnsolved" | "fontysFrameSolved"
 
     | "book1" | "book2" | "book3" | "book4" | "book5" | "book6" | "book7"
     | "binder1" | "binder2"
@@ -34,7 +41,7 @@ export type AnchorKey =
     | "trashBin"
     | "cigar1" | "ashTray1"
     | "calendar2025"
-    | "mapFrame"
+    | "initialProfileFrame"
     | "mapFramePin"
     | "newspaper1"
     | "newspaper2"
@@ -80,7 +87,7 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     plant: { eye: [1.000, 1.200, 3.500], position: [1.047, 0.734, 4.397], rotation: [0, 0.200, 0] },
 
     cardboardLid1:{ eye: [1.7, 1.2, 3.4], position: [1.80, 0.75, 4.40], rotation: [0.4, 0.1, 0.4] },
-    cardboard1:   { eye: [1.7, 1.2, 3.4], position: [1.90, 0.725, 4.20], rotation: [0, 0.4, 0] },
+    cardboard1:   { eye: [1.7, 1.1, 3.9], position: [1.90, 0.725, 4.20], rotation: [0, 0.4, 0] },
 
     book1: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.695, 4.25], rotation: [Math.PI, -0.6, 0] },
     book2: { eye: [0.2, 1.3, 3.6], position: [1.2, 0.665, 4.25], rotation: [Math.PI, -0.5, 0] },
@@ -114,11 +121,11 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     trashBin: { eye: [-1.100, 1.050, 3.200], position: [-1.138, 0.191, 4.172], rotation: [0, 0.350, 0] },
 
     // Puzzle Stuff
-    mugFrame: { eye: [ 0.0, 1.3, 3.6], position: [0.50, 1.34, 4.965] },
+    mugFrame: { eye: [ 0.0, 1.3, 3.6], position: [0.42, 1.27, 4.965] },
 
     drawerLeftTopContent: { eye: [0.2, 1.3, 3.6], position: [0.12, 0.78, 3.2] },
 
-    cardbox01:    { eye: [1.90, 1.1, 3.2], position: [1.90, 0.10, 4.20], rotation: [0, 0.4, 0] },
+    cardbox01:    { eye: [1.90, 0.5, 3.9], position: [1.90, 0.10, 4.20], rotation: [0, 0.4, 0] },
 
     // Puzzles
     // Desktop Spawns
@@ -127,26 +134,43 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
 
     // 1
     mugshotSpawn: { eye: [1.6, 1.3, 3.6], position: [0.15, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
-    mugshotSecretFile: { eye: [1.6, 1.3, 3.6], position: [0.10, 0.78, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
+    mugshotSecretFile: { eye: [1.6, 1.3, 3.6], position: [0.10, 0.7721, 4.2], rotation: [-Math.PI / 2, 0, Math.PI] },
     photoClueFrame: { eye: [ 0.0, 1.3, 3.6], position: [0, 1.5, 4.965] },
 
     // 2
     hboIct: { eye: [-0.2, 1.2, 3.6], position: [1.507, 1.464, 4.988], rotation: [0 , Math.PI, 0] },
-    hboIctFrame: { eye: [ 0.0, 1.3, 3.6], position: [-0.25, 1.34, 4.965] },
+    hboIctFrame: { eye: [ 0.0, 1.3, 3.6], position: [-0.45, 1.34, 4.965] },
 
     // 4
-    semester7: { eye: [-0.2, 1.2, 3.6], position: [-1.007, 1.264, 4.988], rotation: [0 , Math.PI, 0.2] },
-    semester7Frame: { eye: [ 0.0, 1.3, 3.6], position: [-0.35, 1.54, 4.965], rotation: [0 ,0, 0.1]},
+    semester7: { eye: [-0.2, 1.2, 3.6], position: [-1.007, 1.274, 4.988], rotation: [0 , Math.PI, 0.2] },
+    semester7Frame: { eye: [ 0.0, 1.3, 3.6], position: [-0.40, 1.58, 4.965], rotation: [0 ,0, 0.1]},
 
     // 4
-    groupProjectsFrame: { eye: [ 0.2, 1.3, 3.6], position: [0.2, 1.3, 4.965] },
+    groupProjectsFrame: { eye: [ 0.2, 1.3, 3.6], position: [0.4, 1.05, 4.965] },
 
     // 5
+    workExperienceSpawn: { eye: [-0.600, 1.000, 3.300], position: [-1.366, 0.034, 3.100], rotation: [Math.PI * 1.5, 0, Math.PI / 2] },
+    workExperienceFrame: { eye: [ 0.2, 1.3, 3.6], position: [-0.02, 1.15, 4.965] },
+
+    // 6
     mug: { eye: [-0.2, 1.3, 3.2], position: [-1.382, 0.710, 2.650] },
 
     //Evidence
     groupProjectSanquin: { eye: [-0.200, 0.00, 3.200], position: [-1.342, 0.658, 3.589], rotation: [-Math.PI/2, 0, 2.893] },
     groupProjectEclipse: { eye: [-0.200, 1.00, 3.200], position: [-1.338, 0.660, 3.470], rotation: [-Math.PI/2, 0, 2.525] },
+
+    previousJobSAH: { eye: [-0.200, 1.000, 3.200], position: [1.955, 0.660, 4.239], rotation: [-Math.PI/2, 0, -2.466] },
+    previousJobAldi: { eye: [-0.200, 1.000, 3.200], position: [1.894, 0.052, 4.187], rotation: [-Math.PI/2, 0, 3.040] },
+
+    //Magnifier Puzzle
+    corkBoardMagnifier: { eye: [0.000, 1.300, 3.200], position: [0.400, 1.200, 1.517], rotation: [0, 0, 0] },
+
+    jfcFrame: { eye: [0.000, 1.300, 3.200], position: [0.144, 1.007, 1.527], rotation: [0, 0, 0] },
+    tableTopTunes2Frame: { eye: [0.000, 1.300, 3.200], position: [-0.094, 1.310, 1.617], rotation: [0, 0, 0.204] },
+    notableActivityFrame: { eye: [0.000, 1.300, 3.200], position: [0.564, 1.101, 1.617], rotation: [0, 0, -0.1] },
+    fontysFrameUnsolved: { eye: [0.000, 1.300, 3.200], position: [0.8900, 1.400, 1.617], rotation: [0, 0, 0.05] },
+
+    fontysFrameSolved: { eye: [ 0.2, 1.3, 3.6], position: [-0.42, 1.0, 4.965] },
 
     // Ground Decoration
     newspaper1: { eye: [0.900, 1.300, 3.600], position: [-1.138, 0.001, 3.652], rotation: [-Math.PI/2, 0, 2.917] },
@@ -157,8 +181,8 @@ export const ANCHOR: Record<AnchorKey, { eye: Vec3; position: Vec3; rotation?: V
     writtenLetter1: { eye: [0.900, 1.300, 3.600], position: [1.136, 1.550, 4.995], rotation: [Math.PI, 0, -2.848] },
     writtenLetter2: { eye: [0.900, 1.300, 3.600], position: [1.015, 1.750, 4.997], rotation: [Math.PI, 0, 2.904] },
 
-    mapFrame: { eye: [0.2, 1.3, 3.6], position: [0.40, 1.60, 4.965], rotation: [Math.PI, 0, Math.PI + 0.05] },
-    mapFramePin: { eye: [0.200, 1.300, 3.600], position: [0.400, 1.681, 4.957], rotation: [Math.PI/2, 0, -3.092] },
+    initialProfileFrame: { eye: [0.2, 1.3, 3.6], position: [0.50, 1.55, 4.965], rotation: [Math.PI, 0, Math.PI + 0.05] },
+    mapFramePin: { eye: [0.200, 1.300, 3.600], position: [0.500, 1.671, 4.957], rotation: [Math.PI/2, 0, -3.092] },
 
     calendar2025: { eye: [0.900, 1.300, 3.600], position: [1.107, 1.064, 4.988], rotation: [Math.PI, 0, Math.PI] },
 

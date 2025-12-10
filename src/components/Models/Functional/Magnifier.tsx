@@ -69,7 +69,7 @@ export const Magnifier = memo(function Magnifier({
             roughness: 0,
             metalness: 0,
             transparent: true,
-            opacity: 0.05,
+            opacity: 0.02,
             depthWrite: false,
             side: THREE.DoubleSide,
             castShadow: false,
@@ -124,7 +124,7 @@ export const Magnifier = memo(function Magnifier({
 
         const activeColor = held ? '#86b8ff' : (lensBase.color ?? '#f5f7ff')
         const activeOpacity = held
-            ? 0.35
+            ? 0.1
             : (typeof lensBase.opacity === 'number' ? lensBase.opacity : 0.05)
 
         return {

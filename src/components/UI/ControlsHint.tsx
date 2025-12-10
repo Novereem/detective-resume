@@ -141,7 +141,7 @@ export function ControlsHint({
 
                     <Row icon={<MouseIcon button="left" size={22} />}  label="Inspect" hint="Left click" />
                     <Row icon={<MouseIcon button="right" size={22} />} label="Move to object"   hint="Right click" />
-                    <Row icon={<HoldLeftMouseIcon size={22} />} label="Orbit camera" hint="Hold left click + mooooooove" />
+                    <Row icon={<HoldLeftMouseIcon size={22} />} label="Orbit camera" hint="Hold left click + move" />
                     <Row icon={<KbdEscIcon size={22} />} label="Menu" hint="Press Esc" />
                 </div>
             </Scaled>

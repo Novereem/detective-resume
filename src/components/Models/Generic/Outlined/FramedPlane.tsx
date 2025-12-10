@@ -3,9 +3,9 @@ import React from 'react'
 import { useCursor } from '@react-three/drei'
 import type { InspectState, FramedInspect } from '@/components/Types/inspectModels'
 import { useManagedTexture } from '@/components/Textures/useManagedTexture'
-import MagnifierRevealMaterial from "@/components/CameraEffects/Magnifier/MagnifierRevealMaterial";
-import {useMagnifierState} from "@/components/CameraEffects/Magnifier/MagnifierStateContext";
-import {useThree} from "@react-three/fiber";
+import MagnifierRevealMaterial from '@/components/CameraEffects/Magnifier/MagnifierRevealMaterial'
+import { useMagnifierState } from '@/components/CameraEffects/Magnifier/MagnifierStateContext'
+import { useThree } from '@react-three/fiber'
 
 type CommonTransform = {
     position?: [number, number, number]
@@ -228,36 +228,30 @@ export function FramedPlane({
         const d = Math.sqrt(dx * dx + dy * dy)
         const extra = 0.05
 
-        return d <= (mask.radius + extra)
+        return d <= mask.radius + extra
     }, [textureMagnifierOnly, lensMaskRef, held, camera])
 
     return (
         <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
-            <mesh
-                raycast={() => null}
-                castShadow={lit && castShadow}
-                receiveShadow={lit && receiveShadow}
-            >
-                <planeGeometry args={[width, height]} />
-                {matKind === 'basic' && <meshBasicMaterial color={color} side={side} />}
-                {matKind === 'lambert' && <meshLambertMaterial color={color} side={side} />}
-                {matKind === 'standard' && (
-                    <meshStandardMaterial
-                        color={color}
-                        side={side}
-                        metalness={metalness}
-                        roughness={roughness}
-                        envMapIntensity={envMapIntensity}
-                    />
-                )}
-            </mesh>
+            {!textureMagnifierOnly && (
+                <mesh raycast={() => null} castShadow={lit && castShadow} receiveShadow={lit && receiveShadow}>
+                    <planeGeometry args={[width, height]} />
+                    {matKind === 'basic' && <meshBasicMaterial color={color} side={side} />}
+                    {matKind === 'lambert' && <meshLambertMaterial color={color} side={side} />}
+                    {matKind === 'standard' && (
+                        <meshStandardMaterial
+                            color={color}
+                            side={side}
+                            metalness={metalness}
+                            roughness={roughness}
+                            envMapIntensity={envMapIntensity}
+                        />
+                    )}
+                </mesh>
+            )}
 
             {tex && (
-                <mesh
-                    position={[0, 0, textureZ]}
-                    raycast={() => null}
-                    receiveShadow={lit && receiveShadow}
-                >
+                <mesh position={[0, 0, textureZ]} raycast={() => null} receiveShadow={lit && receiveShadow}>
                     <planeGeometry args={finalArtSize} />
                     {textureMagnifierOnly ? (
                         <MagnifierRevealMaterial
@@ -287,122 +281,71 @@ export function FramedPlane({
                 </mesh>
             )}
 
-            {hasFrame && (
+            {hasFrame && !textureMagnifierOnly && (
                 <>
+                    {/* Top */}
                     <mesh
                         raycast={() => null}
                         position={[0, height / 2 + border / 2, frameZ]}
-                        receiveShadow={lit && receiveShadow}
+                        receiveShadow={false}
                     >
                         <planeGeometry args={[width + 2 * border, border]} />
-                        {matKind === 'basic' && (
-                            <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
-                        )}
-                        {matKind === 'lambert' && (
-                            <meshLambertMaterial
-                                color={frameColor}
-                                side={side}
-                                {...framePolyProps}
-                            />
-                        )}
-                        {matKind === 'standard' && (
-                            <meshStandardMaterial
-                                color={frameColor}
-                                side={side}
-                                metalness={frameMetalness}
-                                roughness={frameRoughness}
-                                envMapIntensity={envMapIntensity}
-                                {...framePolyProps}
-                            />
-                        )}
+                        <meshBasicMaterial
+                            color={frameColor}
+                            side={side}
+                            toneMapped={false}
+                            {...framePolyProps}
+                        />
                     </mesh>
 
+                    {/* Bottom */}
                     <mesh
                         raycast={() => null}
                         position={[0, -height / 2 - border / 2, frameZ]}
-                        receiveShadow={lit && receiveShadow}
+                        receiveShadow={false}
                     >
                         <planeGeometry args={[width + 2 * border, border]} />
-                        {matKind === 'basic' && (
-                            <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
-                        )}
-                        {matKind === 'lambert' && (
-                            <meshLambertMaterial
-                                color={frameColor}
-                                side={side}
-                                {...framePolyProps}
-                            />
-                        )}
-                        {matKind === 'standard' && (
-                            <meshStandardMaterial
-                                color={frameColor}
-                                side={side}
-                                metalness={frameMetalness}
-                                roughness={frameRoughness}
-                                envMapIntensity={envMapIntensity}
-                                {...framePolyProps}
-                            />
-                        )}
+                        <meshBasicMaterial
+                            color={frameColor}
+                            side={side}
+                            toneMapped={false}
+                            {...framePolyProps}
+                        />
                     </mesh>
 
+                    {/* Left */}
                     <mesh
                         raycast={() => null}
                         position={[-width / 2 - border / 2, 0, frameZ]}
-                        receiveShadow={lit && receiveShadow}
+                        receiveShadow={false}
                     >
                         <planeGeometry args={[border, height]} />
-                        {matKind === 'basic' && (
-                            <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
-                        )}
-                        {matKind === 'lambert' && (
-                            <meshLambertMaterial
-                                color={frameColor}
-                                side={side}
-                                {...framePolyProps}
-                            />
-                        )}
-                        {matKind === 'standard' && (
-                            <meshStandardMaterial
-                                color={frameColor}
-                                side={side}
-                                metalness={frameMetalness}
-                                roughness={frameRoughness}
-                                envMapIntensity={envMapIntensity}
-                                {...framePolyProps}
-                            />
-                        )}
+                        <meshBasicMaterial
+                            color={frameColor}
+                            side={side}
+                            toneMapped={false}
+                            {...framePolyProps}
+                        />
                     </mesh>
 
+                    {/* Right */}
                     <mesh
                         raycast={() => null}
                         position={[width / 2 + border / 2, 0, frameZ]}
-                        receiveShadow={lit && receiveShadow}
+                        receiveShadow={false}
                     >
                         <planeGeometry args={[border, height]} />
-                        {matKind === 'basic' && (
-                            <meshBasicMaterial color={frameColor} side={side} {...framePolyProps} />
-                        )}
-                        {matKind === 'lambert' && (
-                            <meshLambertMaterial
-                                color={frameColor}
-                                side={side}
-                                {...framePolyProps}
-                            />
-                        )}
-                        {matKind === 'standard' && (
-                            <meshStandardMaterial
-                                color={frameColor}
-                                side={side}
-                                metalness={frameMetalness}
-                                roughness={frameRoughness}
-                                envMapIntensity={envMapIntensity}
-                                {...framePolyProps}
-                            />
-                        )}
+                        <meshBasicMaterial
+                            color={frameColor}
+                            side={side}
+                            toneMapped={false}
+                            {...framePolyProps}
+                        />
                     </mesh>
                 </>
             )}
 
+            {/* Invisible hitbox for interaction / dev picking */}
             {(canInteract || devPickable) && (
                 <mesh
                     position={[0, 0, Math.max(textureZ, 0) + 0.002]}
@@ -411,12 +354,7 @@ export function FramedPlane({
                     onClick={handleClick}
                 >
                     <planeGeometry args={[hitWidth, hitHeight]} />
-                    <meshBasicMaterial
-                        transparent
-                        opacity={0}
-                        depthWrite={false}
-                        colorWrite={false}
-                    />
+                    <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
                 </mesh>
             )}
         </group>

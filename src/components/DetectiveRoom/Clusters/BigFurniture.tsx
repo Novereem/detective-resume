@@ -52,6 +52,21 @@ export function BigFurnitureCluster({ rcFocus }: { rcFocus: RcFocus }) {
                 />
             </group>
 
+            <group onContextMenu={rcFocus(ANCHOR.corkBoardMagnifier)} userData={{ movable: true, anchorKey: 'corkBoardMagnifier' }}>
+                <CorkBoard
+                    position={ANCHOR.corkBoardMagnifier.position}
+                    rotation={[0, 0, 0]}
+                    width={2}
+                    color="#fff"
+                    materialsById={corkBoardMaterials}
+                    inspectDistance={1}
+                    inspectPixelSize={3}
+                    disableOutline
+                    inspectDisableOutline
+                    disablePointer={true}
+                />
+            </group>
+
             <group onContextMenu={rcFocus(ANCHOR.coatRack)} userData={{ movable: true, anchorKey: 'coatRack' }}>
                 <CoatRack
                     position={ANCHOR.coatRack.position}
